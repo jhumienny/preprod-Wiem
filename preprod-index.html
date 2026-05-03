@@ -1,0 +1,3070 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no, date=no, email=no, address=no">
+<meta name="translation" content="no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.gstatic.com https://ego-gra-default-rtdb.europe-west1.firebasedatabase.app; img-src 'self' data:;">
+<title>Wiem!</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0e12;--card:#18181f;--rim:#26262f;--text:#f0eef8;--muted:#6a6a80;
+  --c0:#ff4d4d;--c1:#4d8dff;--c2:#3dd68c;--c3:#ffb830;--rad:16px;
+}
+[data-theme="light"]{
+  --bg:#f0eff8;--card:#ffffff;--rim:#dddbe8;--text:#12111a;--muted:#7a7890;
+}
+@media(prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#f0eff8;--card:#ffffff;--rim:#dddbe8;--text:#12111a;--muted:#7a7890;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;justify-content:center;min-height:100dvh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--rim) 1px,transparent 1px),linear-gradient(90deg,var(--rim) 1px,transparent 1px);background-size:32px 32px;opacity:.18;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;width:100%;max-width:440px;min-height:100dvh;display:flex;flex-direction:column;}
+.scr{display:none;flex-direction:column;flex:1;padding:20px 16px max(32px,calc(env(safe-area-inset-bottom) + 24px));gap:16px;animation:pop .28s ease;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.scr.on{display:flex;}
+@keyframes pop{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.logo{font-family:'Syne',sans-serif;font-size:62px;font-weight:800;letter-spacing:-1px;line-height:1;}
+.logo em{color:var(--c0);font-style:normal;}
+.sub{color:var(--muted);font-size:13px;}
+.label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.field{background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:10px;}
+.field label{font-size:13px;color:var(--muted);white-space:nowrap;}
+.field input{flex:1;background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text);}
+.field input::placeholder{color:var(--muted);}
+
+/* setup screen */
+.setup-card{background:var(--card);border:1.5px solid var(--rim);border-radius:var(--rad);padding:20px;}
+.setup-step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--rim);}
+.setup-step:last-child{border-bottom:none;}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--c0);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-txt{font-size:14px;line-height:1.5;}
+.step-txt a{color:var(--c1);text-decoration:none;}
+.step-txt code{background:var(--rim);padding:2px 6px;border-radius:5px;font-size:12px;color:var(--c2);}
+
+/* slot grid */
+.slot-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.slot{background:var(--card);border:2px solid var(--rim);border-radius:var(--rad);padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s;position:relative;}
+.slot:active{transform:scale(.96);}
+.slot.taken{opacity:.4;pointer-events:none;}
+.slot-av{width:48px;height:48px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:20px;}
+.slot-name{font-size:14px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.slot-pts{font-size:12px;color:var(--muted);}
+.slot-badge{position:absolute;top:8px;right:8px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;}
+.sb-you{background:var(--text);color:var(--bg);}
+.sb-free{background:var(--rim);color:var(--muted);}
+
+.codebox{background:var(--card);border:1.5px solid var(--rim);border-radius:var(--rad);padding:20px;text-align:center;}
+.codelbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.codelink{font-size:13px;color:var(--c1);word-break:break-all;line-height:1.5;cursor:pointer;}
+.codesub{font-size:11px;color:var(--muted);margin-top:8px;}
+.sbar{display:flex;gap:4px;background:var(--card);border-radius:10px;padding:8px 10px;}
+.sbi{flex:1;text-align:center;}
+.sbi-n{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sbi-v{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;}
+.plist{display:flex;flex-direction:column;gap:8px;}
+.prow{background:var(--card);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500;}
+.prow-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.ptag{margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;}
+.tag-host{background:var(--text);color:var(--bg);}
+.tag-you{background:var(--rim);color:var(--muted);}
+.rrow-cfg{background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;}
+.rrow-cfg label{flex:1;font-size:14px;color:var(--muted);}
+.rrow-cfg input{width:52px;text-align:right;background:none;border:none;outline:none;font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--text);}
+.qcard{background:var(--card);border:1.5px solid var(--rim);border-radius:var(--rad);padding:22px 18px;position:relative;}
+.qcard-deco{position:absolute;inset:0;border-radius:var(--rad);overflow:hidden;pointer-events:none;}
+.qcard-deco::after{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:var(--ac,#ff4d4d);opacity:.07;}
+.qmeta{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.qabout{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.qabout strong{color:var(--text);}
+.qtext{font-family:'Bebas Neue',sans-serif;font-size:clamp(16px,5.5vw,24px);letter-spacing:.5px;line-height:1.35;word-break:break-word;overflow-wrap:break-word;}
+.ans-list{display:flex;flex-direction:column;gap:9px;}
+.abtn{background:var(--card);border:2px solid var(--rim);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);text-align:left;width:100%;}
+.abtn:not(.locked):active{transform:scale(.98);background:var(--rim);}
+.anum{width:36px;height:36px;border-radius:9px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;flex-shrink:0;transition:all .15s;}
+.abtn.locked{pointer-events:none;}
+.abtn.chosen{border-color:var(--text);}
+.abtn.chosen .anum{background:var(--text);color:var(--bg);}
+.abtn.correct{border-color:var(--c2);}
+.abtn.correct .anum{background:var(--c2);color:var(--bg);}
+.voter-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
+.vchip{font-size:11px;font-weight:600;padding:2px 9px;border-radius:99px;}
+.wmid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:20px 0;}
+.wav{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:32px;margin:0 auto;}
+.wtitle{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;}
+.wdesc{font-size:14px;color:var(--muted);line-height:1.6;max-width:260px;}
+.wq{background:var(--card);border:1px solid var(--rim);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--muted);font-style:italic;line-height:1.5;max-width:300px;}
+.pulse{animation:blink 1.6s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.rcard{background:var(--card);border:1.5px solid var(--rim);border-radius:var(--rad);padding:16px;}
+.rctitle{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.5px;margin-bottom:12px;}
+.rvrow{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--rim);font-size:14px;}
+.rvrow:last-child{border-bottom:none;}
+.rvl{display:flex;align-items:center;gap:8px;}
+.rvdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;}
+.b-yes{background:#1a3d2b;color:var(--c2);}
+.b-no{background:#2d1a1a;color:var(--c0);}
+.b-sub{background:var(--text);color:var(--bg);}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:6px;}
+.podcol{flex:1;text-align:center;}
+.podbar{border-radius:8px 8px 0 0;margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.vstatus{text-align:center;font-size:13px;color:var(--muted);min-height:20px;}
+.conn{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);}
+.cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dok{background:var(--c2);}
+.dwait{background:var(--c3);animation:blink .9s infinite;}
+.derr{background:var(--c0);}
+.btn{border-radius:12px;padding:15px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .15s;text-align:center;width:100%;display:block;}
+.btn:active{transform:scale(.98);}
+.btn-lit{background:var(--text);color:var(--bg);}
+.btn-dim{background:var(--card);color:var(--text);border:1.5px solid var(--rim);}
+.brow{display:flex;gap:8px;}
+.brow .btn{flex:1;}
+.err-msg{color:var(--c0);font-size:13px;text-align:center;display:none;padding:4px 0;}
+.maxp-btn{width:36px;height:36px;border-radius:8px;border:1.5px solid var(--rim);background:var(--card);color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:18px;cursor:pointer;transition:all .15s;}
+.maxp-btn:active{transform:scale(.95);}
+.maxp-btn.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+.mode-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 8px;border-radius:12px;border:1.5px solid var(--rim);background:var(--card);color:var(--muted);cursor:pointer;transition:all .15s;}
+.mode-btn:active{transform:scale(.97);}
+.mode-btn-active{border-color:#7F77DD;background:#1e1b4b;color:var(--text);}
+.theme-btn{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:10px;border:1.5px solid var(--rim);background:var(--card);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:all .15s;}
+.theme-btn:active{transform:scale(.95);}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- hidden question browser trigger -->
+<button id="admin-trigger" onclick="openQBrowser()" style="position:fixed;top:0;left:0;width:44px;height:44px;background:transparent;border:none;cursor:pointer;z-index:100;opacity:0;display:none" aria-label="Przeglądaj pytania"></button>
+
+<!-- ══ QUESTION BROWSER ══ -->
+<div class="scr" id="s-qbrowser">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onclick="show('s-home')" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0;line-height:1">←</button>
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex:1">Baza pytań</div>
+    <button onclick="toggleAddQuestion()" id="qb-add-btn" style="background:var(--card);border:1.5px solid var(--rim);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer">+ Nowe</button>
+    <button onclick="openCatManager()" style="background:var(--card);border:1.5px solid var(--rim);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer">🏷 Kategorie</button>
+  </div>
+
+  <!-- Add new question form -->
+  <div id="qb-add-form" style="display:none;background:#0f172a;border:1.5px solid #534AB7;border-radius:12px;padding:14px;flex-direction:column;gap:10px">
+    <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#a78bfa;font-weight:700">Nowe pytanie</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1">Treść <span style="color:var(--c3)">(opcjonalnie użyj [imię] dla gracza Temat)</span></div>
+      <button id="nq-type-btn" onclick="toggleNewQType()" style="padding:4px 10px;border-radius:99px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid var(--rim);background:transparent;color:var(--muted);" title="Typ odpowiedzi">📝 Własne</button>
+    </div>
+    <textarea id="nq-q" placeholder="Jak [imię] spędza wolny weekend?" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:12px;color:var(--text);font-family:inherit;resize:vertical;min-height:52px"
+      onkeydown="event.stopPropagation()"></textarea>
+    <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#a78bfa">Pytanie dla Tematu (2. osoba)</div>
+    <textarea id="nq-qs" placeholder="Jak spędzasz wolny weekend?" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:12px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px"
+      onkeydown="event.stopPropagation()"></textarea>
+    <div id="nq-answers-section">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Odpowiedzi (dla innych)</div>
+        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#a78bfa">Odpowiedzi (dla Tematu)</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:center">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">1</div>
+            <input id="nq-a1" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Odpowiedź 1…" style="flex:1;min-width:0;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--text);font-family:inherit" onkeydown="event.stopPropagation()">
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:18px;height:18px;border-radius:4px;background:#3730a344;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#a78bfa">1</div>
+            <input id="nq-as1" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Odpowiedź 1 (Temat)…" style="flex:1;min-width:0;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:11px;color:#a78bfa;font-family:inherit" onkeydown="event.stopPropagation()">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:center">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">2</div>
+            <input id="nq-a2" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Odpowiedź 2…" style="flex:1;min-width:0;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--text);font-family:inherit" onkeydown="event.stopPropagation()">
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:18px;height:18px;border-radius:4px;background:#3730a344;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#a78bfa">2</div>
+            <input id="nq-as2" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Odpowiedź 2 (Temat)…" style="flex:1;min-width:0;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:11px;color:#a78bfa;font-family:inherit" onkeydown="event.stopPropagation()">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:center">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">3</div>
+            <input id="nq-a3" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Odpowiedź 3…" style="flex:1;min-width:0;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--text);font-family:inherit" onkeydown="event.stopPropagation()">
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:18px;height:18px;border-radius:4px;background:#3730a344;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#a78bfa">3</div>
+            <input id="nq-as3" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Odpowiedź 3 (Temat)…" style="flex:1;min-width:0;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:11px;color:#a78bfa;font-family:inherit" onkeydown="event.stopPropagation()">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="nq-players-section" style="display:none;background:var(--bg);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--muted);text-align:center;line-height:1.6">
+      👥 Odpowiedziami będą <strong style="color:var(--text)">imiona graczy</strong> w danej rundzie<br>
+      <span style="font-size:10px">(gracz Temat nie pojawia się wśród opcji)</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:2px">
+      <button onclick="saveNewQuestion()" style="flex:1;background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Dodaj pytanie ✓</button>
+      <button onclick="toggleAddQuestion()" style="flex:1;background:var(--card);color:var(--muted);border:1.5px solid var(--rim);border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Anuluj</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div style="display:flex;gap:6px">
+    <button id="qtab-all" onclick="setQTab('all')" style="flex:1;padding:8px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;background:var(--text);color:var(--bg);border:none">Wszystkie</button>
+    <button id="qtab-reported" onclick="setQTab('reported')" style="flex:1;padding:8px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;background:var(--card);color:var(--muted);border:1.5px solid var(--rim);position:relative">Zgłoszone <span id="qtab-reported-count" style="display:none;background:#dc2626;color:#fff;font-size:9px;padding:1px 5px;border-radius:99px;margin-left:3px"></span></button>
+  </div>
+
+  <!-- Category filter -->
+  <div id="qb-cat-filter" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+
+  <!-- Bulk action bar (shown when items checked) -->
+  <div id="qb-bulk-bar" style="display:none;background:#1e1b4b;border:1.5px solid #534AB7;border-radius:10px;padding:10px 12px;display:none;flex-direction:column;gap:8px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="qb-bulk-count" style="font-size:12px;color:#a5b4fc;flex:1">0 zaznaczonych</span>
+      <button onclick="clearBulkSelection()" style="background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer">Odznacz</button>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap" id="qb-bulk-cats"></div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:8px">
+    <div style="font-size:11px;color:var(--muted);flex:1" id="qb-count"></div>
+    <button id="qb-copy-btn" onclick="copyMarkedForReview()" style="display:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:var(--card);color:var(--muted);border:1.5px solid var(--rim);white-space:nowrap">📋 Kopiuj</button>
+    <button id="qb-marked-btn" onclick="toggleMarkedView()" style="display:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:#1e1b4b;color:#a5b4fc;border:1.5px solid #534AB7;white-space:nowrap">Zaznaczone (<span id="qb-marked-count">0</span>)</button>
+  </div>
+  <div id="qb-col-headers" style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;color:var(--muted);padding:0 2px">
+    <div>Dla innych graczy</div>
+    <div>Dla gracza Temat</div>
+  </div>
+  <div id="qb-list" style="display:flex;flex-direction:column;gap:10px"></div>
+</div>
+
+<!-- ══ HOME ══ -->
+<div class="scr on" id="s-home">
+  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Zmień motyw">🌙</button>
+
+  <div style="padding-top:24px">
+    <div class="logo">Wiem<em>!</em></div>
+    <div class="sub">Kto zna cię najlepiej?</div>
+  </div>
+
+  <!-- Imię + dołącz -->
+  <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:var(--rad);padding:18px;display:flex;flex-direction:column;gap:12px;">
+    <div class="field" style="background:var(--bg)">
+      <label style="font-size:13px;color:var(--muted);white-space:nowrap">Imię:</label>
+      <input id="inp-name" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Twoje imię" maxlength="14" autocomplete="off"
+        style="font-size:16px;font-weight:600;"
+        onkeydown="event.stopPropagation()"
+        onkeyup="event.stopPropagation()">
+    </div>
+    <div style="height:1px;background:var(--rim)"></div>
+    <div class="field" style="background:var(--bg)">
+      <label style="font-size:13px;color:var(--muted);white-space:nowrap">Kod:</label>
+      <input id="inp-code" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="np. AB3K"
+        maxlength="4"
+        style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:6px;text-transform:uppercase;"
+        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4)"
+        onkeydown="if(event.key==='Enter')joinGame()">
+    </div>
+    <button class="btn btn-dim" onclick="joinGame()">→ Dołącz do gry</button>
+  </div>
+
+  <button class="btn btn-lit" onclick="createGame()">🎮 Utwórz nową grę</button>
+
+  <div class="err-msg" id="home-err"></div>
+
+  <!-- Jak grać -->
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;padding-top:4px">Jak grać?</div>
+
+    <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:var(--rad);padding:18px;display:flex;flex-direction:column;gap:16px">
+
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:28px;flex-shrink:0;width:40px;text-align:center">🪙</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:3px">Każdy startuje z 20 żetonami</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.5">Na początku każdy gracz oddaje połowę do wspólnej puli. Celem gry jest zebrać jak najwięcej żetonów.</div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--rim)"></div>
+
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:28px;flex-shrink:0;width:40px;text-align:center">🎯</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:3px">W każdej rundzie jedna osoba odpowiada, a reszta zgaduje</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.5">Jeden z graczy dostaje pytanie i odpowiada szczerze. Pozostali starają się przewidzieć jego odpowiedź.</div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--rim)"></div>
+
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:28px;flex-shrink:0;width:40px;text-align:center">⚖️</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:3px">Wybierz ile ryzykujesz</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.5">Przed potwierdzeniem odpowiedzi decydujesz czy stawiasz <strong style="color:var(--text)">1</strong> czy <strong style="color:var(--text)">2 żetony</strong>. Im pewniejszy jesteś — tym więcej możesz zyskać.</div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--rim)"></div>
+
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:28px;flex-shrink:0;width:40px;text-align:center">✅</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:3px">Trafisz — zyskujesz. Nie trafisz — tracisz</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.5">Jeśli zgadniesz poprawnie, dostajesz postawione żetony z puli. Jeśli nie — tracisz je na rzecz puli. Osoba z pytaniem dostaje żeton za każdą osobę, która odpowiedziała zgodnie.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ SLOT PICK ══ -->
+<div class="scr" id="s-slots">
+  <div style="padding-top:12px">
+    <div class="logo" style="font-size:42px">Wiem<em>!</em></div>
+    <div class="sub" id="slots-sub">Wybierz swój slot</div>
+  </div>
+  <div class="field">
+    <label style="font-size:13px;color:var(--muted);white-space:nowrap">Imię:</label>
+    <input id="slots-name-inp" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Twoje imię" maxlength="14" autocomplete="off" style="font-size:16px;font-weight:600;"
+      oninput="this.dataset.touched='1'"
+      onkeydown="event.stopPropagation();if(event.key==='Enter')changeSlotName()"
+      onkeyup="event.stopPropagation()">
+    <button onclick="changeSlotName()" style="background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:6px 12px;font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0">Zmień</button>
+  </div>
+  <div class="slot-grid" id="slot-grid"></div>
+  <div class="conn" id="slots-conn"><span class="cdot dwait"></span>Ładowanie…</div>
+</div>
+
+<!-- ══ LOBBY ══ -->
+<div class="scr" id="s-lobby">
+  <div style="padding-top:12px">
+    <div class="logo" style="font-size:42px">Wiem<em>!</em></div>
+  </div>
+  <div class="codebox">
+    <div class="codelbl">Kod gry — wyślij znajomym</div>
+    <div class="codelink" id="lob-code" onclick="copyCode()">----</div>
+    <div class="codesub">Kliknij aby skopiować · Każdy wpisuje kod w aplikacji</div>
+  </div>
+  <div class="label" id="lob-cnt">Gracze (0/4)</div>
+  <div class="plist" id="lob-list"></div>
+
+  <!-- Name change row -->
+  <div class="field" id="lob-name-row" style="display:none">
+    <label>Twoje imię:</label>
+    <input id="lob-name-inp" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" maxlength="14" autocomplete="off" placeholder="Zmień imię"
+      oninput="this.dataset.touched='1'"
+      onkeydown="event.stopPropagation();if(event.key==='Enter')changeName()"
+      onkeyup="event.stopPropagation()">
+    <button onclick="changeName()" style="background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:6px 12px;font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0">OK</button>
+  </div>
+
+  <!-- Ready button (everyone) -->
+  <button class="btn" id="btn-ready" style="display:none" onclick="toggleReady()"></button>
+
+  <!-- Host controls -->
+  <div id="lob-host" style="display:none;flex-direction:column;gap:10px;">
+    <div class="rrow-cfg">
+      <label>Liczba graczy</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="maxp-btn" data-n="2" onclick="setMaxPlayers(2)">2</button>
+        <button class="maxp-btn" data-n="3" onclick="setMaxPlayers(3)">3</button>
+        <button class="maxp-btn active" data-n="4" onclick="setMaxPlayers(4)">4</button>
+        <button class="maxp-btn" data-n="5" onclick="setMaxPlayers(5)">5</button>
+        <button class="maxp-btn" data-n="6" onclick="setMaxPlayers(6)">6</button>
+        <button class="maxp-btn" data-n="7" onclick="setMaxPlayers(7)">7</button>
+        <button class="maxp-btn" data-n="8" onclick="setMaxPlayers(8)">8</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <label style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Tryb gry</label>
+      <div style="display:flex;gap:8px">
+        <button id="mode-rounds" class="mode-btn mode-btn-active" onclick="setGameMode('rounds')">
+          <span style="font-size:18px">🔢</span>
+          <span style="font-size:13px;font-weight:700">Na rundy</span>
+          <span style="font-size:10px;opacity:.65">X rund na gracza</span>
+        </button>
+        <button id="mode-pool" class="mode-btn" onclick="setGameMode('pool')">
+          <span style="font-size:18px">🪙</span>
+          <span style="font-size:13px;font-weight:700">Żetonowy</span>
+          <span style="font-size:10px;opacity:.65">do bankructwa</span>
+        </button>
+      </div>
+      <div id="rpp-row" style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:10px 12px">
+        <span style="font-size:13px;color:var(--muted);flex:1">Rund na gracza</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button onclick="adjustRpp(-1)" style="width:28px;height:28px;border-radius:8px;border:1.5px solid var(--rim);background:var(--card);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">−</button>
+          <span id="rpp-display" style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;min-width:24px;text-align:center">3</span>
+          <input type="number" id="rpp" value="3" min="1" max="10" style="display:none">
+          <button onclick="adjustRpp(1)" style="width:28px;height:28px;border-radius:8px;border:1.5px solid var(--rim);background:var(--card);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">+</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-lit" id="btn-start" onclick="hostStart()">Rozpocznij grę ▶</button>
+    <!-- Category selector - rendered by JS -->
+    <div id="lob-cat-row" style="display:flex;flex-direction:column;gap:6px"></div>
+  </div>
+  <div id="lob-guest" style="display:none;">
+    <div class="conn" id="lob-guest-conn"><span class="cdot dwait"></span>Czekaj aż host rozpocznie grę…</div>
+  </div>
+  <div class="conn"><span class="cdot dok"></span><span id="sync-st">Połączono</span></div>
+  <button class="btn btn-dim" style="color:var(--c0);border-color:var(--c0)44;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
+</div>
+
+<!-- ══ VOTE ══ -->
+<div class="scr" id="s-vote">
+  <div class="sbar" id="sb-v"></div>
+  <div class="qcard" id="qc-v">
+    <div class="qcard-deco"></div>
+    <div class="qmeta" id="v-meta"></div>
+    <div class="qabout" id="v-about"></div>
+    <div class="qtext" id="v-q"></div>
+  </div>
+  <div class="ans-list" id="v-ans"></div>
+  <div id="v-bet" style="display:none">
+    <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Ile żetonów stawiasz?</div>
+    <div style="display:flex;gap:8px">
+      <button id="bet-1" class="abtn" onclick="setBet(1)" style="flex:1;justify-content:center;padding:14px 10px">
+        <div class="anum" id="bet-1-num">1</div><span>żeton</span>
+      </button>
+      <button id="bet-2" class="abtn" onclick="setBet(2)" style="flex:1;justify-content:center;padding:14px 10px">
+        <div class="anum" id="bet-2-num">2</div><span>żetony</span>
+      </button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center">Trafisz → zyskujesz. Nie trafisz → tracisz żetony.</div>
+  </div>
+  <div class="vstatus" id="v-st"></div>
+  <button class="btn btn-lit" id="btn-vote" style="display:none" onclick="confirmVote()">Zatwierdź odpowiedź ✓</button>
+  <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
+  <button class="btn btn-dim" id="report-btn-v" style="font-size:11px;padding:8px;color:var(--muted);border-color:var(--rim);margin-top:0" onclick="reportCurrentQuestion('v')">⚑ Zgłoś błąd w pytaniu</button>
+</div>
+
+<!-- ══ WAIT ══ -->
+<div class="scr" id="s-wait">
+  <div class="sbar" id="sb-w"></div>
+  <div class="wmid">
+    <div class="wav pulse" id="w-av"></div>
+    <div class="wtitle" id="w-title"></div>
+    <div class="wdesc" id="w-desc"></div>
+    <div class="wq" id="w-q"></div>
+  </div>
+  <div id="w-ans-wrap" style="display:none">
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:8px">💭 Możliwe odpowiedzi</div>
+    <div class="ans-list" id="w-ans" style="opacity:0.55"></div>
+  </div>
+  <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33" onclick="leaveGame()">← Opuść grę</button>
+  <button class="btn btn-dim" id="report-btn-w" style="font-size:11px;padding:8px;color:var(--muted);border-color:var(--rim);margin-top:0" onclick="reportCurrentQuestion('w')">⚑ Zgłoś błąd w pytaniu</button>
+</div>
+
+<!-- ══ SUBJECT ══ -->
+<div class="scr" id="s-subj">
+  <div class="sbar" id="sb-sj"></div>
+  <div class="qcard" id="qc-sj">
+    <div class="qcard-deco"></div>
+    <div class="qmeta" id="sj-meta"></div>
+    <div class="qabout" id="sj-about" style="font-size:15px;font-weight:600;margin-bottom:8px;"></div>
+    <div class="qtext" id="sj-q"></div>
+  </div>
+  <div class="ans-list" id="sj-ans"></div>
+  <button class="btn btn-dim" id="btn-swap-sj" style="display:none" onclick="swapQuestionSJ()"></button>
+  <button class="btn btn-lit" id="btn-sj" style="display:none" onclick="submitSJ()">Zatwierdź i pozwól innym odpowiedzieć →</button>
+  <button class="btn btn-dim" id="report-btn-sj" style="font-size:11px;padding:8px;color:var(--muted);border-color:var(--rim)" onclick="reportCurrentQuestion('sj')">⚑ Zgłoś błąd w pytaniu</button>
+  <button class="btn btn-dim" id="swap-btn-sj" style="display:none;font-size:11px;padding:8px;color:var(--c3);border-color:var(--c3)55" onclick="swapReported('sj')">🔄 Zamień pytanie na inne</button>
+  <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
+</div>
+
+<!-- ══ REVEAL ══ -->
+<div class="scr" id="s-reveal" style="gap:12px">
+  <div class="sbar" id="sb-rv"></div>
+  <div id="rv-banner"></div>
+  <div class="ans-list" id="rv-ans"></div>
+  <div class="rcard" id="rv-res"></div>
+  <div id="rv-btn"></div>
+</div>
+
+<!-- ══ END ══ -->
+<div class="scr" id="s-end">
+  <div style="text-align:center;padding-top:12px">
+    <div style="font-size:48px;margin-bottom:4px">🏆</div>
+    <div class="logo" style="font-size:42px">Koniec!</div>
+  </div>
+  <div class="podium" id="end-pod"></div>
+  <div class="rcard" id="end-sc"></div>
+  <div id="end-btns" style="display:flex;flex-direction:column;gap:8px;"></div>
+</div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   📚  BAZA PYTAŃ — dodawaj tutaj!
+   Format: { q: "Pytanie o [imię]?", a: ["Opcja 1","Opcja 2","Opcja 3"] }
+═══════════════════════════════════════════════════════════════ */
+const QS=[
+  {q:"Co [imię] robi gdy jest mu/jej nudno na imprezie?",                          qs:"Co robisz gdy jest ci nudno na imprezie?",                                           a:["Scrolluje telefon w kącie","Udaje że dobrze się bawi","Szczerze mówi że jedzie do domu"],                                                                                     as:["Scrolluję telefon w kącie","Udaje że dobrze się bawię","Szczerze mówię że jadę do domu"]},
+  {q:"Jak [imię] reaguje gdy ktoś zrobi mu/jej niespodziankę?",                    qs:"Jak reagujesz gdy ktoś zrobi ci niespodziankę?",                                     a:["Płacze ze wzruszenia","Śmieje się nerwowo","Udaje zachwyt, a w środku stres"],                                                                                            as:["Płaczę ze wzruszenia","Śmieję się nerwowo","Udaję zachwyt, a w środku stres"]},
+  {q:"Co [imię] robi gdy ktoś zje jego/jej jedzenie w lodówce?",                   qs:"Co robisz gdy ktoś zje twoje jedzenie w lodówce?",                                   a:["Mówi spokojnie że to było jego/jej","Milczy, ale pamięta","Wybucha od razu"],                                                                                             as:["Mówię spokojnie że to było moje","Milczę, ale pamiętam","Wybucham od razu"]},
+  {q:"Ile czasu [imię] spędza w łazience rano?",                                   qs:"Ile czasu spędzasz w łazience rano?",                                                 a:["Minimum – 5 minut i wypad","Pół godziny to norma","Godzina – rytuał jest rytuałem"],                                                                                      as:["Minimum – 5 minut i wypad","Pół godziny to norma","Godzina – rytuał jest rytuałem"]},
+  {q:"Jak [imię] zachowuje się gdy wygra w grę planszową?",                        qs:"Jak zachowujesz się gdy wygrasz w grę planszową?",                                   a:["Świętuje głośno i długo","Skromnie uśmiecha się","Od razu chce zagrać jeszcze raz"],                                                                                      as:["Świętuję głośno i długo","Skromnie uśmiecham się","Od razu chcę zagrać jeszcze raz"]},
+  {q:"Czego [imię] nigdy nie powiedziałby/aby rodzicom?",                          qs:"Czego nigdy nie powiedziałbyś/abyś rodzicom?",                                       a:["Ile naprawdę wydaje na głupoty","Co naprawdę myśli o ich znajomych","Co robił/a ostatni weekend"],                                                                         as:["Ile naprawdę wydaję na głupoty","Co naprawdę myślę o ich znajomych","Co robiłem/am ostatni weekend"]},
+  {q:"Jak [imię] zachowuje się w pierwszej godzinie po przebudzeniu?",             qs:"Jak zachowujesz się w pierwszej godzinie po przebudzeniu?",                          a:["Nie odzywaj się do mnie – to strefa ciszy","Normalnie – od razu gotowy/a do działania","Potrzebuje kawy zanim stanie się człowiekiem"],                                    as:["Nie odzywaj się do mnie – to strefa ciszy","Normalnie – od razu gotowy/a do działania","Potrzebuję kawy zanim stanę się człowiekiem"]},
+  {q:"Co [imię] robi gdy film w kinie jest zły?",                                   qs:"Co robisz gdy film w kinie jest zły?",                                               a:["Siedzi cierpliwie – kupił/a bilet","Komentuje pod nosem","Wychodzi bez wyrzutów sumienia"],                                                                               as:["Siedzę cierpliwie – kupiłem/am bilet","Komentuję pod nosem","Wychodzę bez wyrzutów sumienia"]},
+  {q:"Jak [imię] reaguje gdy ktoś go/ją ignoruje na grupowym czacie?",             qs:"Jak reagujesz gdy ktoś cię ignoruje na grupowym czacie?",                            a:["Pisze jeszcze raz – może nie zobaczyli","Milczy z urazą","Olewa – nie będzie się narzucać"],                                                                               as:["Piszę jeszcze raz – może nie zobaczyli","Milczę z urazą","Olewam – nie będę się narzucać"]},
+  {q:"Co [imię] kupuje impulsywnie czego potem żałuje?",                           qs:"Co kupujesz impulsywnie czego potem żałujesz?",                                      a:["Jedzenie o późnej porze","Ubrania których nie nosi","Gadżety których nie potrzebuje"],                                                                                    as:["Jedzenie o późnej porze","Ubrania których nie noszę","Gadżety których nie potrzebuję"]},
+  {q:"Jak [imię] zachowuje się gdy jest na diecie?",                               qs:"Jak zachowujesz się gdy jesteś na diecie?",                                          a:["Trzyma się ściśle przez tydzień potem odpuszcza","Mówi że jest na diecie ale je wszystko","Naprawdę się trzyma i jest z siebie dumny/a"],                                as:["Trzymam się ściśle przez tydzień potem odpuszczam","Mówię że jestem na diecie ale jem wszystko","Naprawdę się trzymam i jestem z siebie dumny/a"]},
+  {q:"Co [imię] robi gdy słyszy nieprawdziwą plotkę o sobie?",                     qs:"Co robisz gdy słyszysz nieprawdziwą plotkę o sobie?",                               a:["Prostuje od razu i głośno","Udaje że nie słyszał/a","Śmieje się bo jest lepsza od prawdy"],                                                                               as:["Prostuję od razu i głośno","Udaję że nie słyszałem/am","Śmieję się bo jest lepsza od prawdy"]},
+  {q:"Jak [imię] zachowuje się na pikniku gdy zaczyna padać?",                     qs:"Jak zachowujesz się na pikniku gdy zaczyna padać?",                                  a:["Natychmiast pakuje manatki","Zostaje – trochę deszczu nie zaszkodzi","Już wcześniej wiedział/a że tak będzie i mówi to wszystkim"],                                      as:["Natychmiast pakuję manatki","Zostaję – trochę deszczu nie zaszkodzi","Już wcześniej wiedziałem/am że tak będzie i mówię to wszystkim"]},
+  {q:"Co [imię] robi gdy dostanie dziwny prezent którego nie chce?",               qs:"Co robisz gdy dostaniesz dziwny prezent którego nie chcesz?",                       a:["Dziękuje szczerze i wyrzuca po tygodniu","Pyta wprost skąd taki pomysł","Trzyma na widoku gdy tamta osoba przychodzi"],                                                   as:["Dziękuję szczerze i wyrzucam po tygodniu","Pytam wprost skąd taki pomysł","Trzymam na widoku gdy tamta osoba przychodzi"]},
+  {q:"Jak [imię] spędza ostatnią godzinę przed snem?",                             qs:"Jak spędzasz ostatnią godzinę przed snem?",                                          a:["Scrolluje telefon mimo że wie że nie powinien/powinna","Czyta lub ogląda coś spokojnego","Leży i myśli o wszystkich niezręcznych sytuacjach z przeszłości"],              as:["Scrolluję telefon mimo że wiem że nie powinienem/powinnam","Czytam lub oglądam coś spokojnego","Leżę i myślę o wszystkich niezręcznych sytuacjach z przeszłości"]},
+  {q:"Co [imię] robi gdy automat z kawą nie wydaje reszty?",                       qs:"Co robisz gdy automat z kawą nie wydaje reszty?",                                   a:["Potrząsa automatem ze złością","Wzrusza ramionami i idzie dalej","Szuka obsługi technicznej przez pół godziny"],                                                           as:["Potrząsam automatem ze złością","Wzruszam ramionami i idę dalej","Szukam obsługi technicznej przez pół godziny"]},
+  {q:"Jak [imię] zachowuje się gdy ktoś spoileruje mu/jej serial?",                qs:"Jak zachowujesz się gdy ktoś spoileruje ci serial?",                                 a:["Wybucha i nie może się uspokoić","Udaje że mu/jej to nie przeszkadza","Spokojnie mówi że woli nie wiedzieć"],                                                             as:["Wybucham i nie mogę się uspokoić","Udaję że mi to nie przeszkadza","Spokojnie mówię że wolę nie wiedzieć"]},
+  {q:"Co [imię] robi gdy musi zadzwonić na infolinię?",                            qs:"Co robisz gdy musisz zadzwonić na infolinię?",                                      a:["Odkłada to tygodniami","Dzwoni od razu – chce mieć to z głowy","Prosi kogoś bliskiego żeby zadzwonił/a za niego/nią"],                                                   as:["Odkładam to tygodniami","Dzwonię od razu – chcę mieć to z głowy","Proszę kogoś bliskiego żeby zadzwonił/a za mnie"]},
+  {q:"Jak [imię] tłumaczy się gdy spóźni się na spotkanie?",                       qs:"Jak tłumaczysz się gdy spóźnisz się na spotkanie?",                                 a:["Szczerze mówi że po prostu za późno wyszedł/wyszła","Zawsze ma gotową historyjkę","Pisze że jest już blisko gdy dopiero wychodzi"],                                      as:["Szczerze mówię że po prostu za późno wyszedłem/wyszłam","Zawsze mam gotową historyjkę","Piszę że jestem już blisko gdy dopiero wychodzę"]},
+  {q:"Co [imię] robi gdy ktoś pyta go/ją o zdanie a jemu/jej naprawdę wszystko jedno?", qs:"Co robisz gdy ktoś pyta cię o zdanie a tobie naprawdę wszystko jedno?",      a:["Mówi wprost że nie ma preferencji","Wymyśla jakąś odpowiedź żeby skończyć temat","Pyta co tamta osoba woli i popiera jej wybór"],                                          as:["Mówię wprost że nie mam preferencji","Wymyślam jakąś odpowiedź żeby skończyć temat","Pytam co tamta osoba woli i popieram jej wybór"]},
+  {q:"Jak [imię] zachowuje się gdy ktoś przy nim/niej fałszuje piosenkę?",         qs:"Jak zachowujesz się gdy ktoś przy tobie fałszuje piosenkę?",                        a:["Subtelnie przestaje śpiewać sam/a","Śpiewa głośniej żeby zagłuszyć","Mówi wprost że to trochę nie ta tonacja"],                                                            as:["Subtelnie przestaję śpiewać sam/a","Śpiewam głośniej żeby zagłuszyć","Mówię wprost że to trochę nie ta tonacja"]},
+  {q:"Co [imię] robi ostatniego dnia urlopu?",                                      qs:"Co robisz ostatniego dnia urlopu?",                                                 a:["Myśli o pracy i się nakręca","Żyje chwilą do ostatniej sekundy","Ma wszystko w dupie"],                                                                                    as:["Myślę o pracy i się nakręcam","Żyję chwilą do ostatniej sekundy","Mam wszystko w dupie"]},
+  {q:"Jak [imię] reaguje gdy ktoś mówi że jego/jej ulubiony zespół jest kiepski?", qs:"Jak reagujesz gdy ktoś mówi że twój ulubiony zespół jest kiepski?",                 a:["Broni zajadle z faktami","Wzrusza ramionami – każdy ma swój gust","Urywa kontakt z tą osobą na jakiś czas"],                                                               as:["Bronię zajadle z faktami","Wzruszam ramionami – każdy ma swój gust","Urywam kontakt z tą osobą na jakiś czas"]},
+  {q:"Co [imię] robi gdy nie może zasnąć z powodu głośnych sąsiadów?",            qs:"Co robisz gdy nie możesz zasnąć z powodu głośnych sąsiadów?",                       a:["Zakłada słuchawki i próbuje dalej","Puka do ściany albo dzwoni do drzwi","Leży wściekły/a ale nic nie robi"],                                                             as:["Zakładam słuchawki i próbuję dalej","Pukam do ściany albo dzwonię do drzwi","Leżę wściekły/a ale nic nie robię"]},
+  {q:"Jak [imię] zachowuje się gdy ma coś zrobić pierwszy raz?",                   qs:"Jak zachowujesz się gdy masz coś zrobić pierwszy raz?",                              a:["Szuka informacji przez tydzień zanim zacznie","Rzuca się na głęboką wodę bez przygotowania","Pyta kogoś kto już to robił"],                                               as:["Szukam informacji przez tydzień zanim zacznę","Rzucam się na głęboką wodę bez przygotowania","Pytam kogoś kto już to robił"]},
+  {q:"Kto z graczy jako pierwszy rzuciłby wszystko i wyjechał w Bieszczady?",              qs:"Kto z graczy jako pierwszy rzuciłby wszystko i wyjechał w Bieszczady?",              a:[],type:"players"},
+  {q:"Kto z graczy najdłużej potrafi milczeć gdy jest na kogoś zły?",                     qs:"Kto z graczy najdłużej potrafi milczeć gdy jest na kogoś zły?",                     a:[],type:"players"},
+  {q:"Kto z graczy byłby najlepszym politykiem?",                                          qs:"Kto z graczy byłby najlepszym politykiem?",                                          a:[],type:"players"},
+  {q:"Kto z graczy najszybciej przepije wszystkie żetony na prawdziwej imprezie?",        qs:"Kto z graczy najszybciej przepije wszystkie żetony na prawdziwej imprezie?",        a:[],type:"players"},
+  {q:"Kto z graczy ma największy chaos w telefonie?",                                      qs:"Kto z graczy ma największy chaos w telefonie?",                                      a:[],type:"players"},
+  {q:"Kto z graczy jako ostatni przyznałby się do błędu?",                                qs:"Kto z graczy jako ostatni przyznałby się do błędu?",                                a:[],type:"players"},
+  {q:"Kto z graczy przeżyłby najdłużej na bezludnej wyspie?",                            qs:"Kto z graczy przeżyłby najdłużej na bezludnej wyspie?",                            a:[],type:"players"},
+  {q:"Kto z graczy jest najbardziej prawdopodobnym autorem anonimowego donosu?",          qs:"Kto z graczy jest najbardziej prawdopodobnym autorem anonimowego donosu?",          a:[],type:"players"},
+  {q:"Kto z graczy płakałby na ślubie obcej osoby?",                                      qs:"Kto z graczy płakałby na ślubie obcej osoby?",                                      a:[],type:"players"},
+  {q:"Kto z graczy jako pierwszy zasnąłby na nudnym wykładzie?",                          qs:"Kto z graczy jako pierwszy zasnąłby na nudnym wykładzie?",                          a:[],type:"players"},
+  {q:"Kto z graczy najchętniej kłamie że już jedzie gdy jeszcze nawet nie wstał z kanapy?", qs:"Kto z graczy najchętniej kłamie że już jedzie gdy jeszcze nawet nie wstał z kanapy?", a:[],type:"players"},
+  {q:"Kto z graczy byłby najgroźniejszy jako szef?",                                      qs:"Kto z graczy byłby najgroźniejszy jako szef?",                                      a:[],type:"players"},
+  {q:"Kto z graczy ma największy talent do wchodzenia w kłopoty bez złych intencji?",    qs:"Kto z graczy ma największy talent do wchodzenia w kłopoty bez złych intencji?",    a:[],type:"players"},
+  {q:"Kto z graczy jako pierwszy zdradza tajemnicę gdy jest pod wpływem?",               qs:"Kto z graczy jako pierwszy zdradza tajemnicę gdy jest pod wpływem?",               a:[],type:"players"},
+  {q:"Kto z graczy najlepiej poradziłby sobie w apokalipsie zombie?",                     qs:"Kto z graczy najlepiej poradziłby sobie w apokalipsie zombie?",                     a:[],type:"players"},
+  {q:"Kto z graczy skończyłby w więzieniu?",                                               qs:"Kto z graczy skończyłby w więzieniu?",                                               a:[],type:"players"},
+  {q:"Kto z graczy jest najbardziej prawdopodobnym przyszłym miliarderem?",               qs:"Kto z graczy jest najbardziej prawdopodobnym przyszłym miliarderem?",               a:[],type:"players"},
+  {q:"Kto z graczy nagrałby TikToka z tańcem i wrzucił bez mrugnięcia okiem?",           qs:"Kto z graczy nagrałby TikToka z tańcem i wrzucił bez mrugnięcia okiem?",           a:[],type:"players"},
+  {q:"Kto z graczy najpewniej płakałby przy reklamie z psem?",                            qs:"Kto z graczy najpewniej płakałby przy reklamie z psem?",                            a:[],type:"players"},
+  {q:"Kto z graczy byłby pierwszą ofiarą w horrorze?",                                    qs:"Kto z graczy byłby pierwszą ofiarą w horrorze?",                                    a:[],type:"players"},
+];
+/* ═══════════════════════════════════════════════════════════════ */
+
+const COLORS=['#a78bfa','#38bdf8','#fb923c','#e879f9','#f43f5e','#34d399','#facc15','#60a5fa'];
+
+/* ── MOTYW ── */
+function applyTheme(t, persist=true){
+  document.documentElement.setAttribute('data-theme',t);
+  if(persist) localStorage.setItem('ego_theme',t);
+  const icon=t==='dark'?'☀️':'🌙';
+  document.querySelectorAll('.theme-btn').forEach(b=>b.textContent=icon);
+}
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme')||'dark';
+  applyTheme(cur==='dark'?'light':'dark', true); // manual toggle always persists
+}
+// Init theme — called after DOM + $ are ready (see below)
+
+/* ── ODMIANA PŁCI ── */
+// Heuristic: Polish feminine names typically end in 'a' or 'i'
+// Masculine exceptions ending in 'a': Kuba, Sasha, Nikita, Barnaba, Kosma, Bonawentura, Jarema
+const MASC_ENDING_A=['kuba','sasha','nikita','barnaba','kosma','bonawentura','jarema','misza','sasza','ilia','borja'];
+function isFeminine(name){
+  if(!name)return false;
+  const n=name.toLowerCase().trim();
+  if(MASC_ENDING_A.some(m=>n===m))return false;
+  return n.endsWith('a')||n.endsWith('ia');
+}
+// Returns gendered form: genderWord(name, 'Trafiłeś/aś') → 'Trafiłaś' or 'Trafiłeś'
+// Usage: gW(name, masc, fem)
+function gW(name,masc,fem){return isFeminine(name)?fem:masc;}
+
+// Transforms question from 3rd person to 2nd person for subject screen
+function qForSubject(q){
+  let s=q.replace(/\s*\[imię\]\s*/g,' ').trim();
+  s=s.replace(/\bjego\/jej\b/gi,'twoje').replace(/\bjego\b/gi,'twoje').replace(/\bjej\b/gi,'twoje');
+  s=s.replace(/go\/ją/gi,'Cię').replace(/\bgo\b/gi,'Cię').replace(/\bją\b/gi,'Cię');
+  // Fix specific patterns before verb mapping
+  s=s.replace(/nie może zasnąć/i,'nie możesz zasnąć');
+  s=s.replace(/gdyby wygrał\/a/i,'Gdybyś wygrał/a');
+  s=s.replace(/co zrobi jako pierwsze/i,'co zrobisz jako pierwsze');
+  s=s.replace(/gdyby mógł\/a zmienić/i,'Gdybyś mógł/a zmienić');
+  // Remove mógł/a from verb list since we handle it in specific patterns
+  s=s.replace(/gdy czuje że/gi,'gdy czujesz że');
+  s=s.replace(/towarzyszy najczęściej/i,'towarzyszy Ci najczęściej');
+  s=s.replace(/\s+/g,' ');
+  s=s.replace(/obejrzy\b/i,'obejrzysz');
+  s=s.replace(/jest zły\/a/i,'jesteś zły/a');
+  s=s.replace(/najbardziej stresuje\b/i,'najbardziej Cię stresuje');
+  s=s.charAt(0).toUpperCase()+s.slice(1);
+
+  const verbs=[
+    ['zachowuje się','zachowujesz się'],
+    ['podchodzi do','podchodzisz do'],
+    ['reaguje na','reagujesz na'],['reaguje gdy','reagujesz gdy'],
+    ['reaguje, gdy','reagujesz, gdy'],['reaguje','reagujesz'],
+    ['zachowuje','zachowujesz'],['podchodzi','podchodzisz'],
+    ['myśli o','myślisz o'],['myśli gdy','myślisz gdy'],['myśli','myślisz'],
+    ['robi gdy','robisz gdy'],['robi co','robisz co'],['robi','robisz'],
+    ['wybiera','wybierasz'],['czuje się','czujesz się'],['czuje','czujesz'],
+    ['ceni','cenisz'],['pełni','pełnisz'],['traktuje','traktujesz'],
+    ['radzi sobie','radzisz sobie'],['radzi','radzisz'],['podejmuje','podejmujesz'],
+    ['irytuje innych','irytujesz innych'],['irytuje','irytujesz'],
+    ['spędza','spędzasz'],['mówi','mówisz'],
+    ['chce','chcesz'],['lubi','lubisz'],['kocha','kochasz'],
+    ['uważa','uważasz'],['szuka','szukasz'],['woli','wolisz'],
+    ['daje','dajesz'],['bierze','bierzesz'],['bywa','bywasz'],
+    ['wstaje','wstajesz'],['słucha','słuchasz'],['ogląda','oglądasz'],
+    ['planuje','planujesz'],['angażuje','angażujesz'],['pije','pijesz'],
+    ['jest','jesteś'],['ma ','masz '],['wie','wiesz'],
+    ['powie','powiesz'],
+  ];
+  for(const [from,to] of verbs){
+    const idx=s.toLowerCase().indexOf(from.toLowerCase());
+    if(idx>=0){
+      const before=idx===0||/[\s,?!()\-–]/.test(s[idx-1]);
+      const after=idx+from.length>=s.length||/[\s,?!()\-–]/.test(s[idx+from.length]);
+      if(before&&after){ s=s.slice(0,idx)+to+s.slice(idx+from.length); break; }
+    }
+  }
+  return s;
+}
+
+// Converts answer from 3rd person to 1st person for subject screen
+function answerForSubject(a){
+  // First replace jego/jej → swoje/moje contextually
+  let s=a.replace(/\bjego\/jej\b/gi,'swoje').replace(/\bjego\b/gi,'swoje').replace(/\bjej\b/gi,'swoje');
+
+  const verbs=[
+    ['Wybucha i mówi wprost','Wybucham i mówię wprost'],
+    ['Milczy i dąsa się','Milczę i dąsam się'],
+    ['Zamyka się i potrzebuje czasu','Zamykam się i potrzebuję czasu'],
+    ['Bawi się do białego rana','Bawię się do białego rana'],
+    ['Wychodzi po 2 godzinach','Wychodzę po 2 godzinach'],
+    ['Siedzi z jedną osobą','Siedzę z jedną osobą'],
+    ['Stara się odzyskać','Staram się odzyskać'],
+    ['Stara się zmienić','Staram się zmienić'],
+    ['Zastanawia się co','Zastanawiam się co'],
+    ['Zastanawia się','Zastanawiam się'],
+    ['Stara się','Staram się'],
+    ['Pozwala chętnie','Pozwalam chętnie'],
+    ['Pozwala','Pozwalam'],
+    ['Zamawia pizzę lub kebaba','Zamawiam pizzę lub kebaba'],
+    ['Nie je po 20:00','Nie jem po 20:00'],
+    ['Scrolluje social media','Scrolluję social media'],
+    ['Wymyśla nowe projekty','Wymyślam nowe projekty'],
+    ['Śpi – nicnierobienie','Śpię – nicnierobienie'],
+    ['Przegląda telefon','Przeglądam telefon'],
+    ['Rozmyśla o wszystkim','Rozmyślam o wszystkim'],
+    ['Wstaje i coś robi','Wstaję i coś robię'],
+    ['Zachwyca się i głośno cieszy','Zachwycam się i głośno cieszę'],
+    ['Uśmiecha, ale woli','Uśmiecham się, ale wolę'],
+    ['Stresuje się zmianą planów','Stresuję się zmianą planów'],
+    ['Reaguje emocjonalnie od razu','Reaguję emocjonalnie od razu'],
+    ['Zachowuje spokój zewnętrznie','Zachowuję spokój zewnętrznie'],
+    ['Potrzebuje chwili sam/a','Potrzebuję chwili sam/a'],
+    ['Cierpliwie czeka','Cierpliwie czekam'],
+    ['Niecierpliwi się i wierci','Niecierpliwię się i wiercę'],
+    ['Szuka drogi na skróty','Szukam drogi na skróty'],
+    ['Stosuje je ściśle','Stosuję je ściśle'],
+    ['Nagina gdy trzeba','Naginam gdy trzeba'],
+    ['Ignoruje jeśli nie ma sensu','Ignoruję jeśli nie ma sensu'],
+    ['Odkłada regularnie','Odkładam regularnie'],
+    ['Wydaje i jakoś wychodzi','Wydaję i jakoś wychodzi'],
+    ['Żyje chwilą','Żyję chwilą'],
+    ['Bierze ją bardzo do serca','Biorę ją bardzo do serca'],
+    ['Analizuje spokojnie','Analizuję spokojnie'],
+    ['Impulsywnie – działa od razu','Impulsywnie – działam od razu'],
+    ['Długo rozważa za i przeciw','Długo rozważam za i przeciw'],
+    ['Pyta bliskich o zdanie','Pytam bliskich o zdanie'],
+    ['Odłoży lub zainwestuje','Odłożę lub zainwestuję'],
+    ['Kupi coś dużego','Kupię coś dużego'],
+    ['Leniuchując w domu','Leniuchuję w domu'],
+    ['Wychodząc ze znajomymi','Wychodzę ze znajomymi'],
+    ['nie nosi','nie noszę'],
+    // single verbs
+    ['Irytuje się','Irytuję się'],
+    ['Scrolluje','Scrolluję'],['Zamawia','Zamawiam'],['Przegląda','Przeglądam'],
+    ['Rozmyśla','Rozmyślam'],['Zachwyca','Zachwycam'],['Stresuje','Stresuję'],
+    ['Reaguje','Reaguję'],['Zachowuje','Zachowuję'],['Potrzebuje','Potrzebuję'],
+    ['Szuka','Szukam'],['Stosuje','Stosuję'],['Ignoruje','Ignoruję'],
+    ['Odkłada','Odkładam'],['Wydaje','Wydaję'],['Bierze','Biorę'],
+    ['Odpiera – wie swoje','Odpieram – wiem swoje'],
+    ['Analizuje','Analizuję'],['Odpiera','Odpieram'],['Działa','Działam'],
+    ['Rozważa','Rozważam'],['Pyta','Pytam'],['Milczy','Milczę'],
+    ['Zamyka','Zamykam'],['Wychodzi','Wychodzę'],
+    ['Bawi','Bawię'],['Wstaje','Wstaję'],['Wymyśla','Wymyślam'],
+    ['Niecierpliwi','Niecierpliwię'],['Nagina','Naginam'],['Uśmiecha','Uśmiecham'],
+    ['Żyje','Żyję'],['Odłoży','Odłożę'],['Kupi','Kupię'],
+    ['Chodzi','Chodzę'],['Robi','Robię'],['Mówi','Mówię'],
+    ['Siedzi','Siedzę'],['Śpi','Śpię'],['Je ','Jem '],
+    ['Pije','Piję'],['Czyta','Czytam'],['Słucha','Słucham'],
+    ['Ogląda','Oglądam'],['Planuje','Planuję'],['Gotuje','Gotuję'],
+    ['Lubi','Lubię'],['Woli','Wolę'],['Kocha','Kocham'],
+    ['Daje','Daję'],['Idzie','Idę'],['Wraca','Wracam'],
+    ['Wyjedzie w podróż marzeń','Wyjeżdżam w podróż marzeń'],
+    ['Próbuje','Próbuję'],['Czuje','Czuję'],['Irytuje','Irytuję'],
+    ['Musi','Muszę'],['Może','Mogę'],['Chce','Chcę'],
+    ['Myśli','Myślę'],['Uważa','Uważam'],['Twierdzi','Twierdzę'],
+    ['Biega','Biegam'],['Ćwiczy','Ćwiczę'],['Sprząta','Sprzątam'],
+    ['Pracuje','Pracuję'],['Mieszka','Mieszkam'],['Podróżuje','Podróżuję'],
+  ];
+  for(const [from,to] of verbs){
+    const idx=s.toLowerCase().indexOf(from.toLowerCase());
+    if(idx>=0){
+      // Check word boundary after match to avoid partial matches (e.g. "Mówi" in "Mówieniem")
+      const after=idx+from.length;
+      const nextChar=s[after]||'';
+      if(nextChar && /[a-ząćęłńóśźżA-ZĄĆĘŁŃÓŚŹŻ]/.test(nextChar)) continue;
+      const wasUpper=s[idx]===s[idx].toUpperCase();
+      const result=wasUpper?(to.charAt(0).toUpperCase()+to.slice(1)):to;
+      return s.slice(0,idx)+result+s.slice(idx+from.length);
+    }
+  }
+  return s;
+}
+const C=i=>COLORS[i%4];
+const POLL_MS=2500;
+const $=id=>document.getElementById(id);
+
+// Prevent browser back navigation when backspace is pressed in an empty input
+document.addEventListener('keydown', e=>{
+  if(e.key==='Backspace'){
+    const t=e.target;
+    const isInput=t.tagName==='INPUT'||t.tagName==='TEXTAREA';
+    if(!isInput) e.preventDefault();
+  }
+}, true);
+const show=id=>{
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  $(id).classList.add('on');
+  const trigger=$('admin-trigger');
+  if(trigger) trigger.style.display=id==='s-home'?'block':'none';
+};
+const shuf=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
+const dc=o=>JSON.parse(JSON.stringify(o));
+
+// Init theme from localStorage or system preference
+(()=>{
+  const saved=localStorage.getItem('ego_theme');
+  if(saved){
+    applyTheme(saved);
+  } else {
+    const isDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+    applyTheme(isDark?'dark':'light');
+    // Don't persist — let it follow system
+    localStorage.removeItem('ego_theme');
+  }
+  // Listen for system theme changes
+  window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',e=>{
+    if(!localStorage.getItem('ego_theme')){
+      applyTheme(e.matches?'dark':'light');
+      localStorage.removeItem('ego_theme');
+    }
+  });
+})();
+const CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const rnd4=()=>Array.from({length:4},()=>CHARS[Math.floor(Math.random()*CHARS.length)]).join('');
+function showErr(id,msg){const e=$(id);if(!e)return;e.textContent=msg;e.style.display='block';}
+function hideErr(id){const e=$(id);if(e)e.style.display='none';}
+
+// ── DB config ──
+let DB_URL='https://ego-gra-default-rtdb.europe-west1.firebasedatabase.app';
+
+function getDbUrl(){ return true; }
+function saveDbUrl(){}
+function resetDb(){}
+
+// ── Firebase REST ──
+async function fbGet(path){
+  const r=await fetch(`${DB_URL}/${path}.json`);
+  if(r.status===401||r.status===403){
+    throw new Error('PERMISSION_DENIED – sprawdź reguły Firebase ('+r.status+')');
+  }
+  if(!r.ok)throw new Error('GET '+r.status);
+  return r.json();
+}
+async function fbPut(path,data){
+  const r=await fetch(`${DB_URL}/${path}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  if(r.status===401||r.status===403)throw new Error('PERMISSION_DENIED '+r.status);
+  if(!r.ok)throw new Error('PUT '+r.status);
+  return r.json();
+}
+async function fbPost(path,data){
+  const r=await fetch(`${DB_URL}/${path}.json`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  if(!r.ok)throw new Error('POST '+r.status);
+  return r.json();
+}
+async function fbPatch(path,data){
+  const r=await fetch(`${DB_URL}/${path}.json`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  if(!r.ok)throw new Error('PATCH '+r.status);
+  return r.json();
+}
+
+// ── Normalize GS (Firebase drops empty arrays/objects → null) ──
+function norm(gs){
+  if(!gs)return gs;
+  // Firebase returns arrays-with-nulls as plain objects — convert back to real arrays
+  const toArr4 = v => {
+    if(Array.isArray(v)) {
+      while(v.length<8) v.push(null); // always keep 8 max slots internally
+      return v;
+    }
+    if(v && typeof v==='object') {
+      const a=[null,null,null,null,null,null,null,null];
+      Object.keys(v).forEach(k=>{ const n=parseInt(k); if(n>=0&&n<8) a[n]=v[k]; });
+      return a;
+    }
+    return [null,null,null,null,null,null,null,null];
+  };
+  const toArr = v => {
+    if(Array.isArray(v)) return v;
+    if(v && typeof v==='object') {
+      const max=Math.max(0,...Object.keys(v).map(Number))+1;
+      const a=new Array(max).fill(0);
+      Object.keys(v).forEach(k=>{ a[parseInt(k)]=v[k]; });
+      return a;
+    }
+    return [];
+  };
+  gs.players  = toArr4(gs.players);
+  gs.subjects = toArr(gs.subjects);
+  gs.qSeq     = toArr(gs.qSeq);
+  gs.votes    = gs.votes || {};
+  gs.bets     = gs.bets  || {};
+  gs.pool     = gs.pool  != null ? parseInt(gs.pool)||0 : 0;
+  gs.ready      = gs.ready || {};
+  gs.maxPlayers = gs.maxPlayers || 4;
+  gs.swapAt     = gs.swapAt || null;
+  gs.gameMode   = gs.gameMode || 'rounds';
+  gs.qAnswers   = gs.qAnswers || {};
+  gs.usedQs     = gs.usedQs ? (Array.isArray(gs.usedQs)?gs.usedQs:Object.values(gs.usedQs)) : [];
+  // Normalize vote keys AND values to integers
+  // Skip null/undefined values — parseInt(null)=NaN would falsely pass allVoted checks
+  if(gs.votes && typeof gs.votes==='object'){
+    const v={};
+    Object.keys(gs.votes).forEach(k=>{
+      const val=gs.votes[k];
+      if(val!==null && val!==undefined){ v[parseInt(k)]=parseInt(val); }
+    });
+    gs.votes=v;
+  }
+  if(gs.sa!==undefined && gs.sa!==null && gs.sa!==-1) gs.sa=parseInt(gs.sa);
+  else if(gs.sa===undefined||gs.sa===null) gs.sa=-1;
+  if(gs.ri===undefined||gs.ri===null) gs.ri=0;
+  if(gs.rt===undefined||gs.rt===null) gs.rt=0;
+  return gs;
+}
+let gameId=null; // short 4-char code used as key
+let mySlot=null;
+let isHost=false;
+let GS=null;
+let pollTimer=null;
+let _kickCheckTimer=null; // dedicated timer to detect if player was removed from lobby
+let _sjPick=null;
+let _lastRi=null; // track round index to reset local state on round change
+let _allVotedAt=null; // timestamp when all votes first detected
+let _countdownTimer=null; // drives timed transitions under SSE
+let _voteRetryTimer=null; // retry fetch if last vote missed by race condition
+
+function startCountdown(ms, onTick, onDone){
+  if(_countdownTimer) clearInterval(_countdownTimer);
+  _countdownTimer=setInterval(()=>{
+    const remaining=Math.ceil((ms-(Date.now()-_allVotedAt))/1000);
+    if(remaining>0){ onTick(remaining); }
+    else{ clearInterval(_countdownTimer);_countdownTimer=null; onDone(); }
+  },500);
+}
+
+function stopCountdown(){
+  if(_countdownTimer){clearInterval(_countdownTimer);_countdownTimer=null;}
+}
+let _maxPlayers=4; // host-controlled, 2-8
+let _gameMode='rounds'; // 'rounds' | 'pool'
+let _selectedCat=null; // null = wszystkie, or catId
+
+function renderLobCatSelector(){
+  const row=$('lob-cat-row');
+  if(!row)return;
+  const cats=Object.entries(_qCats||{});
+  if(cats.length===0){ row.innerHTML=''; return; }
+  row.innerHTML=`
+    <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Kategoria pytań</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <button onclick="setLobCat(null)" style="padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid ${_selectedCat===null?'var(--text)':'var(--rim)'};background:${_selectedCat===null?'var(--text)':'transparent'};color:${_selectedCat===null?'var(--bg)':'var(--muted)'}">Wszystkie</button>
+      ${cats.map(([id,cat])=>{
+        const active=_selectedCat===id;
+        const count=Object.values(_qCatMap||{}).filter(arr=>arr&&arr.includes(id)).length;
+        return`<button onclick="setLobCat('${id}')" style="padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid ${active?cat.color:cat.color+'55'};background:${active?cat.color+'33':'transparent'};color:${active?cat.color:'var(--muted)'}">${cat.name} <span style="opacity:.6">${count}</span></button>`;
+      }).join('')}
+    </div>`;
+}
+
+function setLobCat(id){
+  _selectedCat=id;
+  renderLobCatSelector();
+}
+
+function setGameMode(mode){
+  _gameMode=mode;
+  ['rounds','pool'].forEach(m=>{
+    const b=$('mode-'+m);
+    if(b){
+      b.classList.toggle('mode-btn-active', m===mode);
+    }
+  });
+  const rppRow=$('rpp-row');
+  if(rppRow) rppRow.style.display=mode==='rounds'?'flex':'none';
+  if(gameId) fbPatch(`games/${gameId}`,{gameMode:mode}).catch(()=>{});
+}
+
+function adjustRpp(delta){
+  const inp=$('rpp');
+  const display=$('rpp-display');
+  if(!inp)return;
+  const val=Math.min(10,Math.max(1,(parseInt(inp.value)||3)+delta));
+  inp.value=val;
+  if(display) display.textContent=val;
+}
+
+function setMaxPlayers(n){
+  _maxPlayers=n;
+  document.querySelectorAll('.maxp-btn[data-n]').forEach(b=>{
+    b.classList.toggle('active', parseInt(b.dataset.n)===n);
+  });
+  if(gameId) fbPatch(`games/${gameId}`,{maxPlayers:n}).catch(()=>{});
+  renderLobby();
+}
+
+// ── Firebase Realtime listener (SSE) instead of polling ──
+let _sseSource=null;
+
+function startPoll(){
+  stopPoll();
+  if(!gameId)return;
+  // Try SSE first (requires HTTPS)
+  try{
+    _sseSource=new EventSource(`${DB_URL}/games/${gameId}.json?stream=true`);
+    _sseSource.addEventListener('put',async(ev)=>{
+      try{
+        const msg=JSON.parse(ev.data);
+        if(!msg||msg.data===null){stopPoll();return;}
+        if(msg.path==='/'||!msg.path){GS=norm(msg.data);}
+        else{
+          await new Promise(r=>setTimeout(r,150));
+          const gs=await fbGet(`games/${gameId}`);if(!gs){stopPoll();return;}GS=norm(gs);
+        }
+        await handleGSUpdate();
+      }catch(e){console.error('SSE put error',e.message);}
+    });
+    _sseSource.addEventListener('patch',async()=>{
+      try{
+        // Small delay to ensure Firebase write is fully committed before reading back
+        await new Promise(r=>setTimeout(r,250));
+        const gs=await fbGet(`games/${gameId}`);
+        if(!gs){stopPoll();return;}
+        GS=norm(gs);await handleGSUpdate();
+      }catch(e){console.error('SSE patch error',e.message);}
+    });
+    _sseSource.onerror=()=>{
+      console.warn('SSE failed, falling back to polling');
+      if(_sseSource){_sseSource.close();_sseSource=null;}
+      if(!pollTimer){
+        pollTimer=setInterval(async()=>{
+          if(!gameId)return;
+          try{const gs=await fbGet(`games/${gameId}`);if(!gs){stopPoll();return;}GS=norm(gs);await handleGSUpdate();}
+          catch(e){console.error('fallback poll',e.message);}
+        },POLL_MS);
+      }
+    };
+  }catch(e){
+    // SSE not available — use polling
+    pollTimer=setInterval(async()=>{
+      if(!gameId)return;
+      try{const gs=await fbGet(`games/${gameId}`);if(!gs){stopPoll();return;}GS=norm(gs);await handleGSUpdate();}
+      catch(e){console.error('poll error',e.message);}
+    },POLL_MS);
+  }
+}
+
+function stopPoll(){
+  if(_sseSource){_sseSource.close();_sseSource=null;}
+  if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+  if(_kickCheckTimer){clearInterval(_kickCheckTimer);_kickCheckTimer=null;}
+}
+
+function startKickCheck(){
+  if(_kickCheckTimer) clearInterval(_kickCheckTimer);
+  _kickCheckTimer=setInterval(async()=>{
+    if(!gameId||mySlot===null||isHost)return;
+    try{
+      const fresh=await fbGet(`games/${gameId}`);
+      if(!fresh){return;}
+      const normed=norm(fresh);
+      if(!normed.players[mySlot]){
+        clearInterval(_kickCheckTimer);_kickCheckTimer=null;
+        stopPoll();
+        sessionStorage.removeItem('ego_sess');
+        sessionStorage.removeItem('ego_name');
+        gameId=null; mySlot=null; isHost=false; GS=null;
+        show('s-home');
+      }
+    }catch(e){}
+  },1500);
+}
+
+async function writeGS(){
+  // Full PUT only for major phase transitions that reset many fields at once
+  await fbPut(`games/${gameId}`,GS);
+}
+
+// Minimal PATCH for single-field updates during gameplay
+async function patchGS(fields){
+  await fbPatch(`games/${gameId}`,fields);
+  Object.assign(GS,fields);
+}
+
+async function handleGSUpdate(){
+  // Detect if this player's slot was cleared (kicked by host or removed)
+  if(mySlot!==null && !isHost && !GS.players[mySlot]){
+    stopPoll();
+    sessionStorage.removeItem('ego_sess');
+    sessionStorage.removeItem('ego_name');
+    gameId=null; mySlot=null; isHost=false; GS=null;
+    show('s-home');
+    return;
+  }
+
+  // Apply slot remap when returning to lobby after mid-game player left
+  if(GS.phase==='lobby' && GS.slotRemap && mySlot!==null && GS.slotRemap[mySlot]!==undefined && GS.slotRemap[mySlot]!==mySlot){
+    mySlot=GS.slotRemap[mySlot];
+    sessionStorage.setItem('ego_sess',JSON.stringify({gameId,mySlot}));
+  }
+
+  // Detect if this player was promoted to host (e.g. original host left mid-game)
+  if(GS.phase==='lobby' && mySlot!==null && (GS.hostSlot??0)===mySlot && !isHost){
+    isHost=true;
+    if(_kickCheckTimer){clearInterval(_kickCheckTimer);_kickCheckTimer=null;}
+  }
+
+  if(GS.phase==='lobby' && mySlot!==null && !$('s-slots').classList.contains('on')) renderLobby();
+
+  if(isHost){
+    const si=GS.subjects[GS.ri]??0;
+
+    if(GS.phase==='lobby'){
+      const filled=GS.players.filter(Boolean);
+      const ready=GS.ready||{};
+      const allReady=filled.length>=2 && GS.players.every((p,i)=>!p||!!ready[i]);
+      if(allReady){
+        if(!_allVotedAt){
+          _allVotedAt=Date.now();
+          startCountdown(3000,
+            (rem)=>{ if($('sync-st'))$('sync-st').textContent=`Wszyscy gotowi! Start za ${rem}s…`; },
+            ()=>handleGSUpdate()
+          );
+        }
+        const remaining=Math.ceil((3000-(Date.now()-_allVotedAt))/1000);
+        if(remaining<=0){
+          stopCountdown();
+          _allVotedAt=null;
+          const mode=_gameMode;
+          const idx=GS.players.map((p,i)=>p?i:null).filter(i=>i!==null);
+          let sub=[];
+          if(mode==='rounds'){const rpp=Math.max(1,parseInt($('rpp')?.value)||3);for(let r=0;r<rpp;r++)sub=[...sub,...[...idx]];}
+          else{for(let r=0;r<100;r++)sub=[...sub,...[...idx]];}
+          const qPool=_selectedCat?QS.map((_,i)=>i).filter(i=>(_qCatMap[i]||[]).includes(_selectedCat)):QS.map((_,i)=>i);
+          const qPoolFinal=qPool.length>0?qPool:QS.map((_,i)=>i);
+          if(qPoolFinal.length===0) return;
+          let qp=shuf([...qPoolFinal]),_s=0;
+          while(qp.length<sub.length&&_s++<200)qp=[...qp,...shuf([...qPoolFinal])];
+          const qSeq=qp.slice(0,sub.length);
+          const playerCount=GS.players.filter(Boolean).length;
+          const playerNames=GS.players.map((p,i)=>p?{name:p.name,slot:i}:null).filter(Boolean);
+          const qAnswers={};
+          qSeq.forEach((qIdx,ri)=>{const qq=QS[qIdx];if(qq&&qq.type==='players'){const opts=playerNames.map(p=>p.name);if(opts.length>0)qAnswers[ri]=opts;}});
+          GS={...GS,phase:'subject',gameMode:mode,subjects:sub,qSeq,qAnswers,rt:sub.length,ri:0,votes:{},bets:{},sa:-1,ready:{},pool:playerCount*10};
+          await writeGS();
+        }
+      } else { if(_allVotedAt) stopCountdown(); _allVotedAt=null; }
+    }
+
+    // subject→voting: handled client-side in submitSJ()
+    // voting→reveal: castVote() handles it optimistically, but if local GS was stale
+    // (race condition with concurrent votes), host catches it here as a guaranteed fallback
+    if(GS.phase==='voting'){
+      const guessers=GS.players.filter((p,i)=>p&&i!==si);
+      const done=guessers.filter((p,gi)=>{const pi=GS.players.indexOf(p);return GS.votes[pi]!==undefined;}).length;
+      if($('sync-st'))$('sync-st').textContent=`Odpowiedzi: ${done}/${guessers.length}`;
+      // Fallback: if all guessers have voted but reveal wasn't triggered yet, host does it
+      if(done>=guessers.length && guessers.length>0){
+        // GS here is already a fresh re-fetch from SSE handler — use it directly
+        const next=norm(dc(GS));
+        next.phase='reveal';
+        let poolDelta=0;
+        next.players.forEach((p,i)=>{
+          if(!p||i===si)return;
+          const bet=parseInt(next.bets?.[i])||1;
+          if(next.votes[i]==next.sa){
+            next.players[i].pts+=bet; next.players[si].pts++;
+            poolDelta-=bet; poolDelta--;
+          } else {
+            const actual=Math.min(bet,next.players[i].pts);
+            next.players[i].pts=Math.max(0,next.players[i].pts-actual);
+            poolDelta+=actual;
+          }
+        });
+        next.pool=Math.max(0,(next.pool||0)+poolDelta);
+        const mode=next.gameMode||'rounds';
+        const anyBroke=next.players.some(p=>p&&p.pts<=0);
+        if(mode==='pool'&&(next.pool<=0||anyBroke)) next.phase='ended';
+        else if(mode==='rounds'&&next.ri+1>=next.rt) next.phase='ended';
+        GS=next;
+        await writeGS();
+        render();
+        return; // skip the render() below — already called above
+      }
+    }
+  }
+
+  render();
+  if(GS.phase!=='voting'&&$('sync-st'))$('sync-st').textContent='Połączono';
+}
+
+// ── CREATE ──
+async function createGame(){
+  const name=($('inp-name').value.trim()||'Gracz 1');
+  hideErr('home-err');
+  showErr('home-err','⏳ Tworzę grę…');
+  $('home-err').style.color='var(--muted)';
+  try{
+    gameId=rnd4();
+    GS={phase:'lobby',players:[{name,pts:10},null,null,null],subjects:[],qSeq:[],rt:0,ri:0,votes:{},bets:{},sa:-1,ready:{},maxPlayers:4,pool:0,hostSlot:0};
+    await fbPut(`games/${gameId}`,GS);
+    mySlot=0;isHost=true;
+    sessionStorage.setItem('ego_sess',JSON.stringify({gameId,mySlot}));
+    hideErr('home-err');
+    renderLobby();show('s-lobby');
+    startPoll();
+  }catch(e){
+    showErr('home-err','❌ Błąd połączenia z Firebase. Sprawdź URL bazy danych.');
+    $('home-err').style.color='var(--c0)';
+    console.error(e);
+  }
+}
+
+// ── JOIN ──
+async function joinGame(){
+  const name=($('inp-name').value.trim());
+  if(!name){showErr('home-err','Wpisz swoje imię');return;}
+  const code=$('inp-code').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(code.length<2){showErr('home-err','Wpisz kod gry od hosta');return;}
+  hideErr('home-err');
+  showErr('home-err','⏳ Łączę…');
+  $('home-err').style.color='var(--muted)';
+  try{
+    const gs=await fbGet(`games/${code}`);
+    if(!gs){showErr('home-err','❌ Nie znaleziono gry. Sprawdź kod.');$('home-err').style.color='var(--c0)';return;}
+    if(gs.phase && gs.phase!=='lobby'){
+      showErr('home-err','❌ Ta gra już się rozpoczęła. Poczekaj na kolejną rozgrywkę.');
+      $('home-err').style.color='var(--c0)';return;
+    }
+    gameId=code;GS=norm(gs);
+    sessionStorage.setItem('ego_name',name);
+    hideErr('home-err');
+    renderSlots(gs,name);show('s-slots');
+    startPoll();
+  }catch(e){
+    console.error('joinGame error:',e);
+    showErr('home-err','❌ Błąd: '+e.message);
+    $('home-err').style.color='var(--c0)';
+  }
+}
+
+// ── SLOTS ──
+function renderSlots(gs,name){
+  const ni=$('slots-name-inp');
+  // Only set input value on first load, never overwrite while user is typing
+  if(ni && name && !ni.dataset.touched){
+    ni.value=name;
+  }
+  // Use confirmed name for display — never live input value
+  const confirmedName=(sessionStorage.getItem('ego_name')||name||'').trim();
+  $('slots-sub').textContent=confirmedName?`Cześć ${confirmedName}! Wybierz swój slot`:'Wybierz swój slot';
+  renderSlotsGrid(gs, confirmedName||'Gracz');
+  $('slots-conn').innerHTML=`<span class="cdot dok"></span>Połączono. Wybierz slot aby dołączyć.`;
+}
+
+function changeSlotName(){
+  const ni=$('slots-name-inp');
+  const newName=(ni?.value||'').trim();
+  if(!newName){ni?.focus();return;}
+  // Save confirmed name
+  sessionStorage.setItem('ego_name',newName);
+  if($('inp-name')) $('inp-name').value=newName;
+  // Clear touched flag
+  if(ni) delete ni.dataset.touched;
+  // Visual feedback on button
+  const btn=ni?.nextElementSibling;
+  if(btn){btn.textContent='✓';setTimeout(()=>{btn.textContent='Zmień';},1500);}
+  // NOW update subtitle and grid with confirmed name
+  $('slots-sub').textContent=`Cześć ${newName}! Wybierz swój slot`;
+  if(GS) renderSlotsGrid(GS, newName);
+}
+
+function renderSlotsGrid(gs,name){
+  const grid=$('slot-grid');if(!grid)return;
+  grid.innerHTML='';
+  const max=gs.maxPlayers||4;
+  for(let i=0;i<8;i++){
+    if(i>=max) continue;
+    const p=gs.players[i];
+    const isMine=mySlot===i;
+    const div=document.createElement('div');
+    div.className='slot'+(p&&!isMine?' taken':'')+(isMine?' mine':'');
+    div.style.borderColor=p?C(i)+'88':'var(--rim)';
+    div.innerHTML=`
+      <div class="slot-av" style="background:${C(i)}22;color:${C(i)}">${p?p.name.charAt(0).toUpperCase():(i+1)}</div>
+      <div class="slot-name" style="color:${p?C(i):'var(--muted)'}">${p?p.name:'Wolny slot'}</div>
+      <div class="slot-pts">${p?p.pts+' 🪙':'Kliknij aby dołączyć'}</div>
+      ${isMine?'<span class="slot-badge sb-you">ty</span>':(p?'':'<span class="slot-badge sb-free">wolny</span>')}
+    `;
+    if(!p||isMine)div.onclick=()=>{
+      const n=($('slots-name-inp')?.value||'').trim()||name||'Gracz';
+      claimSlot(i,n);
+    };
+    grid.appendChild(div);
+  }
+}
+
+async function claimSlot(slot,name){
+  try{
+    // Re-fetch fresh state to prevent race condition
+    const gs=await fbGet(`games/${gameId}`);
+    const fresh=norm(gs);
+    if(fresh.players[slot]&&mySlot!==slot){
+      alert('Ten slot jest właśnie zajęty przez kogoś innego!');
+      GS=fresh;renderSlots(fresh,name);return;
+    }
+    const normalName=(name||'Gracz').trim().toLowerCase();
+    const duplicate=fresh.players.some((p,i)=>p&&i!==slot&&p.name.trim().toLowerCase()===normalName);
+    if(duplicate){alert(`Imię "${name}" jest już zajęte. Wpisz inne imię.`);return;}
+    // Use PATCH with only the changed player slot — minimal write, atomic
+    const patch={};
+    patch[`players/${slot}`]={name:name||'Gracz',pts:fresh.players[slot]?.pts??10};
+    await fbPatch(`games/${gameId}`,patch);
+    GS=norm(dc(fresh));
+    GS.players[slot]={name:name||'Gracz',pts:fresh.players[slot]?.pts??10};
+    mySlot=slot;isHost=(slot===(GS.hostSlot??0));
+    sessionStorage.setItem('ego_sess',JSON.stringify({gameId,mySlot}));
+    if(!isHost) startKickCheck();
+    renderLobby();show('s-lobby');
+  }catch(e){alert('Błąd – spróbuj ponownie');}
+}
+
+// ── COPY CODE ──
+function copyCode(){
+  const code=gameId||$('lob-code').textContent;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(code).catch(()=>fallbackCopy(code));
+  } else {
+    fallbackCopy(code);
+  }
+  $('lob-code').textContent='✓ Skopiowano!';
+  setTimeout(()=>{ if($('lob-code')) $('lob-code').textContent=gameId||code; },2000);
+}
+function fallbackCopy(text){
+  const ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.cssText='position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta);
+  ta.focus();ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta);
+}
+
+// ── LOBBY ──
+function renderLobby(){
+  if(!GS)return;
+  $('lob-code').textContent=gameId||'----';
+  const ready=GS.ready||{};
+  const players=GS.players;
+  const max=GS.maxPlayers||4;
+  const activePlayers=players.slice(0,max);
+  const filled=activePlayers.filter(Boolean).length;
+  $('lob-cnt').textContent=`Gracze (${filled}/${max})`;
+
+  // Sync maxp-btn active state for host
+  if(isHost){
+    document.querySelectorAll('.maxp-btn[data-n]').forEach(b=>{
+      b.classList.toggle('active', parseInt(b.dataset.n)===max);
+    });
+    _maxPlayers=max;
+    // Sync game mode
+    const savedMode=GS.gameMode||'rounds';
+    if(savedMode!==_gameMode) setGameMode(savedMode);
+    renderLobCatSelector();
+  }
+
+  $('lob-list').innerHTML=activePlayers.map((p,i)=>{
+    if(!p)return`<div style="background:var(--card);border:1.5px dashed var(--rim);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--muted)">Slot ${i+1} — wolny</div>`;
+    const isReady=!!ready[i];
+    const readyBadge=isReady
+      ? `<span style="background:#14532d;color:#4ade80;border:1.5px solid #16a34a;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap">✓ ${gW(p.name,'gotowy','gotowa')}</span>`
+      : `<span style="background:#2d1a1a;color:#f87171;border:1.5px solid #dc262655;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap">⏳ czeka</span>`;
+    const kickBtn=isHost&&i!==mySlot
+      ? `<button onclick="kickPlayer(${i})" style="flex-shrink:0;background:#2d1a1a;border:1.5px solid #dc262655;color:#f87171;font-size:12px;font-weight:700;cursor:pointer;padding:5px 12px;border-radius:8px;white-space:nowrap">✕ Usuń</button>`
+      : '';
+    return`<div class="prow" style="border:1.5px solid ${isReady?'#16a34a':C(i)+'44'};gap:8px;">
+      <div class="prow-dot" style="background:${C(i)};flex-shrink:0"></div>
+      <span style="font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${p.name}</span>
+      ${i===(GS.hostSlot??0)?'<span class="ptag tag-host" style="flex-shrink:0">HOST</span>':''}
+      ${i===mySlot?'<span class="ptag tag-you" style="flex-shrink:0">ty</span>':''}
+      ${readyBadge}
+      ${kickBtn}
+    </div>`;
+  }).join('');
+
+  // Name change field
+  if(mySlot!==null){
+    $('lob-name-row').style.display='flex';
+    const curName=players[mySlot]?.name||'';
+    const inp=$('lob-name-inp');
+    if(inp){
+      inp.placeholder=curName;
+      // Only clear the field if user hasn't started typing — ensures placeholder shows current name
+      if(!inp.dataset.touched) inp.value='';
+    }
+  }
+
+  // Ready button
+  if(mySlot!==null){
+    const btn=$('btn-ready');
+    btn.style.display='block';
+    const iAmReady=!!ready[mySlot];
+    const myName=GS.players[mySlot]?.name||'';
+    if(iAmReady){
+      btn.textContent=`✅ ${gW(myName,'Jesteś gotowy','Jesteś gotowa')} — kliknij aby cofnąć`;
+      btn.style.cssText='background:#14532d;color:#4ade80;border:2px solid #16a34a;border-radius:12px;padding:15px;font-size:15px;font-weight:700;font-family:\'DM Sans\',sans-serif;cursor:pointer;width:100%;';
+    } else {
+      btn.textContent=gW(myName,'Jestem gotowy ✓','Jestem gotowa ✓');
+      btn.style.cssText='background:var(--text);color:var(--bg);border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;font-family:\'DM Sans\',sans-serif;cursor:pointer;width:100%;';
+    }
+  }
+
+  // Host / guest controls
+  const allReady=activePlayers.every((p,i)=>!p||!!ready[i]);
+  if(isHost){
+    $('lob-host').style.display='flex';
+    $('lob-guest').style.display='none';
+    const btn=$('btn-start');
+    const readyCount=activePlayers.filter((p,i)=>p&&!!ready[i]).length;
+    if(allReady && filled>=2){
+      btn.disabled=false;
+      btn.style.opacity='1';
+      // Show how many players will play and allow manual start
+      btn.textContent=filled===activePlayers.filter(Boolean).length && filled===(GS.maxPlayers||4)
+        ? '▶ Rozpocznij grę'
+        : `▶ Rozpocznij z ${filled} graczami`;
+    } else {
+      btn.disabled=true;
+      btn.style.opacity='0.4';
+      btn.textContent=`Gotowych: ${readyCount}/${filled} — czekaj…`;
+    }
+  } else {
+    $('lob-host').style.display='none';
+    $('lob-guest').style.display='block';
+    const readyCount=activePlayers.filter((p,i)=>p&&!!ready[i]).length;
+    $('lob-guest-conn').innerHTML=allReady
+      ? `<span class="cdot dok"></span>Wszyscy gotowi! Gra startuje za chwilę…`
+      : `<span class="cdot dwait"></span>Gotowych: ${readyCount}/${filled} — czekaj na pozostałych`;
+  }
+  // Note: show('s-lobby') is NOT called here — renderLobby only updates content, screen switching is done explicitly
+}
+
+async function toggleReady(){
+  if(mySlot===null)return;
+  try{
+    const gs=await fbGet(`games/${gameId}`);
+    GS=norm(dc(gs));
+    if(!GS.ready) GS.ready={};
+    GS.ready[mySlot]=!GS.ready[mySlot];
+    await fbPatch(`games/${gameId}`,{ready:GS.ready});
+    renderLobby();
+  }catch(e){console.error('toggleReady',e);}
+}
+
+async function changeName(){
+  const inp=$('lob-name-inp');
+  const newName=(inp?.value||'').trim();
+  if(!newName||mySlot===null){inp?.focus();return;}
+  // Check duplicate
+  const norm2=newName.toLowerCase();
+  const dup=GS.players.some((p,i)=>p&&i!==mySlot&&p.name.trim().toLowerCase()===norm2);
+  if(dup){alert(`Imię "${newName}" jest już zajęte. Wybierz inne.`);return;}
+  try{
+    const patch={};
+    patch[`players/${mySlot}/name`]=newName;
+    if(!GS.ready) GS.ready={};
+    GS.ready[mySlot]=false;
+    patch[`ready/${mySlot}`]=false;
+    await fbPatch(`games/${gameId}`,patch);
+    GS.players[mySlot].name=newName;
+    // Clear input, update placeholder
+    if(inp){ inp.value=''; delete inp.dataset.touched; inp.placeholder=newName; }
+    renderLobby();
+  }catch(e){console.error('changeName',e);}
+}
+
+async function leaveGame(){
+  if(!confirm('Na pewno chcesz opuścić grę?'))return;
+  try{
+    const activeGame=GS && GS.phase && GS.phase!=='lobby' && GS.phase!=='ended';
+    if(activeGame && gameId){
+      // Remove leaving player and reset to lobby for remaining players
+      const newPlayers=[...GS.players];
+      newPlayers[mySlot]=null;
+      const remainingSlots=newPlayers.map((p,i)=>p?i:null).filter(i=>i!==null);
+      if(remainingSlots.length===0){
+        await fbPatch(`games/${gameId}`,{phase:'ended'});
+      } else {
+        const currentHostSlot=GS.hostSlot??0;
+        const rawHostSlot=remainingSlots.includes(currentHostSlot)
+          ? currentHostSlot
+          : remainingSlots[Math.floor(Math.random()*remainingSlots.length)];
+        // Compact: host first, then rest in original order
+        const ordered=[rawHostSlot,...remainingSlots.filter(s=>s!==rawHostSlot)];
+        const compactPlayers=ordered.map(s=>({name:GS.players[s].name,pts:10}));
+        // Pad to maxPlayers with nulls
+        const max=GS.maxPlayers||4;
+        while(compactPlayers.length<max)compactPlayers.push(null);
+        // Build remap: oldSlot → newSlot
+        const slotRemap={};
+        ordered.forEach((oldSlot,newSlot)=>{slotRemap[oldSlot]=newSlot;});
+        await fbPut(`games/${gameId}`,{
+          phase:'lobby',players:compactPlayers,hostSlot:0,slotRemap,
+          subjects:[],qSeq:[],qAnswers:{},rt:0,ri:0,
+          votes:{},bets:{},sa:-1,ready:{},maxPlayers:max,pool:0
+        });
+      }
+    } else if(mySlot!==null && gameId){
+      const patch={};
+      patch[`players/${mySlot}`]=null;
+      patch[`ready/${mySlot}`]=null;
+      await fbPatch(`games/${gameId}`,patch);
+    }
+  }catch(e){}
+  stopPoll();
+  sessionStorage.removeItem('ego_sess');
+  sessionStorage.removeItem('ego_name');
+  gameId=null; mySlot=null; isHost=false; GS=null;
+  _localVote=null; _confirmedVote=null; _sjPick=null; _lastRi=null;
+  show('s-home');
+}
+
+async function kickPlayer(slot){
+  if(!isHost||slot===mySlot)return;
+  try{
+    const patch={};
+    patch[`players/${slot}`]=null;
+    patch[`ready/${slot}`]=null;
+    await fbPatch(`games/${gameId}`,patch);
+    if(GS.players) GS.players[slot]=null;
+    if(GS.ready)   GS.ready[slot]=null;
+    renderLobby();
+  }catch(e){console.error('kickPlayer',e);}
+}
+
+// ── HOST START ──
+// Returns answers for current round — either static or player-name-based
+function getQAnswers(ri){
+  if(GS.qAnswers && GS.qAnswers[ri]) return GS.qAnswers[ri];
+  const q=QS[GS.qSeq[ri]];
+  return q?q.a:[];
+}
+
+async function hostStart(){
+  if(!isHost)return;
+  const ps=GS.players.filter(Boolean);
+  if(ps.length<2){alert('Potrzeba co najmniej 2 graczy!');return;}
+  const ready=GS.ready||{};
+  const allReady=GS.players.every((p,i)=>!p||!!ready[i]);
+  if(!allReady){alert('Nie wszyscy gracze są gotowi!');return;}
+  const mode=_gameMode;
+  const idx=GS.players.map((p,i)=>p?i:null).filter(i=>i!==null);
+  const playerCount=GS.players.filter(Boolean).length;
+  let sub,qp;
+  if(mode==='rounds'){
+    const rpp=Math.max(1,parseInt($('rpp').value)||3);
+    for(let r=0;r<rpp;r++) sub=[...(sub||[]),...[...idx]];
+  } else {
+    for(let r=0;r<100;r++) sub=[...(sub||[]),...[...idx]];
+  }
+  const qPool=_selectedCat
+    ? QS.map((_,i)=>i).filter(i=>(_qCatMap[i]||[]).includes(_selectedCat))
+    : QS.map((_,i)=>i);
+  const qPoolFinal=qPool.length>0?qPool:QS.map((_,i)=>i);
+  if(qPoolFinal.length===0){alert('Brak pytań w bazie! Dodaj pytania aby rozpocząć grę.');return;}
+  qp=shuf([...qPoolFinal]);
+  // Safe fill — avoid infinite loop if pool smaller than sub
+  let safety=0;
+  while(qp.length<sub.length && safety++<200) qp=[...qp,...shuf([...qPoolFinal])];
+  const qSeq=qp.slice(0,sub.length);
+
+  // For player-type questions, bake player names as answers
+  const playerNames=GS.players.map((p,i)=>p?{name:p.name,slot:i}:null).filter(Boolean);
+  const qAnswers={};
+  qSeq.forEach((qIdx,ri)=>{
+    const q=QS[qIdx];
+    if(q&&q.type==='players'){
+      // Exclude the subject from their own question options
+      const subjSlot=sub[ri];
+      const opts=playerNames.map(p=>p.name);
+      if(opts.length>0) qAnswers[ri]=opts;
+    }
+  });
+
+  GS={...GS,phase:'subject',gameMode:mode,subjects:sub,qSeq,qAnswers,rt:sub.length,ri:0,votes:{},bets:{},sa:-1,ready:{},pool:playerCount*10};
+  await writeGS();render();
+}
+
+// ── RENDER ──
+function render(){
+  if(!GS)return;
+
+  // If this player's slot was cleared, redirect to home immediately
+  if(mySlot!==null && !isHost && !GS.players[mySlot]){
+    stopPoll();
+    sessionStorage.removeItem('ego_sess');
+    sessionStorage.removeItem('ego_name');
+    gameId=null; mySlot=null; isHost=false; GS=null;
+    show('s-home');
+    return;
+  }
+
+  // Reset local per-round state whenever round changes
+  const currentRi = GS.ri ?? 0;
+  if(_lastRi !== null && _lastRi !== currentRi){
+    _localVote=null; _confirmedVote=null; _sjPick=null; _sjPending=null;
+    _swapsLeft=2; _sjSwapsLeft=2; _lastSwapAt=null; _localBet=1;
+    _reportedThisQ=false; _swappedAfterReport=false;
+    stopCountdown();
+    if(_voteRetryTimer){clearTimeout(_voteRetryTimer);_voteRetryTimer=null;}
+  }
+  _lastRi = currentRi;
+
+  // Detect question swap — only show toast and reset for NON-subject players
+  const curSwapAt = GS.swapAt || null;
+  if(curSwapAt && curSwapAt !== _lastSwapAt){
+    const isFirstLoad = _lastSwapAt === null;
+    _lastSwapAt = curSwapAt;
+    if(!isFirstLoad && !amSJ()){
+      _localVote = null;
+      _confirmedVote = null;
+      _localBet = 1; // reset bet too
+      if(mySlot!==null && gameId){
+        const p={}; p[`votes/${mySlot}`]=null;
+        fbPatch(`games/${gameId}`,p).catch(()=>{});
+      }
+      if(GS.votes) delete GS.votes[mySlot];
+      showSwapToast();
+    }
+  }
+
+  // If on slots screen, keep updating it
+  if($('s-slots').classList.contains('on')){
+    renderSlots(GS,sessionStorage.getItem('ego_name')||'Gracz');
+    return;
+  }
+  switch(GS.phase){
+    case'lobby':   renderLobby(); show('s-lobby'); break;
+    case'voting':  renderVoting(); break;
+    case'subject': renderSubj();   break;
+    case'reveal':  renderReveal(); break;
+    case'ended':   renderEnd();    break;
+  }
+}
+
+function showSwapToast(){
+  const si=GS.subjects?.[GS.ri??0]??0;
+  const sp=GS.players?.[si];
+  const name=sp?.name||'Temat';
+  // Create or reuse toast
+  let t=$('swap-toast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='swap-toast';
+    t.style.cssText='position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:999;background:#1e1b4b;border:2px solid #818cf8;color:#a5b4fc;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;text-align:center;max-width:300px;box-shadow:0 4px 20px #0006;animation:pop .3s ease;';
+    document.body.appendChild(t);
+  }
+  t.textContent=`🔄 ${name} ${gW(name,'zmienił','zmieniła')} pytanie!`;
+  t.style.display='block';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>{t.style.display='none';},3500);
+}
+
+// ── helpers ──
+const SI=()=>GS.subjects[GS.ri]??0;
+const SP=()=>GS.players[SI()];
+const CQ=()=>QS[GS.qSeq[GS.ri]];
+const amSJ=()=>mySlot===SI();
+
+// Dynamically scale question text font size based on character count
+function setQText(elId, text){
+  const el=$(elId); if(!el) return;
+  el.textContent=text;
+  const len=text.length;
+  // Bebas Neue is condensed — thresholds tuned for ~343px content width on iPhone
+  if(len>110)      el.style.fontSize='15px';
+  else if(len>80)  el.style.fontSize='17px';
+  else if(len>55)  el.style.fontSize='20px';
+  else             el.style.fontSize=''; // let CSS clamp() take over
+}
+
+// Build "waiting for these players" chip list for voting screen
+function buildPendingVoters(si){
+  const pending=GS.players.map((p,i)=>({p,i})).filter(({p,i})=>p&&i!==si&&GS.votes[i]===undefined);
+  if(pending.length===0){
+    return`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--rim);color:var(--c2);font-size:13px;font-weight:600;text-align:center">✓ Wszyscy zagłosowali!</div>`;
+  }
+  const chips=pending.map(({p,i})=>`<span style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:99px;background:${C(i)}22;color:${C(i)};border:1px solid ${C(i)}55;white-space:nowrap">${p.name}</span>`).join('');
+  return`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--rim)">
+    <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;text-align:center">Czeka na</div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center">${chips}</div>
+  </div>`;
+}
+
+function mkSbar(id){
+  const el=$(id);if(!el||!GS)return;
+  const max=GS.maxPlayers||4;
+  el.innerHTML=GS.players.slice(0,max).map((p,i)=>p
+    ?`<div class="sbi"><div class="sbi-n" style="color:${C(i)}">${p.name}</div><div class="sbi-v" style="color:${C(i)}">${p.pts} 🪙</div></div>`
+    :''
+  ).join('');
+
+  // Pool row — separate card below scorebar
+  const poolRowId='pool-row-'+id;
+  let pr=$(poolRowId);
+  if(!pr){
+    pr=document.createElement('div');
+    pr.id=poolRowId;
+    pr.style.cssText='display:flex;align-items:center;justify-content:center;gap:6px;background:var(--card);border-radius:8px;padding:5px 12px;border:1.5px solid var(--c3)44;margin-top:4px';
+    el.parentNode.insertBefore(pr,el.nextSibling);
+  }
+  pr.innerHTML=`<span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Pula</span><span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--c3)">${GS.pool??0} 🪙</span>`;
+
+  // Code row below pool row
+  const codeRowId='code-row-'+id;
+  let cr=$(codeRowId);
+  if(!cr){
+    cr=document.createElement('div');
+    cr.id=codeRowId;
+    cr.onclick=copySbarCode;
+    cr.title='Kliknij aby skopiować kod';
+    cr.style.cssText='text-align:center;cursor:pointer;font-size:11px;color:var(--muted);letter-spacing:3px;font-family:\'Bebas Neue\',sans-serif;padding:2px 0;margin-top:2px';
+    pr.parentNode.insertBefore(cr,pr.nextSibling);
+  }
+  cr.textContent=gameId||'';
+}
+
+function copySbarCode(){
+  if(!gameId)return;
+  navigator.clipboard?.writeText(gameId).catch(()=>{});
+  document.querySelectorAll('[id^="code-row-"]').forEach(el=>{
+    const orig=el.textContent;
+    el.textContent='✓  SKOPIOWANO';
+    el.style.color='var(--c2)';
+    setTimeout(()=>{el.textContent=orig;el.style.color='';},1500);
+  });
+}
+
+function buildAns(cid,answers,locked,chosen,correct,cb){
+  const c=$(cid);if(!c)return;c.innerHTML='';
+  answers.forEach((a,i)=>{
+    const btn=document.createElement('button');
+    btn.className='abtn'+(locked||correct!==null?' locked':'');
+    if(correct!==null&&i==correct)btn.classList.add('correct');
+    if(locked&&i===chosen)btn.classList.add('chosen');
+    btn.innerHTML=`<div class="anum">${i+1}</div><span>${a}</span>`;
+    if(!locked&&correct===null&&cb)btn.onclick=()=>cb(i);
+    c.appendChild(btn);
+  });
+}
+
+function setWait(color,name,title,desc,qt){
+  resetReportBtns('w');
+  const av=$('w-av');
+  av.style.cssText=`width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:32px;background:${color}22;color:${color};margin:0 auto;`;
+  av.textContent=name.charAt(0).toUpperCase();
+  $('w-title').textContent=title;
+  $('w-desc').textContent=desc;
+  $('w-q').textContent=qt;
+}
+
+// ── VOTING (guessers only) ──
+let _localVote = null;
+let _confirmedVote = null;
+let _localBet = 1; // 1 or 2 points bet
+
+function renderVoting(){
+  resetReportBtns('v');
+  const q=CQ();if(!q)return;
+  const si=SI(),sp=SP();
+  mkSbar('sb-v'); mkSbar('sb-w');
+  $('qc-v').style.setProperty('--ac',C(si));
+  const ri=GS.ri+1,tot=GS.rt;
+
+  // In voting phase subject already answered — show them a wait screen
+  if(amSJ()){
+    const guessers=GS.players.filter((p,i)=>p&&i!==si);
+    const done=guessers.filter((p,gi)=>{
+      const pi=GS.players.indexOf(p); return GS.votes[pi]!==undefined;
+    }).length;
+    mkSbar('sb-v');
+    $('qc-v').style.setProperty('--ac',C(si));
+    $('v-meta').textContent=`Runda ${ri} / ${tot}`;
+    $('v-about').innerHTML=`Inni zgadują Twoją odpowiedź…`;
+    setQText('v-q',q.q.replace('[imię]',sp.name));
+    buildAns('v-ans',getQAnswers(GS.ri),true,GS.sa,null,null);
+    $('btn-vote').style.display='none';
+    $('v-bet').style.display='none';
+    $('v-st').innerHTML=`
+      <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:14px 16px;text-align:center;margin-top:4px">
+        <div style="font-size:20px;margin-bottom:6px">🤫</div>
+        <div style="font-weight:600;font-size:14px;margin-bottom:4px">${gW(GS.players[mySlot]?.name||'','Już odpowiedziałeś!','Już odpowiedziałaś!')}</div>
+        <div style="color:var(--muted);font-size:13px">Zagłosowało ${done} z ${guessers.length} graczy</div>
+        ${buildPendingVoters(si)}
+      </div>`;
+    show('s-vote'); return;
+  }
+  if(mySlot===null||!GS.players[mySlot]){
+    setWait('#888','?','Trwa głosowanie…','Czekaj',q.q.replace('[imię]',sp.name));
+    show('s-wait'); return;
+  }
+
+  $('v-meta').textContent=`Runda ${ri} / ${tot}`;
+  $('v-about').innerHTML=`Pytanie o: <strong style="color:${C(si)}">${sp.name}</strong>`;
+  setQText('v-q',q.q.replace('[imię]',sp.name));
+
+  const fbVote=GS.votes[mySlot];
+  const voted=fbVote!==undefined||_confirmedVote!==null;
+  const shownVote=fbVote!==undefined?fbVote:(_confirmedVote!==null?_confirmedVote:_localVote);
+
+  const myName=GS.players[mySlot]?.name||'';
+
+  if(voted){
+    buildAns('v-ans',getQAnswers(GS.ri),true,shownVote,null,null);
+    $('btn-vote').style.display='none';
+    $('v-bet').style.display='none';
+    const guessers=GS.players.filter((p,i)=>p&&i!==si);
+    const done=guessers.filter((p,gi)=>{const pi=GS.players.indexOf(p);return GS.votes[pi]!==undefined;}).length;
+    $('v-st').innerHTML=`
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="color:var(--c2);font-size:13px;font-weight:600">✓ ${gW(myName,'Zatwierdziłeś','Zatwierdziłaś')}! (${done}/${guessers.length})</div>
+        ${buildPendingVoters(si)}
+      </div>`;
+  } else {
+    buildAns('v-ans',getQAnswers(GS.ri),false,null,null,i=>{
+      _localVote=i; renderVoting();
+    });
+    if(_localVote!==null){
+      const btns=document.querySelectorAll('#v-ans .abtn');
+      btns.forEach((b,i)=>{if(i==_localVote){b.classList.add('chosen');b.querySelector('.anum').style.background='var(--text)';b.querySelector('.anum').style.color='var(--bg)';}});
+      $('btn-vote').style.display='block';
+      $('v-bet').style.display='flex';
+      $('v-bet').style.flexDirection='column';
+      $('v-bet').style.gap='8px';
+      // Don't override _localBet if user already picked — only init on first show
+      updateBetUI();
+      $('v-st').textContent='';
+    } else {
+      $('btn-vote').style.display='none';
+      $('v-bet').style.display='none';
+      $('v-st').textContent='Jak twoim zdaniem odpowie?';
+    }
+  }
+  show('s-vote');
+}
+
+// ── SWAP QUESTION ──
+let _lastSwapAt=null; // track last swap timestamp seen
+
+async function swapQuestionSJ(){
+  if(_sjSwapsLeft<=0)return;
+  _sjSwapsLeft--;
+
+  // All questions ever used: planned qSeq + history of swapped-out ones
+  const allUsed=new Set([...(GS.qSeq||[]),...(GS.usedQs||[])]);
+  // Must also exclude current question being swapped
+  allUsed.add(GS.qSeq[GS.ri]);
+  const available=QS.map((_,i)=>i).filter(i=>!allUsed.has(i));
+  // If pool exhausted, allow anything except current question
+  const pool=available.length>0 ? available : QS.map((_,i)=>i).filter(i=>i!==GS.qSeq[GS.ri]);
+  if(!pool.length)return;
+  const newQIdx=pool[Math.floor(Math.random()*pool.length)];
+
+  // Track old question as used so it never comes back
+  const usedQs=[...(GS.usedQs||[]),GS.qSeq[GS.ri]];
+  const newSeq=[...GS.qSeq];
+  newSeq[GS.ri]=newQIdx;
+
+  // Fix qAnswers for the new question at this round index
+  const newQ=QS[newQIdx];
+  const newQAnswers={...(GS.qAnswers||{})};
+  if(newQ&&newQ.type==='players'){
+    const playerNames=GS.players.filter(Boolean).map(p=>p.name);
+    if(playerNames.length>0) newQAnswers[GS.ri]=playerNames;
+    else delete newQAnswers[GS.ri];
+  } else {
+    delete newQAnswers[GS.ri];
+  }
+
+  GS.qSeq=newSeq;
+  GS.usedQs=usedQs;
+  GS.qAnswers=newQAnswers;
+  GS.votes={};
+  GS.bets={};
+  GS.sa=-1;
+  GS.phase='subject';
+  const swapAt=Date.now();
+  _allVotedAt=null;
+  _sjPending=null; _localVote=null; _confirmedVote=null;
+  try{
+    await fbPatch(`games/${gameId}`,{
+      [`qSeq`]:newSeq,
+      usedQs,
+      qAnswers:newQAnswers,
+      votes:{},
+      bets:{},
+      sa:-1,
+      phase:'subject',
+      swapAt
+    });
+    GS.qSeq=newSeq;GS.usedQs=usedQs;GS.qAnswers=newQAnswers;GS.votes={};GS.bets={};GS.sa=-1;GS.phase='subject';GS.swapAt=swapAt;
+  }catch(e){console.error('swap write',e);}
+  renderSubj();
+}
+
+function _swapBtnLabel(left){ return left>0 ? `🔄 Zmień pytanie (zostało: ${left})` : '🔄 Brak wymian'; }
+
+function setBet(n){
+  _localBet=n;
+  updateBetUI();
+}
+function updateBetUI(){
+  [1,2].forEach(n=>{
+    const btn=$('bet-'+n);
+    const numEl=$('bet-'+n+'-num');
+    if(!btn)return;
+    const active=_localBet===n;
+    btn.classList.toggle('chosen', active);
+    if(numEl){
+      numEl.style.background=active?'var(--text)':'';
+      numEl.style.color=active?'var(--bg)':'';
+      numEl.style.borderColor=active?'var(--text)':'';
+    }
+  });
+}
+
+
+function confirmVote(){
+  if(_localVote===null)return;
+  _confirmedVote=_localVote;
+  $('btn-vote').style.display='none';
+  $('v-bet').style.display='none';
+  buildAns('v-ans',getQAnswers(GS.ri),true,_confirmedVote,null,null);
+  const myName=GS&&mySlot!==null?GS.players[mySlot]?.name||'':'';
+  $('v-st').innerHTML=`<span style="color:var(--c2)">✓ ${gW(myName,'Zatwierdziłeś','Zatwierdziłaś')}! Czekaj na pozostałych…</span>`;
+  castVote(_confirmedVote);
+}
+
+async function castVote(ans){
+  try{
+    const patch={};
+    patch[`votes/${mySlot}`]=ans;
+    patch[`bets/${mySlot}`]=_localBet;
+    await fbPatch(`games/${gameId}`,patch);
+    GS.votes[mySlot]=ans;
+    if(!GS.bets) GS.bets={};
+    GS.bets[mySlot]=_localBet;
+
+    // Check if I was the last voter — if so, compute reveal immediately
+    const si=SI();
+    const guessers=GS.players.filter((p,i)=>p&&i!==si);
+    const allVoted=guessers.every((p,gi)=>{
+      const pi=GS.players.indexOf(p);
+      return GS.votes[pi]!==undefined;
+    });
+
+    if(allVoted && guessers.length>0){
+      // Small delay so other clients' SSE can settle, then write reveal
+      await new Promise(r=>setTimeout(r,400));
+      // Re-fetch to get authoritative state before computing
+      const fresh=await fbGet(`games/${gameId}`);
+      if(!fresh||fresh.phase!=='voting'){render();return;} // already transitioned
+      const next=norm(dc(fresh));
+      next.phase='reveal';
+      let poolDelta=0;
+      next.players.forEach((p,i)=>{
+        if(!p||i===si)return;
+        const bet=parseInt(next.bets?.[i])||1;
+        if(next.votes[i]==next.sa){
+          next.players[i].pts+=bet; next.players[si].pts++;
+          poolDelta-=bet; poolDelta--;
+        } else {
+          const actual=Math.min(bet,next.players[i].pts);
+          next.players[i].pts=Math.max(0,next.players[i].pts-actual);
+          poolDelta+=actual;
+        }
+      });
+      next.pool=Math.max(0,(next.pool||0)+poolDelta);
+      const mode=next.gameMode||'rounds';
+      const anyBroke=next.players.some(p=>p&&p.pts<=0);
+      if(mode==='pool'&&(next.pool<=0||anyBroke)) next.phase='ended';
+      else if(mode==='rounds'&&next.ri+1>=next.rt) next.phase='ended';
+      GS=next;
+      await writeGS();
+    }
+    render();
+  }catch(e){console.error('castVote',e);}
+}
+
+// ── SUBJECT answers last ──
+let _sjPending=null;
+let _swapsLeft=2;    // resets each round, shared between voter and subject screens
+let _sjSwapsLeft=2;  // for subject screen
+
+function renderSubj(){
+  resetReportBtns('sj');
+  const q=CQ();if(!q)return;
+  const si=SI(),sp=SP();
+  mkSbar('sb-sj'); mkSbar('sb-w');
+  $('qc-sj').style.setProperty('--ac',C(si));
+  const ri=GS.ri+1,tot=GS.rt;
+
+  // Non-subject players see wait screen
+  if(!amSJ()){
+    setWait(C(si),sp.name,`${sp.name} wybiera odpowiedź…`,
+      'Twoja kolej zaraz — poczekaj!',
+      q.type==='players'?q.q:q.q.replace('[imię]',sp.name));
+    const wAnsWrap=$('w-ans-wrap');
+    const waitAnswers=getQAnswers(GS.ri);
+    if(waitAnswers&&waitAnswers.length>0){
+      buildAns('w-ans',waitAnswers,true,null,null,null);
+      if(wAnsWrap)wAnsWrap.style.display='block';
+    }else{
+      if(wAnsWrap)wAnsWrap.style.display='none';
+    }
+    show('s-wait'); return;
+  }
+
+  // Subject screen
+  $('sj-meta').textContent=`Runda ${ri} / ${tot} — To pytanie jest o Tobie!`;
+  $('sj-about').textContent=`Odpowiedz szczerze!`;
+  // Build answer buttons — always unlocked so subject can change
+  const ac=$('sj-ans'); ac.innerHTML='';
+  const isPlayerType=q.type==='players';
+  const answers=getQAnswers(GS.ri);
+  setQText('sj-q',q.qs);
+  answers.forEach((a,i)=>{
+    const btn=document.createElement('button');
+    btn.className='abtn';
+    const displayAnswer=isPlayerType?a:(q.as?q.as[i]:a);
+    btn.innerHTML=`<div class="anum" style="${i==_sjPending?'background:var(--text);color:var(--bg);border-color:var(--text);':''}">${i+1}</div><span>${displayAnswer}</span>`;
+    btn.onclick=()=>{ _sjPending=i; renderSubj(); };
+    ac.appendChild(btn);
+  });
+
+  // Swap button — always visible, at top
+  const sb=$('btn-swap-sj');
+  sb.style.display='block';
+  sb.textContent=_swapBtnLabel(_sjSwapsLeft);
+  sb.disabled=_sjSwapsLeft<=0;
+  sb.style.opacity=_sjSwapsLeft>0?'1':'0.4';
+
+  // Confirm button — only after picking
+  $('btn-sj').style.display=_sjPending!==null?'block':'none';
+  $('btn-sj').textContent='Zatwierdź i pozwól innym odpowiedzieć →';
+
+  show('s-subj');
+}
+
+async function submitSJ(){
+  if(_sjPending===null)return;
+  try{
+    // Write answer AND immediately advance to voting — no host needed
+    await fbPatch(`games/${gameId}`,{sa:_sjPending, phase:'voting'});
+    GS.sa=_sjPending;
+    GS.phase='voting';
+    render();
+  }catch(e){console.error('submitSJ',e);}
+}
+
+
+// ── REVEAL ──
+function renderReveal(){
+  resetReportBtns('rv');
+  const q=CQ();if(!q)return;
+  const si=SI(),sp=SP(),correct=GS.sa;
+  mkSbar('sb-rv');
+  const ri=GS.ri+1,tot=GS.rt;
+
+  const myVote=GS.votes[mySlot];
+  const myBet=parseInt((GS.bets||{})[mySlot])||1;
+  const amI=mySlot!==null&&GS.players[mySlot];
+  const iAmSubject=amSJ();
+  const myName=GS.players[mySlot]?.name||'';
+
+  // ── BANNER ──
+  let bannerHtml='';
+  if(amI && !iAmSubject && myVote!==undefined){
+    const hit=myVote==correct;
+    bannerHtml=`<div style="border-radius:16px;padding:20px;background:${hit?'#052e16':'#450a0a'};border:2px solid ${hit?'#16a34a':'#dc2626'};text-align:center">
+      <div style="font-size:44px;margin-bottom:6px">${hit?'🎉':'😬'}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;color:${hit?'#4ade80':'#f87171'};line-height:1">${hit?gW(myName,'TRAFIŁEŚ!','TRAFIŁAŚ!'):'PUDŁO!'}</div>
+      <div style="font-size:13px;color:${hit?'#86efac':'#fca5a5'};margin-top:8px;line-height:1.5">${hit
+        ?`Twoja odpowiedź = odpowiedź ${sp.name} 🎯 &nbsp;<strong>+${myBet} ${myBet===1?'żeton':'żetony'} z puli!</strong>`
+        :`${gW(myName,'Wybrałeś','Wybrałaś')}: <strong style="color:#fff">${getQAnswers(GS.ri)[myVote]}</strong> &nbsp;·&nbsp; Poprawna: <strong style="color:#4ade80">${getQAnswers(GS.ri)[correct]}</strong><br><strong style="color:#f87171">-${myBet} ${myBet===1?'żeton':'żetony'} do puli</strong>`
+      }</div>
+    </div>`;
+  } else if(iAmSubject){
+    const guessers=GS.players.filter((p,i)=>p&&i!==si);
+    const cnt=guessers.filter((p,gi)=>GS.votes[GS.players.indexOf(p)]==correct).length;
+    bannerHtml=`<div style="border-radius:16px;padding:20px;background:${cnt>0?'#1e1b4b':'#1a1a24'};border:2px solid ${cnt>0?'#818cf8':'#3f3f50'};text-align:center">
+      <div style="font-size:44px;margin-bottom:6px">${cnt===guessers.length?'🏆':cnt>0?'🎯':'😮'}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:${cnt>0?'#a5b4fc':'#6b6b80'};line-height:1">TO TWOJE PYTANIE</div>
+      <div style="font-size:13px;color:#c7d2fe;margin-top:8px;line-height:1.6">
+        <strong style="color:#fff">${cnt} z ${guessers.length}</strong> graczy odgadło Twoją odpowiedź<br>
+        ${cnt>0?`<strong style="color:#a5b4fc">+${cnt} ${cnt===1?'żeton':cnt<5?'żetony':'żetonów'} dla Ciebie!</strong>`:`<span style="color:#6b6b80">Nikt nie trafił — 0 żetonów</span>`}
+      </div>
+    </div>`;
+  }
+
+  // ── QUESTION (compact, under banner) ──
+  const rvQText=q.q.replace('[imię]',sp.name);
+  const rvQSize=rvQText.length>90?'14px':rvQText.length>65?'15px':'18px';
+  bannerHtml+=`<div style="background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:14px 16px;margin-top:12px">
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Runda ${ri} / ${tot} · Pytanie o <strong style="color:${C(si)}">${sp.name}</strong></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:${rvQSize};letter-spacing:.3px;line-height:1.35;word-break:break-word">${rvQText}</div>
+  </div>`;
+
+  $('rv-banner').innerHTML=bannerHtml;
+
+  // ── ANSWERS ──
+  const ac=$('rv-ans'); ac.innerHTML='';
+  const rvAnswers=getQAnswers(GS.ri);
+  rvAnswers.forEach((a,i)=>{
+    const isCorrect=i==correct;
+    const isMyVote=!iAmSubject&&i==myVote;
+    const voters=GS.players.filter((p,pi)=>p&&pi!==si&&GS.votes[pi]==i);
+    const hasChips=voters.length>0||isMyVote;
+
+    const btn=document.createElement('button');
+    btn.className='abtn locked'+(isCorrect?' correct':'');
+    if(isMyVote&&!isCorrect) btn.style.cssText='border-color:#dc2626;background:#450a0a;pointer-events:none;cursor:default;';
+    btn.style.flexDirection='column';
+    btn.style.alignItems='stretch';
+    btn.style.gap='0';
+
+    // Top row: number + text
+    let topHtml=`<div style="display:flex;align-items:center;gap:12px">
+      <div class="anum" style="${isCorrect?'background:var(--c2);color:var(--bg);border-color:var(--c2);':isMyVote&&!isCorrect?'background:#dc2626;color:#fff;border-color:#dc2626;':''}">${i+1}</div>
+      <span style="flex:1;text-align:left">${a}</span>
+    </div>`;
+
+    // Chips row
+    let chipsHtml='';
+    if(hasChips){
+      let chips='';
+      if(isMyVote) chips+=`<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:${isCorrect?'#16a34a':'#dc2626'};color:#fff;white-space:nowrap">${isCorrect?'TY ✓':'TY ✗'}</span>`;
+      voters.forEach(v=>{const pi=GS.players.indexOf(v),hit=i==correct;
+        chips+=`<span class="vchip" style="background:${C(pi)}22;color:${C(pi)};border:1px solid ${C(pi)}44">${hit?'✓':'✗'} ${v.name}</span>`;
+      });
+      chipsHtml=`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;padding-left:46px">${chips}</div>`;
+    }
+
+    btn.innerHTML=topHtml+chipsHtml;
+    ac.appendChild(btn);
+  });
+
+  // ── RESULTS TABLE ──
+  const subjPts=GS.players.filter((p,i)=>p&&i!==si&&GS.votes[i]==correct).length; // 1 per guesser
+  $('rv-res').innerHTML=`<div class="rctitle">Wyniki rundy</div>
+    <div class="rvrow"><div class="rvl"><div class="rvdot" style="background:${C(si)}"></div><strong>${sp.name}</strong><span class="badge b-sub" style="margin-left:8px">Temat</span></div><span class="badge ${subjPts>0?'b-yes':'b-no'}">+${subjPts} 🪙</span></div>`+
+    GS.players.map((p,i)=>{if(!p||i===si)return'';const hit=GS.votes[i]==correct;
+      const bet=parseInt((GS.bets||{})[i])||1;
+      return`<div class="rvrow${i===mySlot?' style="background:var(--rim);border-radius:8px;padding:9px 8px;margin:0 -8px"':''}"><div class="rvl"><div class="rvdot" style="background:${C(i)}"></div><span${i===mySlot?' style="font-weight:700"':''}>${p.name}${i===mySlot?' (ty)':''}</span><span style="font-size:11px;color:var(--muted);margin-left:6px">×${bet}</span></div><span class="badge ${hit?'b-yes':'b-no'}">${hit?`+${bet} 🪙`:`-${bet} 🪙`}</span></div>`;
+    }).join('');
+
+  const poolLeft=GS.pool??0;
+  const mode=GS.gameMode||'rounds';
+  const anyBroke=GS.players.some(p=>p&&p.pts<=0);
+  const isLast=mode==='pool'?(poolLeft<=0||anyBroke):(GS.ri+1>=GS.rt);
+  const modeInfo=mode==='pool'
+    ? `W puli pozostało: <strong style="color:var(--c3)">${poolLeft} 🪙</strong>${anyBroke?' · <span style="color:var(--c0)">Ktoś zbankrutował!</span>':''}`
+    : `Runda <strong>${GS.ri+1}</strong> z <strong>${GS.rt}</strong>`;
+  $('rv-btn').innerHTML=`
+    <div style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:8px">${modeInfo}</div>
+    <button class="btn btn-lit" onclick="nextRound()">${isLast?'🏆 Wyniki końcowe':'Następna runda →'}</button>`;
+  show('s-reveal');
+}
+
+async function nextRound(){
+  try{
+    const gs=await fbGet(`games/${gameId}`);
+    GS=norm(dc(gs));
+    const mode=GS.gameMode||'rounds';
+    const anyBroke=GS.players.some(p=>p&&p.pts<=0);
+    const poolGone=(GS.pool??0)<=0;
+    const roundsDone=GS.ri+1>=GS.rt;
+    const isEnd=(mode==='pool')?(poolGone||anyBroke):roundsDone;
+    if(isEnd){GS.phase='ended';}
+    else{GS.ri++;GS.votes={};GS.bets={};GS.sa=-1;GS.phase='subject';_localVote=null;_confirmedVote=null;_sjPick=null;_sjPending=null;_swapsLeft=2;_sjSwapsLeft=2;_lastSwapAt=null;_localBet=1;_allVotedAt=null;}
+    await writeGS();render();
+  }catch(e){console.error('nextRound',e);}
+}
+
+// ── END ──
+function renderEnd(){
+  const ps=[...GS.players.entries()].filter(([,p])=>p).map(([i,p])=>({...p,i})).sort((a,b)=>b.pts-a.pts);
+  const med=['🥇','🥈','🥉',''];
+  const maxPts=Math.max(...ps.map(p=>p.pts),1);
+  const minH=40,maxH=120;
+  $('end-pod').innerHTML=ps.map((p,rank)=>{
+    const h=Math.round(minH+(maxH-minH)*(p.pts/maxPts));
+    return`<div class="podcol"><div class="podbar" style="height:${h}px;background:${C(p.i)};color:#fff;">${med[rank]||''}</div><div style="font-size:12px;font-weight:600;color:${C(p.i)}">${p.name}</div><div style="font-size:11px;color:var(--muted)">${p.pts} 🪙</div></div>`;
+  }).join('');
+  $('end-sc').innerHTML='<div class="rctitle">Wyniki końcowe</div>'+
+    ps.map(p=>`<div class="rvrow"><div class="rvl"><div class="rvdot" style="background:${C(p.i)}"></div><span>${p.name}</span></div><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:${C(p.i)}">${p.pts} 🪙</div></div>`).join('');
+  const eb=$('end-btns');eb.innerHTML='';
+  if(isHost){
+    const b=document.createElement('button');b.className='btn btn-lit';b.textContent='Zagraj ponownie';
+    b.onclick=async()=>{
+      GS={...GS,phase:'lobby',subjects:[],qSeq:[],ri:0,votes:{},bets:{},sa:-1,pool:0};
+      GS.players.forEach(p=>{if(p)p.pts=10;});
+      await writeGS();render();
+    };
+    eb.appendChild(b);
+  }
+  const h2=document.createElement('button');h2.className='btn btn-dim';h2.textContent='← Wyjdź';
+  h2.onclick=()=>leaveGame();
+  eb.appendChild(h2);
+  show('s-end');
+}
+
+// ── INIT ──
+(async()=>{
+  const sess=sessionStorage.getItem('ego_sess');
+  if(sess){
+    try{
+      const{gameId:gid,mySlot:ms}=JSON.parse(sess);
+      const gs=await fbGet(`games/${gid}`);
+      if(gs){gameId=gid;mySlot=ms;isHost=(ms===0);GS=norm(gs);render();startPoll();if(!isHost)startKickCheck();return;}
+    }catch(e){}
+  }
+  show('s-home');
+  // Also fix theme-btn icon on s-actions
+  const tb2=document.querySelector('#s-actions .theme-btn');
+  if(tb2){
+    const saved=localStorage.getItem('ego_theme');
+    const isDark=saved?saved==='dark':window.matchMedia('(prefers-color-scheme:dark)').matches;
+    tb2.textContent=isDark?'☀️':'🌙';
+  }
+})();
+
+function updateHomeActions(){ /* actions always visible */ }
+
+// ── REMOVE PLAYER ON PAGE CLOSE ──
+// Uses pagehide (most reliable on mobile/iOS) + visibilitychange as fallback.
+// sendBeacon is fire-and-forget — works even as page is unloading.
+function sendLeaveBeacon(){
+  if(!gameId||mySlot===null)return;
+  const patch={};
+  patch[`players/${mySlot}`]=null;
+  patch[`ready/${mySlot}`]=null;
+  const url=`${DB_URL}/games/${gameId}.json`;
+  const body=JSON.stringify(patch);
+  // sendBeacon with PATCH isn't directly supported — use fetch keepalive as primary
+  try{
+    fetch(url,{method:'PATCH',headers:{'Content-Type':'application/json'},body,keepalive:true}).catch(()=>{});
+  }catch(e){}
+  // Also try sendBeacon to a PUT on the specific player slot as backup
+  try{
+    navigator.sendBeacon(`${DB_URL}/games/${gameId}/players/${mySlot}.json`,
+      new Blob(['null'],{type:'application/json'}));
+    navigator.sendBeacon(`${DB_URL}/games/${gameId}/ready/${mySlot}.json`,
+      new Blob(['null'],{type:'application/json'}));
+  }catch(e){}
+}
+
+window.addEventListener('pagehide', e=>{
+  // pagehide fires on close, back/forward, tab switch on iOS
+  // e.persisted=true means bfcache — user is NOT leaving, don't remove them
+  if(e.persisted) return;
+  sendLeaveBeacon();
+  stopPoll();
+  sessionStorage.removeItem('ego_sess');
+});
+
+document.addEventListener('visibilitychange', ()=>{
+  // NOTE: visibilitychange fires on EVERY tab switch — do NOT call sendLeaveBeacon here.
+  // Removing the player on tab switch caused the host to disappear from the game
+  // whenever they switched to another browser tab. Player removal is handled
+  // exclusively by the pagehide event (actual tab close / navigation away).
+});
+
+// Load saved question edits from localStorage
+(()=>{
+  try{
+    const saved=JSON.parse(localStorage.getItem('wiem_qs')||'{}');
+    Object.keys(saved).forEach(k=>{
+      const i=parseInt(k);
+      if(QS[i])QS[i]=saved[k];
+    });
+  }catch(e){}
+})();
+
+// ── QUESTION BROWSER ──
+let _qMarked=new Set();
+let _qMarkedView=false;
+let _qColors={};
+let _qTab='all'; // 'all' | 'reported'
+let _qReported={}; // idx → true
+let _qCats={};        // {catId: {name, color}} — category definitions
+let _qCatMap={};      // {idx: [catId, ...]} — which cats each question belongs to
+let _activeCatFilter=null; // null = all, or catId
+let _bulkSelected=new Set(); // indices selected for bulk category assign
+
+// Load saved colors, reported, categories
+(()=>{
+  try{ _qColors=JSON.parse(localStorage.getItem('wiem_qcolors')||'{}'); }catch(e){}
+  try{ _qReported=JSON.parse(localStorage.getItem('wiem_qreported')||'{}'); }catch(e){}
+  try{ _qCats=JSON.parse(localStorage.getItem('wiem_cats')||'{}'); }catch(e){}
+  try{ _qCatMap=JSON.parse(localStorage.getItem('wiem_catmap')||'{}'); }catch(e){}
+
+  // Ensure "Gracze" category always exists
+  if(!_qCats['cat_players']){
+    _qCats['cat_players']={name:'Gracze',color:'#38bdf8'};
+    try{ localStorage.setItem('wiem_cats',JSON.stringify(_qCats)); }catch(e){}
+  }
+
+  // Auto-assign all player-type questions to "Gracze" category
+  let catMapChanged=false;
+  QS.forEach((q,i)=>{
+    if(q.type==='players'){
+      if(!_qCatMap[i]) _qCatMap[i]=[];
+      if(!_qCatMap[i].includes('cat_players')){
+        _qCatMap[i].push('cat_players');
+        catMapChanged=true;
+      }
+    }
+  });
+  if(catMapChanged){
+    try{ localStorage.setItem('wiem_catmap',JSON.stringify(_qCatMap)); }catch(e){}
+  }
+})();
+
+const CAT_COLORS=['#7c3aed','#0891b2','#059669','#d97706','#dc2626','#db2777','#4338ca','#0284c7'];
+
+function saveCats(){
+  try{ localStorage.setItem('wiem_cats',JSON.stringify(_qCats)); }catch(e){}
+  try{ localStorage.setItem('wiem_catmap',JSON.stringify(_qCatMap)); }catch(e){}
+}
+
+// ── CATEGORY MANAGER ──
+function openCatManager(){
+  renderCatManager();
+  $('cat-modal').style.display='flex';
+  setTimeout(()=>{ const i=$('cat-new-inp'); if(i)i.focus(); },50);
+}
+function closeCatManager(){
+  $('cat-modal').style.display='none';
+  renderCatFilter();
+}
+
+function addCategory(){
+  const inp=$('cat-new-inp');
+  const name=(inp?.value||'').trim();
+  if(!name)return;
+  // Check duplicate
+  if(Object.values(_qCats).some(c=>c.name.toLowerCase()===name.toLowerCase())){
+    inp.style.borderColor='var(--c0)';
+    setTimeout(()=>inp.style.borderColor='',1500);
+    return;
+  }
+  const id='cat_'+Date.now();
+  const usedColors=Object.values(_qCats).map(c=>c.color);
+  const color=CAT_COLORS.find(c=>!usedColors.includes(c))||CAT_COLORS[Object.keys(_qCats).length%CAT_COLORS.length];
+  _qCats[id]={name, color};
+  saveCats();
+  if(inp){ inp.value=''; inp.focus(); }
+  renderCatManager();
+}
+
+function deleteCategory(id){
+  delete _qCats[id];
+  // Remove from all question assignments
+  Object.keys(_qCatMap).forEach(idx=>{
+    _qCatMap[idx]=(_qCatMap[idx]||[]).filter(c=>c!==id);
+    if(_qCatMap[idx].length===0) delete _qCatMap[idx];
+  });
+  if(_activeCatFilter===id) _activeCatFilter=null;
+  saveCats();
+  renderCatManager();
+}
+
+function renderCatManager(){
+  const list=$('cat-list-mgr');
+  if(!list)return;
+  const cats=Object.entries(_qCats);
+  if(cats.length===0){
+    list.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:12px;padding:8px 0">Brak kategorii — dodaj pierwszą poniżej</div>`;
+    return;
+  }
+  list.innerHTML=cats.map(([id,cat])=>{
+    const count=Object.values(_qCatMap).filter(arr=>arr&&arr.includes(id)).length;
+    return`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:8px">
+      <div style="width:12px;height:12px;border-radius:50%;background:${cat.color};flex-shrink:0"></div>
+      <span style="flex:1;font-size:13px;font-weight:600">${cat.name}</span>
+      <span style="font-size:11px;color:var(--muted)">${count} pytań</span>
+      <button onclick="deleteCategory('${id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0;line-height:1" title="Usuń kategorię">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+// ── CATEGORY FILTER BAR ──
+function renderCatFilter(){
+  const bar=$('qb-cat-filter');
+  if(!bar)return;
+  const cats=Object.entries(_qCats);
+  if(cats.length===0){ bar.innerHTML=''; return; }
+  bar.innerHTML=`
+    <button onclick="setCatFilter(null)" style="padding:5px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid ${_activeCatFilter===null?'var(--text)':'var(--rim)'};background:${_activeCatFilter===null?'var(--text)':'transparent'};color:${_activeCatFilter===null?'var(--bg)':'var(--muted)'}">Wszystkie</button>
+    ${cats.map(([id,cat])=>{
+      const active=_activeCatFilter===id;
+      return`<button onclick="setCatFilter('${id}')" style="padding:5px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid ${active?cat.color:cat.color+'44'};background:${active?cat.color+'22':'transparent'};color:${active?cat.color:'var(--muted)'}">${cat.name}</button>`;
+    }).join('')}`;
+}
+
+function setCatFilter(id){
+  _activeCatFilter=id;
+  renderCatFilter();
+  renderQBrowser();
+}
+
+// ── BULK SELECTION ──
+function toggleBulkSelect(idx){
+  if(_bulkSelected.has(idx)) _bulkSelected.delete(idx);
+  else _bulkSelected.add(idx);
+  updateBulkBar();
+  // Update card border
+  const card=$('qcard-'+idx);
+  if(card){
+    const base=getCardBorder(idx);
+    card.style.borderColor=_bulkSelected.has(idx)?'#f59e0b':base;
+  }
+}
+
+function clearBulkSelection(){
+  _bulkSelected.forEach(idx=>{
+    const card=$('qcard-'+idx);
+    if(card) card.style.borderColor=getCardBorder(idx);
+  });
+  _bulkSelected.clear();
+  updateBulkBar();
+}
+
+function updateBulkBar(){
+  const bar=$('qb-bulk-bar');
+  const countEl=$('qb-bulk-count');
+  const catsEl=$('qb-bulk-cats');
+  if(!bar)return;
+  const n=_bulkSelected.size;
+  bar.style.display=n>0?'flex':'none';
+  if(countEl) countEl.textContent=`${n} zaznaczonych`;
+  if(catsEl){
+    const cats=Object.entries(_qCats);
+    if(cats.length===0){
+      catsEl.innerHTML=`<span style="font-size:11px;color:var(--muted)">Najpierw utwórz kategorie →</span>`;
+    } else {
+      catsEl.innerHTML=cats.map(([id,cat])=>
+        `<button onclick="assignBulkToCat('${id}')" style="padding:5px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid ${cat.color};background:${cat.color}22;color:${cat.color}">+ ${cat.name}</button>`
+      ).join('');
+    }
+  }
+}
+
+function assignBulkToCat(catId){
+  _bulkSelected.forEach(idx=>{
+    if(!_qCatMap[idx]) _qCatMap[idx]=[];
+    if(!_qCatMap[idx].includes(catId)) _qCatMap[idx].push(catId);
+  });
+  saveCats();
+  clearBulkSelection();
+  renderQBrowser();
+}
+
+function removeCatFromQ(idx, e){
+  e.stopPropagation();
+  // Show mini picker to remove specific cat
+  delete _qCatMap[idx];
+  saveCats();
+  const card=$('qcard-'+idx);
+  if(card){ renderQCard(card,idx,false); const cr=card.querySelector('[id^="qcolor-"]'); if(cr) updateColorBtns(cr,idx); }
+}
+
+let _reportedThisQ=false; // track if current question was reported this render cycle
+let _swappedAfterReport=false; // one swap per report per round
+
+function resetReportBtns(screenSuffix){
+  if(_reportedThisQ){
+    const rb=$('report-btn-'+screenSuffix);
+    const sb=$('swap-btn-'+screenSuffix);
+    if(rb){ rb.textContent='✓ Zgłoszono!'; rb.style.color='var(--c2)'; rb.disabled=true; }
+    // Show swap button only if not yet swapped after report
+    if(sb){
+      if(_swappedAfterReport){
+        sb.style.display='none';
+      } else {
+        sb.style.display='block';
+      }
+    }
+    return;
+  }
+  const rb=$('report-btn-'+screenSuffix);
+  const sb=$('swap-btn-'+screenSuffix);
+  if(rb){ rb.textContent='⚑ Zgłoś błąd w pytaniu'; rb.style.color=''; rb.disabled=false; }
+  if(sb){ sb.style.display='none'; sb.textContent='🔄 Zamień pytanie na inne'; sb.style.color=''; sb.disabled=false; }
+}
+
+function reportCurrentQuestion(screenSuffix){
+  const rb=$('report-btn-'+screenSuffix);
+  if(rb){ rb.textContent='✓ Zgłoszono!'; rb.style.color='var(--c2)'; rb.disabled=true; }
+  if(!GS){ return; }
+  // Firebase may return qSeq as object with string keys
+  const seq=GS.qSeq;
+  const ri=GS.ri;
+  let idx;
+  if(Array.isArray(seq)){ idx=seq[ri]; }
+  else if(seq&&typeof seq==='object'){ idx=seq[String(ri)]; }
+  if(idx!==undefined&&idx!==null&&!isNaN(Number(idx))){
+    idx=Number(idx);
+    _qReported[idx]=true;
+    _reportedThisQ=true;
+    try{ localStorage.setItem('wiem_qreported',JSON.stringify(_qReported)); }catch(e){}
+    if(gameId) fbPatch('reports',{[String(idx)]:true}).catch(()=>{});
+    updateReportedTabCount();
+  }
+  // Only show swap button for subject screen — others just report silently
+  if(screenSuffix==='sj'){
+    const sb=$('swap-btn-sj');
+    if(sb){ sb.style.display='block'; }
+  }
+}
+
+async function swapReported(screenSuffix){
+  if(!GS||!gameId||_swappedAfterReport)return;
+  const sb=$('swap-btn-'+screenSuffix);
+  if(sb){ sb.disabled=true; sb.textContent='⏳ Zamieniam…'; }
+
+  const allUsed=new Set([...(GS.qSeq||[]),...(GS.usedQs||[])]);
+  allUsed.add(GS.qSeq[GS.ri]);
+  const available=QS.map((_,i)=>i).filter(i=>!allUsed.has(i));
+  const pool=available.length>0?available:QS.map((_,i)=>i).filter(i=>i!==GS.qSeq[GS.ri]);
+  if(!pool.length){ if(sb){sb.textContent='Brak dostępnych pytań';} return; }
+  const newQIdx=pool[Math.floor(Math.random()*pool.length)];
+
+  const usedQs=[...(GS.usedQs||[]),GS.qSeq[GS.ri]];
+  const newSeq=[...GS.qSeq];
+  newSeq[GS.ri]=newQIdx;
+
+  // Fix qAnswers for the new question at this round index
+  const newQ=QS[newQIdx];
+  const newQAnswers={...(GS.qAnswers||{})};
+  if(newQ&&newQ.type==='players'){
+    const playerNames=GS.players.filter(Boolean).map(p=>p.name);
+    if(playerNames.length>0) newQAnswers[GS.ri]=playerNames;
+    else delete newQAnswers[GS.ri];
+  } else {
+    delete newQAnswers[GS.ri];
+  }
+
+  GS.qSeq=newSeq; GS.usedQs=usedQs; GS.qAnswers=newQAnswers;
+  GS.votes={}; GS.bets={}; GS.sa=-1; GS.phase='subject';
+  const swapAt=Date.now();
+  _allVotedAt=null; _sjPending=null; _localVote=null; _confirmedVote=null;
+  _swappedAfterReport=true;
+  try{
+    await fbPatch(`games/${gameId}`,{qSeq:newSeq,usedQs,qAnswers:newQAnswers,votes:{},bets:{},sa:-1,phase:'subject',swapAt});
+    GS.swapAt=swapAt;
+    _reportedThisQ=false;
+    if(sb){ sb.style.display='none'; }
+    render();
+  }catch(e){
+    _swappedAfterReport=false;
+    if(sb){ sb.textContent='Błąd – spróbuj ponownie'; sb.disabled=false; }
+  }
+}
+
+function updateReportedTabCount(){
+  const n=Object.keys(_qReported).length;
+  const el=$('qtab-reported-count');
+  if(el){ el.textContent=n; el.style.display=n>0?'inline':'none'; }
+}
+
+function setQTab(tab){
+  _qTab=tab;
+  _qMarkedView=false;
+  ['all','reported'].forEach(k=>{
+    const b=$('qtab-'+k);
+    if(!b)return;
+    const active=k===tab;
+    b.style.background=active?'var(--text)':'var(--card)';
+    b.style.color=active?'var(--bg)':'var(--muted)';
+    b.style.border=active?'none':'1.5px solid var(--rim)';
+  });
+  const headers=$('qb-col-headers');
+  if(headers) headers.style.display=_qTab==='reported'?'none':'grid';
+  renderQBrowser();
+}
+
+function getCardBorder(idx){
+  if(_qColors[idx]==='green') return '#16a34a';
+  if(_qColors[idx]==='red') return '#dc2626';
+  if(_qMarked.has(idx)) return '#7F77DD';
+  return 'var(--rim)';
+}
+
+function setQColor(idx, color){
+  if(_qColors[idx]===color) delete _qColors[idx];
+  else _qColors[idx]=color;
+  try{ localStorage.setItem('wiem_qcolors',JSON.stringify(_qColors)); }catch(e){}
+  const card=$('qcard-'+idx);
+  if(card) card.style.borderColor=getCardBorder(idx);
+  // Re-render just the color buttons row
+  const colorRow=$('qcolor-'+idx);
+  if(colorRow) updateColorBtns(colorRow, idx);
+}
+
+function updateColorBtns(row, idx){
+  const c=_qColors[idx];
+  row.innerHTML=`
+    <button onclick="setQColor(${idx},'green')" title="Poprawne"
+      style="width:18px;height:18px;border-radius:50%;border:2px solid #16a34a;background:${c==='green'?'#16a34a':'#16a34a22'};cursor:pointer;flex-shrink:0;padding:0"></button>
+    <button onclick="setQColor(${idx},'red')" title="Błędne"
+      style="width:18px;height:18px;border-radius:50%;border:2px solid #dc2626;background:${c==='red'?'#dc2626':'#dc262622'};cursor:pointer;flex-shrink:0;padding:0"></button>
+    ${c?`<button onclick="setQColor(${idx},'${c}')" title="Usuń zaznaczenie" style="background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;padding:0;line-height:1">✕</button>`:''}`;
+}
+let _qFilter='all'; // kept for compatibility but not used in UI
+
+const ADMIN_HASH='41455bd85390f866c132887d4ec3771240b21700c1b8de233ddab2d832c20c00';
+
+// Pure JS SHA-256 — works on HTTP and HTTPS alike
+function sha256(str){
+  function rightRotate(v,a){return(v>>>a)|(v<<(32-a));}
+  const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  let h=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const bytes=[];
+  for(let i=0;i<str.length;i++){
+    const c=str.charCodeAt(i);
+    if(c<128) bytes.push(c);
+    else if(c<2048){bytes.push((c>>6)|192);bytes.push((c&63)|128);}
+    else{bytes.push((c>>12)|224);bytes.push(((c>>6)&63)|128);bytes.push((c&63)|128);}
+  }
+  bytes.push(0x80);
+  while((bytes.length%64)!==56) bytes.push(0);
+  const l=str.length*8;
+  bytes.push(0,0,0,0,(l>>>24)&255,(l>>>16)&255,(l>>>8)&255,l&255);
+  for(let i=0;i<bytes.length;i+=64){
+    const w=[];
+    for(let j=0;j<16;j++) w[j]=(bytes[i+j*4]<<24)|(bytes[i+j*4+1]<<16)|(bytes[i+j*4+2]<<8)|bytes[i+j*4+3];
+    for(let j=16;j<64;j++){const s0=rightRotate(w[j-15],7)^rightRotate(w[j-15],18)^(w[j-15]>>>3);const s1=rightRotate(w[j-2],17)^rightRotate(w[j-2],19)^(w[j-2]>>>10);w[j]=(w[j-16]+s0+w[j-7]+s1)>>>0;}
+    let [a,b,c,d,e,f,g,hh]=h;
+    for(let j=0;j<64;j++){const S1=rightRotate(e,6)^rightRotate(e,11)^rightRotate(e,25);const ch=(e&f)^(~e&g);const temp1=(hh+S1+ch+K[j]+w[j])>>>0;const S0=rightRotate(a,2)^rightRotate(a,13)^rightRotate(a,22);const maj=(a&b)^(a&c)^(b&c);const temp2=(S0+maj)>>>0;hh=g;g=f;f=e;e=(d+temp1)>>>0;d=c;c=b;b=a;a=(temp1+temp2)>>>0;}
+    h[0]=(h[0]+a)>>>0;h[1]=(h[1]+b)>>>0;h[2]=(h[2]+c)>>>0;h[3]=(h[3]+d)>>>0;h[4]=(h[4]+e)>>>0;h[5]=(h[5]+f)>>>0;h[6]=(h[6]+g)>>>0;h[7]=(h[7]+hh)>>>0;
+  }
+  return h.map(v=>v.toString(16).padStart(8,'0')).join('');
+}
+
+function openQBrowser(){
+  if(sessionStorage.getItem('admin_ok')==='1'){
+    _qMarkedView=false; setQTab(_qTab); updateReportedTabCount();
+    renderCatFilter();
+    show('s-qbrowser');
+    return;
+  }
+  const modal=$('admin-modal');
+  const inp=$('admin-pw-inp');
+  const err=$('admin-pw-err');
+  if(!modal)return;
+  modal.style.display='flex';
+  if(err) err.style.display='none';
+  if(inp){ inp.value=''; setTimeout(()=>inp.focus(),50); }
+}
+
+function closeAdminModal(){
+  const modal=$('admin-modal');
+  if(modal) modal.style.display='none';
+}
+
+function submitAdminPw(){
+  const inp=$('admin-pw-inp');
+  const err=$('admin-pw-err');
+  const pw=(inp?.value||'').trim();
+  if(!pw)return;
+  const hash=sha256(pw);
+  if(hash===ADMIN_HASH){
+    sessionStorage.setItem('admin_ok','1');
+    closeAdminModal();
+    _qMarkedView=false; setQTab(_qTab); updateReportedTabCount(); show('s-qbrowser');
+  } else {
+    if(err){ err.style.display='block'; }
+    if(inp){ inp.value=''; inp.focus(); }
+  }
+}
+
+function setQFilter(f){ _qFilter=f; }
+
+function toggleMarkedView(){
+  _qMarkedView=!_qMarkedView;
+  const btn=$('qb-marked-btn');
+  if(btn){
+    btn.style.background=_qMarkedView?'#534AB7':'#1e1b4b';
+    btn.style.color='#fff';
+  }
+  renderQBrowser();
+}
+
+function toggleCheck(idx){
+  if(_qMarked.has(idx)) _qMarked.delete(idx);
+  else _qMarked.add(idx);
+  const cb=$('qcb-'+idx);
+  if(cb) cb.checked=_qMarked.has(idx);
+  const card=$('qcard-'+idx);
+  if(card) card.style.borderColor=_qMarked.has(idx)?'#7F77DD':'var(--rim)';
+  updateMarkedBtn();
+}
+
+function updateMarkedBtn(){
+  const btn=$('qb-marked-btn');
+  const copyBtn=$('qb-copy-btn');
+  const countEl=$('qb-marked-count');
+  if(!btn)return;
+  const n=_qMarked.size;
+  btn.style.display=n>0?'block':'none';
+  if(copyBtn)copyBtn.style.display=n>0?'block':'none';
+  if(countEl)countEl.textContent=n;
+}
+
+function copyMarkedForReview(){
+  const lines=['Zaznaczone pytania do sprawdzenia transformacji:\n'];
+  let i=1;
+  _qMarked.forEach(idx=>{
+    const item=QS[idx];
+    const hasName=item.q.includes('[imię]');
+    lines.push(`=== ${i++}. (index ${idx}) ===`);
+    lines.push(`ORYGINAŁ: ${item.q}`);
+    lines.push(`DLA INNYCH: ${item.q.replace(/\[imię\]/g,'[Temat]')}`);
+    if(hasName){
+      lines.push(`DLA TEMATU: ${item.qs||'—'}`);
+      lines.push('ODPOWIEDZI:');
+      item.a.forEach((a,j)=>lines.push(`  ${j+1}. oryg: ${a}  →  temat: ${item.as?item.as[j]:'—'}`));
+    } else {
+      lines.push('(pytanie bez [imię] — brak transformacji dla Tematu)');
+    }
+    lines.push('');
+  });
+  const text=lines.join('\n');
+  navigator.clipboard?.writeText(text).then(()=>{
+    const btn=$('qb-copy-btn');
+    if(btn){const orig=btn.textContent;btn.textContent='✓ Skopiowano!';btn.style.color='var(--c2)';setTimeout(()=>{btn.textContent=orig;btn.style.color='var(--muted)';},2000);}
+  }).catch(()=>alert(text));
+}
+
+function renderQBrowser(){
+  const list=$('qb-list');
+  const countEl=$('qb-count');
+  if(!list)return;
+  list.innerHTML='';
+
+  if(_qTab==='reported'){
+    // Re-read from localStorage to always be fresh
+    try{ _qReported=JSON.parse(localStorage.getItem('wiem_qreported')||'{}'); }catch(e){}
+    updateReportedTabCount();
+    const reportedIndices=Object.keys(_qReported).map(Number);
+    if(countEl) countEl.textContent=`${reportedIndices.length} zgłoszonych`;
+    if(reportedIndices.length===0){
+      list.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Brak zgłoszonych błędów</div>`;
+      return;
+    }
+    // Clear all button
+    const clearDiv=document.createElement('div');
+    clearDiv.style.cssText='display:flex;justify-content:flex-end';
+    clearDiv.innerHTML=`<button onclick="clearAllReports()" style="padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:var(--card);color:var(--muted);border:1.5px solid var(--rim)">🗑 Wyczyść wszystkie</button>`;
+    list.appendChild(clearDiv);
+    reportedIndices.forEach(realIdx=>{
+      const div=document.createElement('div');
+      div.id='qcard-'+realIdx;
+      div.style.cssText=`background:var(--card);border:1.5px solid #dc2626;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px`;
+      renderQCardReported(div, realIdx, false);
+      list.appendChild(div);
+      const colorRow=div.querySelector('[id^="qcolor-"]');
+      if(colorRow) updateColorBtns(colorRow, realIdx);
+    });
+    return;
+  }
+
+  let indices=QS.map((_,i)=>i).filter(i=>_qMarkedView?_qMarked.has(i):true);
+  // Apply category filter
+  if(_activeCatFilter){
+    indices=indices.filter(i=>(_qCatMap[i]||[]).includes(_activeCatFilter));
+  }
+  if(countEl) countEl.textContent=_qMarkedView?`${indices.length} zaznaczonych`:`${indices.length} pytań`;
+
+  indices.forEach(realIdx=>{
+    const div=document.createElement('div');
+    div.id='qcard-'+realIdx;
+    const border=_bulkSelected.has(realIdx)?'#f59e0b':getCardBorder(realIdx);
+    div.style.cssText=`background:var(--card);border:1.5px solid ${border};border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px`;
+    renderQCard(div, realIdx, _qMarkedView);
+    list.appendChild(div);
+    const colorRow=div.querySelector('[id^="qcolor-"]');
+    if(colorRow) updateColorBtns(colorRow, realIdx);
+  });
+
+  updateMarkedBtn();
+  updateBulkBar();
+}
+
+function renderQCardReported(div, idx, editing){
+  const item=QS[idx];
+  const qOther=item.q.replace(/\[imię\]/g,'[Temat]');
+  const qSubj=item.qs||'—';
+  if(!editing){
+    div.innerHTML=`
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#f87171;font-weight:700;flex-shrink:0;margin-top:2px">⚑ ${idx+1}</div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>
+              <div style="font-size:9px;color:var(--muted);margin-bottom:3px;letter-spacing:1px;text-transform:uppercase">Dla innych</div>
+              <div style="font-size:11px;font-weight:700;line-height:1.4;text-transform:uppercase">${qOther}</div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--muted);margin-bottom:3px;letter-spacing:1px;text-transform:uppercase">Dla Tematu</div>
+              <div style="font-size:11px;font-weight:700;line-height:1.4;text-transform:uppercase;color:#a78bfa">${qSubj}</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--rim);padding-top:6px">
+            ${[0,1,2].map(j=>`
+              <div style="font-size:11px;color:var(--muted)">${j+1}. ${item.a[j]}</div>
+              <div style="font-size:11px;color:#a78bfa66">${j+1}. ${item.as?item.as[j]:'—'}</div>`).join('')}
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;align-items:center">
+          <div id="qcolor-${idx}" style="display:flex;align-items:center;gap:4px"></div>
+          <button onclick="startEditQReported(${idx})" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:0;line-height:1" title="Edytuj">✏️</button>
+          <button onclick="dismissReport(${idx})" style="background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;padding:0;line-height:1" title="Usuń zgłoszenie">🗑</button>
+        </div>
+      </div>`;
+  } else {
+    div.innerHTML=`
+      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#f87171;font-weight:700">⚑ Edycja zgłoszonego pytania ${idx+1}</div>
+      <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Treść pytania <span style="color:var(--c3)">(użyj [imię] dla gracza Temat)</span></div>
+      <textarea id="eq-q-${idx}" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:12px;color:var(--text);font-family:inherit;resize:vertical;min-height:56px">${item.q}</textarea>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Odpowiedzi</div>
+        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#a78bfa66">Podgląd dla Tematu</div>
+      </div>
+      ${[0,1,2].map(j=>`
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:center">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${j+1}</div>
+            <input id="eq-a-${idx}-${j}" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" value="${item.a[j].replace(/"/g,'&quot;')}"
+              style="flex:1;min-width:0;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--text);font-family:inherit">
+          </div>
+          <div id="eq-prev-${idx}-${j}" style="font-size:11px;color:#a78bfa66;padding:0 4px;line-height:1.4">${item.as?item.as[j]||'—':'—'}</div>
+        </div>`).join('')}
+      <div style="display:flex;gap:8px;margin-top:2px">
+        <button onclick="saveEditQ(${idx});renderQCardReported($('qcard-${idx}'),${idx},false)" style="flex:1;background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Zapisz</button>
+        <button onclick="renderQCardReported($('qcard-${idx}'),${idx},false)" style="flex:1;background:var(--card);color:var(--muted);border:1.5px solid var(--rim);border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Anuluj</button>
+      </div>`;
+  }
+}
+
+function startEditQReported(idx){
+  const div=$('qcard-'+idx);
+  if(div) renderQCardReported(div, idx, true);
+}
+
+function clearAllReports(){
+  _qReported={};
+  try{ localStorage.setItem('wiem_qreported','{}'); }catch(e){}
+  updateReportedTabCount();
+  renderQBrowser();
+}
+
+function dismissReport(idx){
+  delete _qReported[idx];
+  try{ localStorage.setItem('wiem_qreported',JSON.stringify(_qReported)); }catch(e){}
+  updateReportedTabCount();
+  renderQBrowser();
+}
+
+function renderQCard(div, idx, editing){
+  const item=QS[idx];
+  // Both versions
+  const qOther=item.q.replace(/\[imię\]/g,'[Temat]');
+  const qSubj=item.qs||'—';
+  const hasName=item.q.includes('[imię]');
+
+  if(!editing){
+    // Build category chips
+    const myCats=(_qCatMap[idx]||[]).map(id=>_qCats[id]).filter(Boolean);
+    const isPlayerType=item.type==='players';
+    const catChips=myCats.length>0
+      ? `<div style="display:flex;flex-wrap:wrap;gap:4px;padding-top:4px">
+          ${myCats.map(c=>`<span style="padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;background:${c.color}22;color:${c.color};border:1px solid ${c.color}55">${c.name}</span>`).join('')}
+          <button onclick="removeCatFromQ(${idx},event)" style="padding:2px 6px;border-radius:99px;font-size:9px;background:none;border:1px solid var(--rim);color:var(--muted);cursor:pointer" title="Usuń z kategorii">✕</button>
+        </div>`
+      : '';
+    div.innerHTML=`
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <input type="checkbox" id="qbulk-${idx}" ${_bulkSelected.has(idx)?'checked':''} onchange="toggleBulkSelect(${idx})"
+          style="margin-top:3px;width:15px;height:15px;accent-color:#f59e0b;flex-shrink:0;cursor:pointer" title="Zaznacz do kategorii">
+        <input type="checkbox" id="qcb-${idx}" ${_qMarked.has(idx)?'checked':''} onchange="toggleCheck(${idx})"
+          style="margin-top:3px;width:15px;height:15px;accent-color:#7F77DD;flex-shrink:0;cursor:pointer">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;align-items:start">
+          <div style="font-size:11px;font-weight:700;line-height:1.4;text-transform:uppercase;letter-spacing:.3px;color:var(--text)">${qOther}</div>
+          <div style="font-size:11px;font-weight:700;line-height:1.4;text-transform:uppercase;letter-spacing:.3px;color:${isPlayerType?'#38bdf8':hasName?'#a78bfa':'var(--muted)'}">${isPlayerType?'Imiona graczy w danej rundzie':hasName?qSubj:'—'}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
+          <div id="qcolor-${idx}" style="display:flex;align-items:center;gap:4px"></div>
+          <button onclick="startEditQ(${idx})" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:0;line-height:1" title="Edytuj">✏️</button>
+        </div>
+      </div>
+      ${catChips}
+      ${isPlayerType?'':`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--rim);padding-top:8px">
+        ${[0,1,2].map(j=>`
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px">
+            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${j+1}</div>
+            <span style="color:var(--muted)">${item.a[j]||''}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px">
+            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${j+1}</div>
+            <span style="color:${hasName?'#a78bfa66':'var(--muted)'}">${item.as?item.as[j]||'—':'—'}</span>
+          </div>`).join('')}
+      </div>`}`;
+  } else {
+    div.style.borderColor='#7F77DD';
+    const isPlayers=item.type==='players';
+    div.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="qcb-${idx}" checked onchange="toggleCheck(${idx})"
+          style="width:15px;height:15px;accent-color:#7F77DD;cursor:pointer">
+        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#a78bfa;font-weight:700;flex:1">Edycja pytania</div>
+        <button onclick="toggleEditQType(${idx})" style="padding:3px 8px;border-radius:99px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid ${isPlayers?'#38bdf8':'var(--rim)'};background:${isPlayers?'#0c4a6e44':'transparent'};color:${isPlayers?'#38bdf8':'var(--muted)'}">${isPlayers?'👥 Gracze':'📝 Własne'}</button>
+      </div>
+      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Treść pytania <span style="color:var(--c3)">(użyj [imię] dla gracza Temat)</span></div>
+      <textarea id="eq-q-${idx}" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:12px;color:var(--text);font-family:inherit;resize:vertical;min-height:56px">${item.q}</textarea>
+      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#a78bfa">Pytanie dla Tematu (2. osoba)</div>
+      <textarea id="eq-qs-${idx}" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:12px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px">${item.qs||''}</textarea>
+      ${isPlayers?`
+        <div style="background:var(--bg);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--muted);text-align:center;line-height:1.6">
+          👥 Odpowiedziami będą <strong style="color:var(--text)">imiona graczy</strong> w danej rundzie
+        </div>
+      `:`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Odpowiedzi (dla innych)</div>
+        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#a78bfa">Odpowiedzi (dla Tematu)</div>
+      </div>
+      ${[0,1,2].map(j=>`
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:center">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${j+1}</div>
+            <input id="eq-a-${idx}-${j}" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" value="${(item.a[j]||'').replace(/"/g,'&quot;')}"
+              style="flex:1;min-width:0;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--text);font-family:inherit">
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:18px;height:18px;border-radius:4px;background:#3730a344;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#a78bfa">${j+1}</div>
+            <input id="eq-as-${idx}-${j}" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" value="${(item.as?item.as[j]||'':'').replace(/"/g,'&quot;')}"
+              style="flex:1;min-width:0;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:11px;color:#a78bfa;font-family:inherit">
+          </div>
+        </div>`).join('')}
+      `}
+      <div style="display:flex;gap:8px;margin-top:2px">
+        <button onclick="saveEditQ(${idx})" style="flex:1;background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Zapisz</button>
+        <button onclick="cancelEditQ(${idx})" style="flex:1;background:var(--card);color:var(--muted);border:1.5px solid var(--rim);border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Anuluj</button>
+      </div>`;
+  }
+}
+
+
+
+function toggleEditQType(idx){
+  QS[idx].type=QS[idx].type==='players'?undefined:'players';
+  if(QS[idx].type===undefined) delete QS[idx].type;
+  const div=$('qcard-'+idx);
+  if(div) renderQCard(div,idx,true);
+}
+
+function startEditQ(idx){
+  const div=$('qcard-'+idx);
+  if(div) renderQCard(div, idx, true);
+}
+
+function cancelEditQ(idx){
+  const div=$('qcard-'+idx);
+  if(div){
+    div.style.borderColor=getCardBorder(idx);
+    renderQCard(div, idx, false);
+    const colorRow=div.querySelector('[id^="qcolor-"]');
+    if(colorRow) updateColorBtns(colorRow, idx);
+  }
+}
+
+let _newQType='normal'; // 'normal' | 'players'
+
+function toggleNewQType(){
+  _newQType=_newQType==='normal'?'players':'normal';
+  const btn=$('nq-type-btn');
+  const ans=$('nq-answers-section');
+  const pl=$('nq-players-section');
+  if(_newQType==='players'){
+    if(btn){btn.textContent='👥 Gracze';btn.style.borderColor='#38bdf8';btn.style.color='#38bdf8';btn.style.background='#0c4a6e44';}
+    if(ans) ans.style.display='none';
+    if(pl) pl.style.display='block';
+  } else {
+    if(btn){btn.textContent='📝 Własne';btn.style.borderColor='var(--rim)';btn.style.color='var(--muted)';btn.style.background='transparent';}
+    if(ans) ans.style.display='block';
+    if(pl) pl.style.display='none';
+  }
+}
+
+function toggleAddQuestion(){
+  const form=$('qb-add-form');
+  const btn=$('qb-add-btn');
+  if(!form)return;
+  const opening=form.style.display==='none';
+  form.style.display=opening?'flex':'none';
+  if(btn) btn.style.color=opening?'#a78bfa':'var(--muted)';
+  if(opening){
+    _newQType='normal';
+    // Reset type toggle UI
+    const tBtn=$('nq-type-btn');
+    const ans=$('nq-answers-section');
+    const pl=$('nq-players-section');
+    if(tBtn){tBtn.textContent='📝 Własne';tBtn.style.borderColor='var(--rim)';tBtn.style.color='var(--muted)';tBtn.style.background='transparent';}
+    if(ans) ans.style.display='block';
+    if(pl) pl.style.display='none';
+    ['nq-q','nq-qs','nq-a1','nq-a2','nq-a3','nq-as1','nq-as2','nq-as3'].forEach(id=>{ const el=$(id); if(el) el.value=''; });
+    [1,2,3].forEach(j=>{ const el=$('nq-prev'+j); if(el) el.textContent='—'; });
+    setTimeout(()=>{ const q=$('nq-q'); if(q) q.focus(); },50);
+  }
+}
+
+function saveNewQuestion(){
+  const q=($('nq-q')?.value||'').trim();
+  if(!q){ const el=$('nq-q'); if(el){el.style.borderColor='var(--c0)';setTimeout(()=>el.style.borderColor='',1500);} return; }
+
+  let entry;
+  if(_newQType==='players'){
+    const qs=($('nq-qs')?.value||'').trim()||q;
+    entry={q,qs,a:[],type:'players'};
+  } else {
+    const a=[1,2,3].map(j=>($('nq-a'+j)?.value||'').trim());
+    if(a.some(v=>!v)){
+      [1,2,3].forEach(j=>{ const el=$('nq-a'+j); if(el&&!el.value.trim()){el.style.borderColor='var(--c0)';setTimeout(()=>el.style.borderColor='',1500);} });
+      return;
+    }
+    const qs=($('nq-qs')?.value||'').trim()||q;
+    const as=[1,2,3].map(j=>($('nq-as'+j)?.value||'').trim());
+    entry={q,qs,a,as};
+  }
+
+  QS.push(entry);
+  const idx=QS.length-1;
+  try{
+    const saved=JSON.parse(localStorage.getItem('wiem_qs')||'{}');
+    saved[idx]=entry;
+    localStorage.setItem('wiem_qs',JSON.stringify(saved));
+  }catch(e){}
+  toggleAddQuestion();
+  renderQBrowser();
+  setTimeout(()=>{
+    const card=$('qcard-'+idx);
+    if(card){ card.scrollIntoView({behavior:'smooth',block:'center'}); card.style.borderColor='var(--c2)'; }
+    setTimeout(()=>{ const card=$('qcard-'+idx); if(card) card.style.borderColor=getCardBorder(idx); },2000);
+  },100);
+}
+
+function saveEditQ(idx){
+  const qEl=$('eq-q-'+idx);
+  const newQ=qEl?qEl.value.trim():'';
+  if(!newQ)return;
+  const isPlayers=QS[idx]?.type==='players';
+  const newQs=($('eq-qs-'+idx)?.value||'').trim()||newQ;
+  let newA=[], newAs=[];
+  if(!isPlayers){
+    newA=[0,1,2].map(j=>{ const el=$('eq-a-'+idx+'-'+j); return el?el.value.trim():''; });
+    if(newA.some(a=>!a))return;
+    newAs=[0,1,2].map(j=>{ const el=$('eq-as-'+idx+'-'+j); return el?el.value.trim():''; });
+  }
+  const entry={q:newQ,qs:newQs,a:newA};
+  if(!isPlayers) entry.as=newAs;
+  if(isPlayers) entry.type='players';
+  QS[idx]=entry;
+  try{
+    const saved=JSON.parse(localStorage.getItem('wiem_qs')||'{}');
+    saved[idx]=entry;
+    localStorage.setItem('wiem_qs',JSON.stringify(saved));
+  }catch(e){}
+  const div=$('qcard-'+idx);
+  if(div){
+    div.style.borderColor='var(--c2)';
+    renderQCard(div, idx, _qMarkedView);
+    setTimeout(()=>{if(div)div.style.borderColor=getCardBorder(idx);},1500);
+  }
+}
+
+</script>
+<!-- ══ ADMIN PASSWORD MODAL ══ -->
+<div id="admin-modal" style="display:none;position:fixed;inset:0;background:#000a;z-index:9999;align-items:center;justify-content:center">
+  <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:16px;padding:24px;width:min(320px,90vw);display:flex;flex-direction:column;gap:14px">
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center">🔒 Panel administratora</div>
+    <input id="admin-pw-inp" type="password" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Hasło" autocomplete="off"
+      style="background:var(--bg);border:1.5px solid var(--rim);border-radius:10px;padding:12px;font-size:16px;color:var(--text);font-family:inherit;text-align:center;letter-spacing:3px"
+      onkeydown="event.stopPropagation();if(event.key==='Enter')submitAdminPw()">
+    <div id="admin-pw-err" style="display:none;color:var(--c0);font-size:12px;text-align:center">❌ Błędne hasło</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeAdminModal()" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--rim);background:var(--card);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer">Anuluj</button>
+      <button onclick="submitAdminPw()" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--text);color:var(--bg);font-size:13px;font-weight:700;cursor:pointer">Wejdź →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CATEGORY MANAGER MODAL ══ -->
+<div id="cat-modal" style="display:none;position:fixed;inset:0;background:#000a;z-index:9999;align-items:center;justify-content:center">
+  <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:16px;padding:20px;width:min(340px,92vw);display:flex;flex-direction:column;gap:12px;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex:1">🏷 Zarządzaj kategoriami</div>
+      <button onclick="closeCatManager()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0;line-height:1">×</button>
+    </div>
+    <div id="cat-list-mgr" style="display:flex;flex-direction:column;gap:6px"></div>
+    <div style="display:flex;gap:6px">
+      <input id="cat-new-inp" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Nowa kategoria…" maxlength="24"
+        style="flex:1;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);font-family:inherit"
+        onkeydown="event.stopPropagation();if(event.key==='Enter')addCategory()">
+      <button onclick="addCategory()" style="padding:8px 14px;border-radius:8px;border:none;background:var(--text);color:var(--bg);font-size:13px;font-weight:700;cursor:pointer">+</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
