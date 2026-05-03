@@ -2496,7 +2496,19 @@ async function submitAuth() {
     const fns  = window._fbAuthFns;
     if (!auth || !fns) throw new Error('auth/not-ready');
     if (_authMode === 'login') {
-      await fns.signInWithEmailAndPassword(auth, email, pass);
+      const loginCred = await fns.signInWithEmailAndPassword(auth, email, pass);
+      try {
+        const loginToken = await loginCred.user.getIdToken();
+        const roleR = await fetch(DB_URL + '/users/' + loginCred.user.uid + '/role.json?auth=' + loginToken);
+        const roleData = roleR.ok ? await roleR.json() : null;
+        if (roleData === null) {
+          await fetch(DB_URL + '/users/' + loginCred.user.uid + '.json?auth=' + loginToken, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email: email, role: 'user', createdAt: Date.now() })
+          });
+        }
+      } catch(e2) {}
     } else {
       const cred = await fns.createUserWithEmailAndPassword(auth, email, pass);
       const uid = cred.user.uid;
