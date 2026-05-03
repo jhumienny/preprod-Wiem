@@ -267,13 +267,13 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <input id="inp-code" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="np. AB3K"
         maxlength="4"
         style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:6px;text-transform:uppercase;"
-        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4)"
+        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4); onCodeInput()"
         onkeydown="if(event.key==='Enter')joinGame()">
     </div>
-    <button class="btn btn-dim" onclick="joinGame()">→ Dołącz do gry</button>
+    <button class="btn btn-dim" id="btn-join" style="display:none" onclick="joinGame()">→ Dołącz do gry</button>
   </div>
 
-  <button class="btn btn-lit" onclick="createGame()">🎮 Utwórz nową grę</button>
+  <button class="btn btn-lit" id="btn-create" onclick="createGame()">🎮 Utwórz nową grę</button>
 
   <div class="err-msg" id="home-err"></div>
 
@@ -1139,6 +1139,12 @@ async function handleGSUpdate(){
 }
 
 // ── CREATE ──
+function onCodeInput(){
+  const hasCode=$('inp-code').value.trim().length>0;
+  $('btn-join').style.display=hasCode?'':'none';
+  $('btn-create').style.display=hasCode?'none':'';
+}
+
 async function createGame(){
   const name=($('inp-name').value.trim()||'Gracz 1');
   hideErr('home-err');
