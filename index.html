@@ -1753,6 +1753,18 @@ function renderVoting(){
   $('v-about').innerHTML=`Pytanie o: <strong style="color:${C(si)}">${sp.name}</strong>`;
   setQText('v-q',q.q.replace('[imię]',sp.name));
 
+  // Zero-token block — player can see answers but cannot vote or report
+  const myPts=GS.players[mySlot]?.pts??20;
+  if(myPts<=0){
+    buildAns('v-ans',getQAnswers(GS.ri),true,null,null,null);
+    $('btn-vote').style.display='none';
+    $('v-bet').style.display='none';
+    $('report-btn-v').style.display='none';
+    $('v-st').innerHTML=`<div style="background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:16px;font-size:13px;color:var(--muted);line-height:1.6;text-align:center">Nie masz wystarczająco żetonów, żeby zagrać w tej rundzie.<br>Poczekaj na swoją kolej i postaraj się wygrać żetony, żeby móc dalej odpowiadać.</div>`;
+    show('s-vote'); return;
+  }
+  $('report-btn-v').style.display='';
+
   const fbVote=GS.votes[mySlot];
   const voted=fbVote!==undefined||_confirmedVote!==null;
   const shownVote=fbVote!==undefined?fbVote:(_confirmedVote!==null?_confirmedVote:_localVote);
@@ -1859,12 +1871,19 @@ function setBet(n){
   updateBetUI();
 }
 function updateBetUI(){
+  const myPts=GS&&mySlot!==null?(GS.players[mySlot]?.pts??20):20;
+  const canBet2=myPts>=2;
+  if(!canBet2&&_localBet===2){_localBet=1;}
   [1,2].forEach(n=>{
     const btn=$('bet-'+n);
     const numEl=$('bet-'+n+'-num');
     if(!btn)return;
+    const locked=n===2&&!canBet2;
+    btn.disabled=locked;
+    btn.style.opacity=locked?'0.35':'';
+    btn.style.pointerEvents=locked?'none':'';
     const active=_localBet===n;
-    btn.classList.toggle('chosen', active);
+    btn.classList.toggle('chosen',active);
     if(numEl){
       numEl.style.background=active?'var(--text)':'';
       numEl.style.color=active?'var(--bg)':'';
