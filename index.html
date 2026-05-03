@@ -184,6 +184,7 @@ onAuthStateChanged(auth, (user) => {
         <span id="auth-email" style="font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
         <button id="auth-admin-btn" onclick="show('s-admin')" style="display:none;padding:6px 12px;border-radius:8px;border:none;background:#534AB7;color:#fff;font-size:11px;font-weight:700;cursor:pointer">⚙ Panel</button>
         <button id="auth-myq-btn" onclick="show('s-my-questions')" style="display:none;padding:6px 12px;border-radius:8px;border:none;background:var(--text);color:var(--bg);font-size:11px;font-weight:700;cursor:pointer">📝 Pytania</button>
+        <button onclick="openSettings()" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer" title="Ustawienia imienia">✏️</button>
         <button onclick="authSignOut()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer">Wyloguj</button>
       </div>
     </div>
@@ -1170,6 +1171,72 @@ async function handleGSUpdate(){
 }
 
 // ── CREATE ──
+function openSettings() {
+  const dn = sessionStorage.getItem('ego_name') || ($('inp-name')?.value || '');
+  if ($('settings-inp-name')) $('settings-inp-name').value = dn;
+  const btn = $('settings-save-btn');
+  if (btn) { btn.textContent = 'Zapisz'; btn.disabled = false; }
+  if ($('settings-modal')) $('settings-modal').style.display = 'flex';
+  setTimeout(() => { if ($('settings-inp-name')) $('settings-inp-name').focus(); }, 80);
+}
+
+function closeSettings() {
+  if ($('settings-modal')) $('settings-modal').style.display = 'none';
+}
+
+async function saveSettings() {
+  const name = ($('settings-inp-name')?.value || '').trim();
+  if (!name) { $('settings-inp-name')?.focus(); return; }
+  const btn = $('settings-save-btn');
+  btn.disabled = true;
+  const user = window._currentUser;
+  try {
+    if (user) {
+      const token = await user.getIdToken();
+      await fetch(DB_URL + '/users/' + user.uid + '/displayName.json?auth=' + token, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(name)
+      });
+    }
+    sessionStorage.setItem('ego_name', name);
+    if ($('inp-name')) $('inp-name').value = name;
+    if ($('slots-name-inp') && !$('slots-name-inp').dataset.touched) $('slots-name-inp').value = name;
+    btn.textContent = '✓ Zapisano';
+    setTimeout(() => { closeSettings(); }, 900);
+  } catch(e) {
+    btn.disabled = false;
+    alert('Błąd: ' + e.message);
+  }
+}
+
+function showDuplicateNameModal(slot) {
+  if ($('dupname-inp')) $('dupname-inp').value = '';
+  if ($('dupname-err')) $('dupname-err').style.display = 'none';
+  const modal = $('dupname-modal');
+  if (modal) { modal.style.display = 'flex'; modal.dataset.slot = slot; }
+  setTimeout(() => { if ($('dupname-inp')) $('dupname-inp').focus(); }, 80);
+}
+
+async function confirmDupName() {
+  const modal = $('dupname-modal');
+  const slot = parseInt(modal?.dataset.slot ?? '-1');
+  const name = ($('dupname-inp')?.value || '').trim();
+  if (!name) { $('dupname-inp')?.focus(); return; }
+  const normalName = name.toLowerCase();
+  const lowerDupe = GS && GS.players.some((p, i) => p && i < slot && p.name.trim().toLowerCase() === normalName);
+  if (lowerDupe) {
+    if ($('dupname-err')) $('dupname-err').style.display = '';
+    $('dupname-inp')?.focus();
+    return;
+  }
+  modal.style.display = 'none';
+  sessionStorage.setItem('ego_name', name);
+  if ($('inp-name')) $('inp-name').value = name;
+  if ($('slots-name-inp')) { $('slots-name-inp').value = name; delete $('slots-name-inp').dataset.touched; }
+  await claimSlot(slot, name);
+}
+
 function homeUpdateBtn() {
   const code = ($('inp-code').value||'').trim();
   const btn = $('btn-join-create');
@@ -1300,8 +1367,8 @@ async function claimSlot(slot,name){
       GS=fresh;renderSlots(fresh,name);return;
     }
     const normalName=(name||'Gracz').trim().toLowerCase();
-    const duplicate=fresh.players.some((p,i)=>p&&i!==slot&&p.name.trim().toLowerCase()===normalName);
-    if(duplicate){alert(`Imię "${name}" jest już zajęte. Wpisz inne imię.`);return;}
+    const lowerSlotDupe=fresh.players.some((p,i)=>p&&i<slot&&p.name.trim().toLowerCase()===normalName);
+    if(lowerSlotDupe){showDuplicateNameModal(slot);return;}
     // Use PATCH with only the changed player slot — minimal write, atomic
     const patch={};
     patch[`players/${slot}`]={name:name||'Gracz',pts:fresh.players[slot]?.pts??10};
@@ -2435,15 +2502,22 @@ async function authCheckRole(uid) {
   try {
     const user = window._currentUser;
     const token = user ? await user.getIdToken() : null;
-    const url = DB_URL + '/users/' + uid + '/role.json' + (token ? '?auth=' + token : '');
+    const url = DB_URL + '/users/' + uid + '.json' + (token ? '?auth=' + token : '');
     const r = await fetch(url);
-    const data = await r.json();
-    if (data === null && user && token) {
+    const userData = await r.json();
+    const data = userData ? userData.role : null;
+    if (userData === null && user && token) {
       await fetch(DB_URL + '/users/' + uid + '.json?auth=' + token, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ email: user.email, role: 'user', createdAt: Date.now() })
       });
+    }
+    if (userData && userData.displayName) {
+      const dn = userData.displayName;
+      if ($('inp-name') && !$('inp-name').value) $('inp-name').value = dn;
+      if ($('slots-name-inp') && !$('slots-name-inp').dataset.touched) $('slots-name-inp').value = dn;
+      if (!sessionStorage.getItem('ego_name')) sessionStorage.setItem('ego_name', dn);
     }
     window._currentUserRole = data;
     if (data === 'admin' || data === 'moderator') {
@@ -2466,6 +2540,7 @@ function openAuthModal(mode) {
   $('auth-err').style.display = 'none';
   $('auth-inp-email').value = '';
   $('auth-inp-pass').value = '';
+  if ($('auth-inp-name')) $('auth-inp-name').value = '';
   updateAuthModalLabels();
   modal.style.display = 'flex';
   setTimeout(function(){ $('auth-inp-email').focus(); }, 80);
@@ -2488,6 +2563,8 @@ function updateAuthModalLabels() {
   $('auth-submit-btn').textContent  = isLogin ? 'Zaloguj si\u0119' : 'Zarejestruj si\u0119';
   $('auth-switch-text').textContent = isLogin ? 'Nie masz konta?' : 'Masz ju\u017c konto?';
   $('auth-switch-btn').textContent  = isLogin ? 'Zarejestruj si\u0119' : 'Zaloguj si\u0119';
+  const nameInp = $('auth-inp-name');
+  if (nameInp) nameInp.style.display = isLogin ? 'none' : '';
 }
 
 function authShowErr(msg) {
@@ -2539,6 +2616,7 @@ async function submitAuth() {
         }
       } catch(e2) {}
     } else {
+      const displayName = ($('auth-inp-name').value || '').trim();
       const cred = await fns.createUserWithEmailAndPassword(auth, email, pass);
       const uid = cred.user.uid;
       const role = email === ADMIN_EMAIL ? 'admin' : 'user';
@@ -2546,9 +2624,13 @@ async function submitAuth() {
       const regR = await fetch(DB_URL + '/users/' + uid + '.json?auth=' + regToken, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ email: email, role: role, createdAt: Date.now() })
+        body: JSON.stringify({ email: email, role: role, createdAt: Date.now(), displayName: displayName })
       });
       if (!regR.ok) throw new Error('SET ' + regR.status);
+      if (displayName) {
+        sessionStorage.setItem('ego_name', displayName);
+        if ($('inp-name')) $('inp-name').value = displayName;
+      }
     }
     closeAuthModal();
   } catch(e) {
@@ -3131,6 +3213,31 @@ async function submitMyQuestion() {
 <!-- ══ ADMIN PASSWORD MODAL ══ -->
 
 <!-- ══ AUTH MODAL ══ -->
+<div id="settings-modal" style="display:none;position:fixed;inset:0;background:#000b;z-index:9999;align-items:center;justify-content:center">
+  <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:16px;padding:24px;width:min(320px,92vw);display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-size:13px;font-weight:700;flex:1">✏️ Zmień imię</div>
+      <button onclick="closeSettings()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0;line-height:1">×</button>
+    </div>
+    <input id="settings-inp-name" type="text" autocomplete="off" placeholder="Twoje imię" maxlength="14"
+      style="background:var(--bg);border:1.5px solid var(--rim);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--text);font-family:inherit;width:100%;box-sizing:border-box"
+      onkeydown="event.stopPropagation();if(event.key==='Enter')saveSettings()">
+    <button id="settings-save-btn" onclick="saveSettings()" style="background:var(--text);color:var(--bg);border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer">Zapisz</button>
+  </div>
+</div>
+
+<div id="dupname-modal" style="display:none;position:fixed;inset:0;background:#000b;z-index:9999;align-items:center;justify-content:center">
+  <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:16px;padding:24px;width:min(320px,92vw);display:flex;flex-direction:column;gap:14px">
+    <div style="font-size:13px;font-weight:700">To imię jest już zajęte w tej grze</div>
+    <div style="font-size:12px;color:var(--muted)">Gracz na wcześniejszym slocie używa tego imienia. Wpisz inne.</div>
+    <input id="dupname-inp" type="text" autocomplete="off" placeholder="Nowe imię" maxlength="14"
+      style="background:var(--bg);border:1.5px solid var(--rim);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--text);font-family:inherit;width:100%;box-sizing:border-box"
+      onkeydown="event.stopPropagation();if(event.key==='Enter')confirmDupName()">
+    <div id="dupname-err" style="display:none;color:var(--c0);font-size:12px;text-align:center">To imię też jest zajęte. Wpisz inne.</div>
+    <button onclick="confirmDupName()" style="background:var(--text);color:var(--bg);border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer">Potwierdź</button>
+  </div>
+</div>
+
 <div id="auth-modal" style="display:none;position:fixed;inset:0;background:#000b;z-index:9999;align-items:center;justify-content:center">
   <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:16px;padding:24px;width:min(340px,92vw);display:flex;flex-direction:column;gap:14px">
     <div style="display:flex;align-items:center;gap:8px">
@@ -3142,6 +3249,9 @@ async function submitMyQuestion() {
       onkeydown="event.stopPropagation();if(event.key==='Enter')$('auth-inp-pass').focus()">
     <input id="auth-inp-pass" type="password" autocomplete="current-password" placeholder="Hasło (min. 6 znaków)"
       style="background:var(--bg);border:1.5px solid var(--rim);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--text);font-family:inherit;width:100%;box-sizing:border-box"
+      onkeydown="event.stopPropagation();if(event.key==='Enter' && _authMode==='login')submitAuth();else if(event.key==='Enter')$('auth-inp-name').focus()">
+    <input id="auth-inp-name" type="text" autocomplete="off" placeholder="Twoje imię (widoczne w grze)" maxlength="14"
+      style="display:none;background:var(--bg);border:1.5px solid var(--rim);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--text);font-family:inherit;width:100%;box-sizing:border-box"
       onkeydown="event.stopPropagation();if(event.key==='Enter')submitAuth()">
     <div id="auth-err" style="display:none;color:var(--c0);font-size:12px;text-align:center"></div>
     <button id="auth-submit-btn" onclick="submitAuth()" style="background:var(--text);color:var(--bg);border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer"></button>
