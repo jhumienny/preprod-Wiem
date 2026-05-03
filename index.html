@@ -6,7 +6,7 @@
 <meta name="format-detection" content="telephone=no, date=no, email=no, address=no">
 <meta name="translation" content="no">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.gstatic.com https://ego-gra-default-rtdb.europe-west1.firebasedatabase.app; img-src 'self' data:;">
-<title>preprod Wiem!</title>
+<title>Wiem!</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -27,7 +27,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--rim) 1px,transparent 1px),linear-gradient(90deg,var(--rim) 1px,transparent 1px);background-size:32px 32px;opacity:.18;pointer-events:none;z-index:0;}
 .app{position:relative;z-index:1;width:100%;max-width:440px;min-height:100dvh;display:flex;flex-direction:column;}
 .scr{display:none;flex-direction:column;flex:1;padding:20px 16px max(32px,calc(env(safe-area-inset-bottom) + 24px));gap:16px;animation:pop .28s ease;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.scr>*{flex-shrink:0;}
 .scr.on{display:flex;}
 @keyframes pop{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .logo{font-family:'Syne',sans-serif;font-size:62px;font-weight:800;letter-spacing:-1px;line-height:1;}
@@ -141,108 +140,6 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 <body>
 <div class="app">
 
-<!-- hidden question browser trigger -->
-<button id="admin-trigger" onclick="openQBrowser()" style="position:fixed;top:0;left:0;width:44px;height:44px;background:transparent;border:none;cursor:pointer;z-index:100;opacity:0;display:none" aria-label="Przeglądaj pytania"></button>
-
-<!-- ══ QUESTION BROWSER ══ -->
-<div class="scr" id="s-qbrowser">
-  <div style="display:flex;align-items:center;gap:10px">
-    <button onclick="show('s-home')" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0;line-height:1">←</button>
-    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex:1">Baza pytań</div>
-    <button onclick="toggleAddQuestion()" id="qb-add-btn" style="background:var(--card);border:1.5px solid var(--rim);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer">+ Nowe</button>
-    <button onclick="openCatManager()" style="background:var(--card);border:1.5px solid var(--rim);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer">🏷 Kategorie</button>
-  </div>
-
-  <!-- Add new question form -->
-  <div id="qb-add-form" style="display:none;background:#0f172a;border:1.5px solid #534AB7;border-radius:12px;padding:14px;flex-direction:column;gap:10px">
-    <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#a78bfa;font-weight:700">Nowe pytanie</div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1">Treść <span style="color:var(--c3)">(opcjonalnie użyj [imię] dla gracza Temat)</span></div>
-      <button id="nq-type-btn" onclick="toggleNewQType()" style="padding:4px 10px;border-radius:99px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid var(--rim);background:transparent;color:var(--muted);" title="Typ odpowiedzi">📝 Własne</button>
-    </div>
-    <textarea id="nq-q" placeholder="Jak [imię] spędza wolny weekend?" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:12px;color:var(--text);font-family:inherit;resize:vertical;min-height:52px"
-      onkeydown="event.stopPropagation()"></textarea>
-    <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#a78bfa">Pytanie dla Tematu (2. osoba)</div>
-    <textarea id="nq-qs" placeholder="Jak spędzasz wolny weekend?" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:12px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px"
-      onkeydown="event.stopPropagation()"></textarea>
-    <div id="nq-answers-section">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
-        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Odpowiedzi (dla innych)</div>
-        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#a78bfa">Odpowiedzi (dla Tematu)</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:center">
-          <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">1</div>
-            <input id="nq-a1" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Odpowiedź 1…" style="flex:1;min-width:0;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--text);font-family:inherit" onkeydown="event.stopPropagation()">
-          </div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:18px;height:18px;border-radius:4px;background:#3730a344;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#a78bfa">1</div>
-            <input id="nq-as1" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Odpowiedź 1 (Temat)…" style="flex:1;min-width:0;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:11px;color:#a78bfa;font-family:inherit" onkeydown="event.stopPropagation()">
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:center">
-          <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">2</div>
-            <input id="nq-a2" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Odpowiedź 2…" style="flex:1;min-width:0;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--text);font-family:inherit" onkeydown="event.stopPropagation()">
-          </div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:18px;height:18px;border-radius:4px;background:#3730a344;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#a78bfa">2</div>
-            <input id="nq-as2" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Odpowiedź 2 (Temat)…" style="flex:1;min-width:0;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:11px;color:#a78bfa;font-family:inherit" onkeydown="event.stopPropagation()">
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:center">
-          <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">3</div>
-            <input id="nq-a3" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Odpowiedź 3…" style="flex:1;min-width:0;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--text);font-family:inherit" onkeydown="event.stopPropagation()">
-          </div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:18px;height:18px;border-radius:4px;background:#3730a344;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#a78bfa">3</div>
-            <input id="nq-as3" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Odpowiedź 3 (Temat)…" style="flex:1;min-width:0;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:11px;color:#a78bfa;font-family:inherit" onkeydown="event.stopPropagation()">
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="nq-players-section" style="display:none;background:var(--bg);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--muted);text-align:center;line-height:1.6">
-      👥 Odpowiedziami będą <strong style="color:var(--text)">imiona graczy</strong> w danej rundzie<br>
-      <span style="font-size:10px">(gracz Temat nie pojawia się wśród opcji)</span>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:2px">
-      <button onclick="saveNewQuestion()" style="flex:1;background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Dodaj pytanie ✓</button>
-      <button onclick="toggleAddQuestion()" style="flex:1;background:var(--card);color:var(--muted);border:1.5px solid var(--rim);border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Anuluj</button>
-    </div>
-  </div>
-
-  <!-- Tabs -->
-  <div style="display:flex;gap:6px">
-    <button id="qtab-all" onclick="setQTab('all')" style="flex:1;padding:8px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;background:var(--text);color:var(--bg);border:none">Wszystkie</button>
-    <button id="qtab-reported" onclick="setQTab('reported')" style="flex:1;padding:8px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;background:var(--card);color:var(--muted);border:1.5px solid var(--rim);position:relative">Zgłoszone <span id="qtab-reported-count" style="display:none;background:#dc2626;color:#fff;font-size:9px;padding:1px 5px;border-radius:99px;margin-left:3px"></span></button>
-  </div>
-
-  <!-- Category filter -->
-  <div id="qb-cat-filter" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-
-  <!-- Bulk action bar (shown when items checked) -->
-  <div id="qb-bulk-bar" style="display:none;background:#1e1b4b;border:1.5px solid #534AB7;border-radius:10px;padding:10px 12px;display:none;flex-direction:column;gap:8px">
-    <div style="display:flex;align-items:center;gap:8px">
-      <span id="qb-bulk-count" style="font-size:12px;color:#a5b4fc;flex:1">0 zaznaczonych</span>
-      <button onclick="clearBulkSelection()" style="background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer">Odznacz</button>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap" id="qb-bulk-cats"></div>
-  </div>
-
-  <div style="display:flex;align-items:center;gap:8px">
-    <div style="font-size:11px;color:var(--muted);flex:1" id="qb-count"></div>
-    <button id="qb-copy-btn" onclick="copyMarkedForReview()" style="display:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:var(--card);color:var(--muted);border:1.5px solid var(--rim);white-space:nowrap">📋 Kopiuj</button>
-    <button id="qb-marked-btn" onclick="toggleMarkedView()" style="display:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:#1e1b4b;color:#a5b4fc;border:1.5px solid #534AB7;white-space:nowrap">Zaznaczone (<span id="qb-marked-count">0</span>)</button>
-  </div>
-  <div id="qb-col-headers" style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;color:var(--muted);padding:0 2px">
-    <div>Dla innych graczy</div>
-    <div>Dla gracza Temat</div>
-  </div>
-  <div id="qb-list" style="display:flex;flex-direction:column;gap:10px"></div>
-</div>
-
 <!-- ══ HOME ══ -->
 <div class="scr on" id="s-home">
   <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Zmień motyw">🌙</button>
@@ -267,13 +164,13 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <input id="inp-code" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="np. AB3K"
         maxlength="4"
         style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:6px;text-transform:uppercase;"
-        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4); onCodeInput()"
+        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4)"
         onkeydown="if(event.key==='Enter')joinGame()">
     </div>
-    <button class="btn btn-dim" id="btn-join" style="display:none" onclick="joinGame()">→ Dołącz do gry</button>
+    <button class="btn btn-dim" onclick="joinGame()">→ Dołącz do gry</button>
   </div>
 
-  <button class="btn btn-lit" id="btn-create" onclick="createGame()">🎮 Utwórz nową grę</button>
+  <button class="btn btn-lit" onclick="createGame()">🎮 Utwórz nową grę</button>
 
   <div class="err-msg" id="home-err"></div>
 
@@ -387,18 +284,18 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div style="display:flex;flex-direction:column;gap:8px">
       <label style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Tryb gry</label>
       <div style="display:flex;gap:8px">
-        <button id="mode-pool" class="mode-btn mode-btn-active" onclick="setGameMode('pool')">
-          <span style="font-size:18px">🪙</span>
-          <span style="font-size:13px;font-weight:700">Żetonowy</span>
-          <span style="font-size:10px;opacity:.65">do bankructwa</span>
-        </button>
-        <button id="mode-rounds" class="mode-btn" onclick="setGameMode('rounds')">
+        <button id="mode-rounds" class="mode-btn mode-btn-active" onclick="setGameMode('rounds')">
           <span style="font-size:18px">🔢</span>
           <span style="font-size:13px;font-weight:700">Na rundy</span>
           <span style="font-size:10px;opacity:.65">X rund na gracza</span>
         </button>
+        <button id="mode-pool" class="mode-btn" onclick="setGameMode('pool')">
+          <span style="font-size:18px">🪙</span>
+          <span style="font-size:13px;font-weight:700">Żetonowy</span>
+          <span style="font-size:10px;opacity:.65">do bankructwa</span>
+        </button>
       </div>
-      <div id="rpp-row" style="display:none;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:10px 12px">
+      <div id="rpp-row" style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:10px 12px">
         <span style="font-size:13px;color:var(--muted);flex:1">Rund na gracza</span>
         <div style="display:flex;align-items:center;gap:8px">
           <button onclick="adjustRpp(-1)" style="width:28px;height:28px;border-radius:8px;border:1.5px solid var(--rim);background:var(--card);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">−</button>
@@ -444,7 +341,6 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   <div class="vstatus" id="v-st"></div>
   <button class="btn btn-lit" id="btn-vote" style="display:none" onclick="confirmVote()">Zatwierdź odpowiedź ✓</button>
   <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
-  <button class="btn btn-dim" id="report-btn-v" style="font-size:11px;padding:8px;color:var(--muted);border-color:var(--rim);margin-top:0" onclick="reportCurrentQuestion('v')">⚑ Zgłoś błąd w pytaniu</button>
 </div>
 
 <!-- ══ WAIT ══ -->
@@ -456,12 +352,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="wdesc" id="w-desc"></div>
     <div class="wq" id="w-q"></div>
   </div>
-  <div id="w-ans-wrap" style="display:none">
-    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:8px">💭 Możliwe odpowiedzi</div>
-    <div class="ans-list" id="w-ans" style="opacity:0.55"></div>
-  </div>
   <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33" onclick="leaveGame()">← Opuść grę</button>
-  <button class="btn btn-dim" id="report-btn-w" style="font-size:11px;padding:8px;color:var(--muted);border-color:var(--rim);margin-top:0" onclick="reportCurrentQuestion('w')">⚑ Zgłoś błąd w pytaniu</button>
 </div>
 
 <!-- ══ SUBJECT ══ -->
@@ -476,8 +367,6 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   <div class="ans-list" id="sj-ans"></div>
   <button class="btn btn-dim" id="btn-swap-sj" style="display:none" onclick="swapQuestionSJ()"></button>
   <button class="btn btn-lit" id="btn-sj" style="display:none" onclick="submitSJ()">Zatwierdź i pozwól innym odpowiedzieć →</button>
-  <button class="btn btn-dim" id="report-btn-sj" style="font-size:11px;padding:8px;color:var(--muted);border-color:var(--rim)" onclick="reportCurrentQuestion('sj')">⚑ Zgłoś błąd w pytaniu</button>
-  <button class="btn btn-dim" id="swap-btn-sj" style="display:none;font-size:11px;padding:8px;color:var(--c3);border-color:var(--c3)55" onclick="swapReported('sj')">🔄 Zamień pytanie na inne</button>
   <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
 </div>
 
@@ -745,8 +634,6 @@ document.addEventListener('keydown', e=>{
 const show=id=>{
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   $(id).classList.add('on');
-  const trigger=$('admin-trigger');
-  if(trigger) trigger.style.display=id==='s-home'?'block':'none';
 };
 const shuf=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
 const dc=o=>JSON.parse(JSON.stringify(o));
@@ -843,7 +730,7 @@ function norm(gs){
   gs.ready      = gs.ready || {};
   gs.maxPlayers = gs.maxPlayers || 4;
   gs.swapAt     = gs.swapAt || null;
-  gs.gameMode   = gs.gameMode || 'pool';
+  gs.gameMode   = gs.gameMode || 'rounds';
   gs.qAnswers   = gs.qAnswers || {};
   gs.usedQs     = gs.usedQs ? (Array.isArray(gs.usedQs)?gs.usedQs:Object.values(gs.usedQs)) : [];
   // Normalize vote keys AND values to integers
@@ -887,7 +774,7 @@ function stopCountdown(){
   if(_countdownTimer){clearInterval(_countdownTimer);_countdownTimer=null;}
 }
 let _maxPlayers=4; // host-controlled, 2-8
-let _gameMode='pool'; // 'rounds' | 'pool'
+let _gameMode='rounds'; // 'rounds' | 'pool'
 let _selectedCat=null; // null = wszystkie, or catId
 
 function renderLobCatSelector(){
@@ -1122,7 +1009,7 @@ async function handleGSUpdate(){
           }
         });
         next.pool=Math.max(0,(next.pool||0)+poolDelta);
-        const mode=next.gameMode||'pool';
+        const mode=next.gameMode||'rounds';
         const anyBroke=next.players.some(p=>p&&p.pts<=0);
         if(mode==='pool'&&(next.pool<=0||anyBroke)) next.phase='ended';
         else if(mode==='rounds'&&next.ri+1>=next.rt) next.phase='ended';
@@ -1139,12 +1026,6 @@ async function handleGSUpdate(){
 }
 
 // ── CREATE ──
-function onCodeInput(){
-  const hasCode=$('inp-code').value.trim().length>0;
-  $('btn-join').style.display=hasCode?'':'none';
-  $('btn-create').style.display=hasCode?'none':'';
-}
-
 async function createGame(){
   const name=($('inp-name').value.trim()||'Gracz 1');
   hideErr('home-err');
@@ -1314,7 +1195,7 @@ function renderLobby(){
     });
     _maxPlayers=max;
     // Sync game mode
-    const savedMode=GS.gameMode||'pool';
+    const savedMode=GS.gameMode||'rounds';
     if(savedMode!==_gameMode) setGameMode(savedMode);
     renderLobCatSelector();
   }
@@ -1560,7 +1441,6 @@ function render(){
   if(_lastRi !== null && _lastRi !== currentRi){
     _localVote=null; _confirmedVote=null; _sjPick=null; _sjPending=null;
     _swapsLeft=2; _sjSwapsLeft=2; _lastSwapAt=null; _localBet=1;
-    _reportedThisQ=false; _swappedAfterReport=false;
     stopCountdown();
     if(_voteRetryTimer){clearTimeout(_voteRetryTimer);_voteRetryTimer=null;}
   }
@@ -1705,7 +1585,6 @@ function buildAns(cid,answers,locked,chosen,correct,cb){
 }
 
 function setWait(color,name,title,desc,qt){
-  resetReportBtns('w');
   const av=$('w-av');
   av.style.cssText=`width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:32px;background:${color}22;color:${color};margin:0 auto;`;
   av.textContent=name.charAt(0).toUpperCase();
@@ -1720,7 +1599,6 @@ let _confirmedVote = null;
 let _localBet = 1; // 1 or 2 points bet
 
 function renderVoting(){
-  resetReportBtns('v');
   const q=CQ();if(!q)return;
   const si=SI(),sp=SP();
   mkSbar('sb-v'); mkSbar('sb-w');
@@ -1758,18 +1636,6 @@ function renderVoting(){
   $('v-meta').textContent=`Runda ${ri} / ${tot}`;
   $('v-about').innerHTML=`Pytanie o: <strong style="color:${C(si)}">${sp.name}</strong>`;
   setQText('v-q',q.q.replace('[imię]',sp.name));
-
-  // Zero-token block — player can see answers but cannot vote or report
-  const myPts=GS.players[mySlot]?.pts??20;
-  if(myPts<=0){
-    buildAns('v-ans',getQAnswers(GS.ri),true,null,null,null);
-    $('btn-vote').style.display='none';
-    $('v-bet').style.display='none';
-    $('report-btn-v').style.display='none';
-    $('v-st').innerHTML=`<div style="background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:16px;font-size:13px;color:var(--muted);line-height:1.6;text-align:center">Nie masz wystarczająco żetonów, żeby zagrać w tej rundzie.<br>Poczekaj na swoją kolej i postaraj się wygrać żetony, żeby móc dalej odpowiadać.</div>`;
-    show('s-vote'); return;
-  }
-  $('report-btn-v').style.display='';
 
   const fbVote=GS.votes[mySlot];
   const voted=fbVote!==undefined||_confirmedVote!==null;
@@ -1877,19 +1743,12 @@ function setBet(n){
   updateBetUI();
 }
 function updateBetUI(){
-  const myPts=GS&&mySlot!==null?(GS.players[mySlot]?.pts??20):20;
-  const canBet2=myPts>=2;
-  if(!canBet2&&_localBet===2){_localBet=1;}
   [1,2].forEach(n=>{
     const btn=$('bet-'+n);
     const numEl=$('bet-'+n+'-num');
     if(!btn)return;
-    const locked=n===2&&!canBet2;
-    btn.disabled=locked;
-    btn.style.opacity=locked?'0.35':'';
-    btn.style.pointerEvents=locked?'none':'';
     const active=_localBet===n;
-    btn.classList.toggle('chosen',active);
+    btn.classList.toggle('chosen', active);
     if(numEl){
       numEl.style.background=active?'var(--text)':'';
       numEl.style.color=active?'var(--bg)':'';
@@ -1950,7 +1809,7 @@ async function castVote(ans){
         }
       });
       next.pool=Math.max(0,(next.pool||0)+poolDelta);
-      const mode=next.gameMode||'pool';
+      const mode=next.gameMode||'rounds';
       const anyBroke=next.players.some(p=>p&&p.pts<=0);
       if(mode==='pool'&&(next.pool<=0||anyBroke)) next.phase='ended';
       else if(mode==='rounds'&&next.ri+1>=next.rt) next.phase='ended';
@@ -1967,7 +1826,6 @@ let _swapsLeft=2;    // resets each round, shared between voter and subject scre
 let _sjSwapsLeft=2;  // for subject screen
 
 function renderSubj(){
-  resetReportBtns('sj');
   const q=CQ();if(!q)return;
   const si=SI(),sp=SP();
   mkSbar('sb-sj'); mkSbar('sb-w');
@@ -1979,14 +1837,6 @@ function renderSubj(){
     setWait(C(si),sp.name,`${sp.name} wybiera odpowiedź…`,
       'Twoja kolej zaraz — poczekaj!',
       q.type==='players'?q.q:q.q.replace('[imię]',sp.name));
-    const wAnsWrap=$('w-ans-wrap');
-    const waitAnswers=getQAnswers(GS.ri);
-    if(waitAnswers&&waitAnswers.length>0){
-      buildAns('w-ans',waitAnswers,true,null,null,null);
-      if(wAnsWrap)wAnsWrap.style.display='block';
-    }else{
-      if(wAnsWrap)wAnsWrap.style.display='none';
-    }
     show('s-wait'); return;
   }
 
@@ -2035,7 +1885,6 @@ async function submitSJ(){
 
 // ── REVEAL ──
 function renderReveal(){
-  resetReportBtns('rv');
   const q=CQ();if(!q)return;
   const si=SI(),sp=SP(),correct=GS.sa;
   mkSbar('sb-rv');
@@ -2129,7 +1978,7 @@ function renderReveal(){
     }).join('');
 
   const poolLeft=GS.pool??0;
-  const mode=GS.gameMode||'pool';
+  const mode=GS.gameMode||'rounds';
   const anyBroke=GS.players.some(p=>p&&p.pts<=0);
   const isLast=mode==='pool'?(poolLeft<=0||anyBroke):(GS.ri+1>=GS.rt);
   const modeInfo=mode==='pool'
@@ -2145,7 +1994,7 @@ async function nextRound(){
   try{
     const gs=await fbGet(`games/${gameId}`);
     GS=norm(dc(gs));
-    const mode=GS.gameMode||'pool';
+    const mode=GS.gameMode||'rounds';
     const anyBroke=GS.players.some(p=>p&&p.pts<=0);
     const poolGone=(GS.pool??0)<=0;
     const roundsDone=GS.ri+1>=GS.rt;
@@ -2258,10 +2107,7 @@ document.addEventListener('visibilitychange', ()=>{
 
 // ── QUESTION BROWSER ──
 let _qMarked=new Set();
-let _qMarkedView=false;
 let _qColors={};
-let _qTab='all'; // 'all' | 'reported'
-let _qReported={}; // idx → true
 let _qCats={};        // {catId: {name, color}} — category definitions
 let _qCatMap={};      // {idx: [catId, ...]} — which cats each question belongs to
 let _activeCatFilter=null; // null = all, or catId
@@ -2270,7 +2116,6 @@ let _bulkSelected=new Set(); // indices selected for bulk category assign
 // Load saved colors, reported, categories
 (()=>{
   try{ _qColors=JSON.parse(localStorage.getItem('wiem_qcolors')||'{}'); }catch(e){}
-  try{ _qReported=JSON.parse(localStorage.getItem('wiem_qreported')||'{}'); }catch(e){}
   try{ _qCats=JSON.parse(localStorage.getItem('wiem_cats')||'{}'); }catch(e){}
   try{ _qCatMap=JSON.parse(localStorage.getItem('wiem_catmap')||'{}'); }catch(e){}
 
@@ -2304,261 +2149,19 @@ function saveCats(){
 }
 
 // ── CATEGORY MANAGER ──
-function openCatManager(){
-  renderCatManager();
-  $('cat-modal').style.display='flex';
-  setTimeout(()=>{ const i=$('cat-new-inp'); if(i)i.focus(); },50);
-}
-function closeCatManager(){
-  $('cat-modal').style.display='none';
-  renderCatFilter();
-}
 
-function addCategory(){
-  const inp=$('cat-new-inp');
-  const name=(inp?.value||'').trim();
-  if(!name)return;
-  // Check duplicate
-  if(Object.values(_qCats).some(c=>c.name.toLowerCase()===name.toLowerCase())){
-    inp.style.borderColor='var(--c0)';
-    setTimeout(()=>inp.style.borderColor='',1500);
-    return;
-  }
-  const id='cat_'+Date.now();
-  const usedColors=Object.values(_qCats).map(c=>c.color);
-  const color=CAT_COLORS.find(c=>!usedColors.includes(c))||CAT_COLORS[Object.keys(_qCats).length%CAT_COLORS.length];
-  _qCats[id]={name, color};
-  saveCats();
-  if(inp){ inp.value=''; inp.focus(); }
-  renderCatManager();
-}
 
-function deleteCategory(id){
-  delete _qCats[id];
-  // Remove from all question assignments
-  Object.keys(_qCatMap).forEach(idx=>{
-    _qCatMap[idx]=(_qCatMap[idx]||[]).filter(c=>c!==id);
-    if(_qCatMap[idx].length===0) delete _qCatMap[idx];
-  });
-  if(_activeCatFilter===id) _activeCatFilter=null;
-  saveCats();
-  renderCatManager();
-}
 
-function renderCatManager(){
-  const list=$('cat-list-mgr');
-  if(!list)return;
-  const cats=Object.entries(_qCats);
-  if(cats.length===0){
-    list.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:12px;padding:8px 0">Brak kategorii — dodaj pierwszą poniżej</div>`;
-    return;
-  }
-  list.innerHTML=cats.map(([id,cat])=>{
-    const count=Object.values(_qCatMap).filter(arr=>arr&&arr.includes(id)).length;
-    return`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:8px">
-      <div style="width:12px;height:12px;border-radius:50%;background:${cat.color};flex-shrink:0"></div>
-      <span style="flex:1;font-size:13px;font-weight:600">${cat.name}</span>
-      <span style="font-size:11px;color:var(--muted)">${count} pytań</span>
-      <button onclick="deleteCategory('${id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0;line-height:1" title="Usuń kategorię">🗑</button>
-    </div>`;
-  }).join('');
-}
 
-// ── CATEGORY FILTER BAR ──
-function renderCatFilter(){
-  const bar=$('qb-cat-filter');
-  if(!bar)return;
-  const cats=Object.entries(_qCats);
-  if(cats.length===0){ bar.innerHTML=''; return; }
-  bar.innerHTML=`
-    <button onclick="setCatFilter(null)" style="padding:5px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid ${_activeCatFilter===null?'var(--text)':'var(--rim)'};background:${_activeCatFilter===null?'var(--text)':'transparent'};color:${_activeCatFilter===null?'var(--bg)':'var(--muted)'}">Wszystkie</button>
-    ${cats.map(([id,cat])=>{
-      const active=_activeCatFilter===id;
-      return`<button onclick="setCatFilter('${id}')" style="padding:5px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid ${active?cat.color:cat.color+'44'};background:${active?cat.color+'22':'transparent'};color:${active?cat.color:'var(--muted)'}">${cat.name}</button>`;
-    }).join('')}`;
-}
 
-function setCatFilter(id){
-  _activeCatFilter=id;
-  renderCatFilter();
-  renderQBrowser();
-}
 
-// ── BULK SELECTION ──
-function toggleBulkSelect(idx){
-  if(_bulkSelected.has(idx)) _bulkSelected.delete(idx);
-  else _bulkSelected.add(idx);
-  updateBulkBar();
-  // Update card border
-  const card=$('qcard-'+idx);
-  if(card){
-    const base=getCardBorder(idx);
-    card.style.borderColor=_bulkSelected.has(idx)?'#f59e0b':base;
-  }
-}
 
-function clearBulkSelection(){
-  _bulkSelected.forEach(idx=>{
-    const card=$('qcard-'+idx);
-    if(card) card.style.borderColor=getCardBorder(idx);
-  });
-  _bulkSelected.clear();
-  updateBulkBar();
-}
 
-function updateBulkBar(){
-  const bar=$('qb-bulk-bar');
-  const countEl=$('qb-bulk-count');
-  const catsEl=$('qb-bulk-cats');
-  if(!bar)return;
-  const n=_bulkSelected.size;
-  bar.style.display=n>0?'flex':'none';
-  if(countEl) countEl.textContent=`${n} zaznaczonych`;
-  if(catsEl){
-    const cats=Object.entries(_qCats);
-    if(cats.length===0){
-      catsEl.innerHTML=`<span style="font-size:11px;color:var(--muted)">Najpierw utwórz kategorie →</span>`;
-    } else {
-      catsEl.innerHTML=cats.map(([id,cat])=>
-        `<button onclick="assignBulkToCat('${id}')" style="padding:5px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid ${cat.color};background:${cat.color}22;color:${cat.color}">+ ${cat.name}</button>`
-      ).join('');
-    }
-  }
-}
 
-function assignBulkToCat(catId){
-  _bulkSelected.forEach(idx=>{
-    if(!_qCatMap[idx]) _qCatMap[idx]=[];
-    if(!_qCatMap[idx].includes(catId)) _qCatMap[idx].push(catId);
-  });
-  saveCats();
-  clearBulkSelection();
-  renderQBrowser();
-}
 
-function removeCatFromQ(idx, e){
-  e.stopPropagation();
-  // Show mini picker to remove specific cat
-  delete _qCatMap[idx];
-  saveCats();
-  const card=$('qcard-'+idx);
-  if(card){ renderQCard(card,idx,false); const cr=card.querySelector('[id^="qcolor-"]'); if(cr) updateColorBtns(cr,idx); }
-}
 
-let _reportedThisQ=false; // track if current question was reported this render cycle
-let _swappedAfterReport=false; // one swap per report per round
 
-function resetReportBtns(screenSuffix){
-  if(_reportedThisQ){
-    const rb=$('report-btn-'+screenSuffix);
-    const sb=$('swap-btn-'+screenSuffix);
-    if(rb){ rb.textContent='✓ Zgłoszono!'; rb.style.color='var(--c2)'; rb.disabled=true; }
-    // Show swap button only if not yet swapped after report
-    if(sb){
-      if(_swappedAfterReport){
-        sb.style.display='none';
-      } else {
-        sb.style.display='block';
-      }
-    }
-    return;
-  }
-  const rb=$('report-btn-'+screenSuffix);
-  const sb=$('swap-btn-'+screenSuffix);
-  if(rb){ rb.textContent='⚑ Zgłoś błąd w pytaniu'; rb.style.color=''; rb.disabled=false; }
-  if(sb){ sb.style.display='none'; sb.textContent='🔄 Zamień pytanie na inne'; sb.style.color=''; sb.disabled=false; }
-}
 
-function reportCurrentQuestion(screenSuffix){
-  const rb=$('report-btn-'+screenSuffix);
-  if(rb){ rb.textContent='✓ Zgłoszono!'; rb.style.color='var(--c2)'; rb.disabled=true; }
-  if(!GS){ return; }
-  // Firebase may return qSeq as object with string keys
-  const seq=GS.qSeq;
-  const ri=GS.ri;
-  let idx;
-  if(Array.isArray(seq)){ idx=seq[ri]; }
-  else if(seq&&typeof seq==='object'){ idx=seq[String(ri)]; }
-  if(idx!==undefined&&idx!==null&&!isNaN(Number(idx))){
-    idx=Number(idx);
-    _qReported[idx]=true;
-    _reportedThisQ=true;
-    try{ localStorage.setItem('wiem_qreported',JSON.stringify(_qReported)); }catch(e){}
-    if(gameId) fbPatch('reports',{[String(idx)]:true}).catch(()=>{});
-    updateReportedTabCount();
-  }
-  // Only show swap button for subject screen — others just report silently
-  if(screenSuffix==='sj'){
-    const sb=$('swap-btn-sj');
-    if(sb){ sb.style.display='block'; }
-  }
-}
-
-async function swapReported(screenSuffix){
-  if(!GS||!gameId||_swappedAfterReport)return;
-  const sb=$('swap-btn-'+screenSuffix);
-  if(sb){ sb.disabled=true; sb.textContent='⏳ Zamieniam…'; }
-
-  const allUsed=new Set([...(GS.qSeq||[]),...(GS.usedQs||[])]);
-  allUsed.add(GS.qSeq[GS.ri]);
-  const available=QS.map((_,i)=>i).filter(i=>!allUsed.has(i));
-  const pool=available.length>0?available:QS.map((_,i)=>i).filter(i=>i!==GS.qSeq[GS.ri]);
-  if(!pool.length){ if(sb){sb.textContent='Brak dostępnych pytań';} return; }
-  const newQIdx=pool[Math.floor(Math.random()*pool.length)];
-
-  const usedQs=[...(GS.usedQs||[]),GS.qSeq[GS.ri]];
-  const newSeq=[...GS.qSeq];
-  newSeq[GS.ri]=newQIdx;
-
-  // Fix qAnswers for the new question at this round index
-  const newQ=QS[newQIdx];
-  const newQAnswers={...(GS.qAnswers||{})};
-  if(newQ&&newQ.type==='players'){
-    const playerNames=GS.players.filter(Boolean).map(p=>p.name);
-    if(playerNames.length>0) newQAnswers[GS.ri]=playerNames;
-    else delete newQAnswers[GS.ri];
-  } else {
-    delete newQAnswers[GS.ri];
-  }
-
-  GS.qSeq=newSeq; GS.usedQs=usedQs; GS.qAnswers=newQAnswers;
-  GS.votes={}; GS.bets={}; GS.sa=-1; GS.phase='subject';
-  const swapAt=Date.now();
-  _allVotedAt=null; _sjPending=null; _localVote=null; _confirmedVote=null;
-  _swappedAfterReport=true;
-  try{
-    await fbPatch(`games/${gameId}`,{qSeq:newSeq,usedQs,qAnswers:newQAnswers,votes:{},bets:{},sa:-1,phase:'subject',swapAt});
-    GS.swapAt=swapAt;
-    _reportedThisQ=false;
-    if(sb){ sb.style.display='none'; }
-    render();
-  }catch(e){
-    _swappedAfterReport=false;
-    if(sb){ sb.textContent='Błąd – spróbuj ponownie'; sb.disabled=false; }
-  }
-}
-
-function updateReportedTabCount(){
-  const n=Object.keys(_qReported).length;
-  const el=$('qtab-reported-count');
-  if(el){ el.textContent=n; el.style.display=n>0?'inline':'none'; }
-}
-
-function setQTab(tab){
-  _qTab=tab;
-  _qMarkedView=false;
-  ['all','reported'].forEach(k=>{
-    const b=$('qtab-'+k);
-    if(!b)return;
-    const active=k===tab;
-    b.style.background=active?'var(--text)':'var(--card)';
-    b.style.color=active?'var(--bg)':'var(--muted)';
-    b.style.border=active?'none':'1.5px solid var(--rim)';
-  });
-  const headers=$('qb-col-headers');
-  if(headers) headers.style.display=_qTab==='reported'?'none':'grid';
-  renderQBrowser();
-}
 
 function getCardBorder(idx){
   if(_qColors[idx]==='green') return '#16a34a';
@@ -2589,83 +2192,14 @@ function updateColorBtns(row, idx){
 }
 let _qFilter='all'; // kept for compatibility but not used in UI
 
-const ADMIN_HASH='41455bd85390f866c132887d4ec3771240b21700c1b8de233ddab2d832c20c00';
 
 // Pure JS SHA-256 — works on HTTP and HTTPS alike
-function sha256(str){
-  function rightRotate(v,a){return(v>>>a)|(v<<(32-a));}
-  const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
-  let h=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
-  const bytes=[];
-  for(let i=0;i<str.length;i++){
-    const c=str.charCodeAt(i);
-    if(c<128) bytes.push(c);
-    else if(c<2048){bytes.push((c>>6)|192);bytes.push((c&63)|128);}
-    else{bytes.push((c>>12)|224);bytes.push(((c>>6)&63)|128);bytes.push((c&63)|128);}
-  }
-  bytes.push(0x80);
-  while((bytes.length%64)!==56) bytes.push(0);
-  const l=str.length*8;
-  bytes.push(0,0,0,0,(l>>>24)&255,(l>>>16)&255,(l>>>8)&255,l&255);
-  for(let i=0;i<bytes.length;i+=64){
-    const w=[];
-    for(let j=0;j<16;j++) w[j]=(bytes[i+j*4]<<24)|(bytes[i+j*4+1]<<16)|(bytes[i+j*4+2]<<8)|bytes[i+j*4+3];
-    for(let j=16;j<64;j++){const s0=rightRotate(w[j-15],7)^rightRotate(w[j-15],18)^(w[j-15]>>>3);const s1=rightRotate(w[j-2],17)^rightRotate(w[j-2],19)^(w[j-2]>>>10);w[j]=(w[j-16]+s0+w[j-7]+s1)>>>0;}
-    let [a,b,c,d,e,f,g,hh]=h;
-    for(let j=0;j<64;j++){const S1=rightRotate(e,6)^rightRotate(e,11)^rightRotate(e,25);const ch=(e&f)^(~e&g);const temp1=(hh+S1+ch+K[j]+w[j])>>>0;const S0=rightRotate(a,2)^rightRotate(a,13)^rightRotate(a,22);const maj=(a&b)^(a&c)^(b&c);const temp2=(S0+maj)>>>0;hh=g;g=f;f=e;e=(d+temp1)>>>0;d=c;c=b;b=a;a=(temp1+temp2)>>>0;}
-    h[0]=(h[0]+a)>>>0;h[1]=(h[1]+b)>>>0;h[2]=(h[2]+c)>>>0;h[3]=(h[3]+d)>>>0;h[4]=(h[4]+e)>>>0;h[5]=(h[5]+f)>>>0;h[6]=(h[6]+g)>>>0;h[7]=(h[7]+hh)>>>0;
-  }
-  return h.map(v=>v.toString(16).padStart(8,'0')).join('');
-}
 
-function openQBrowser(){
-  if(sessionStorage.getItem('admin_ok')==='1'){
-    _qMarkedView=false; setQTab(_qTab); updateReportedTabCount();
-    renderCatFilter();
-    show('s-qbrowser');
-    return;
-  }
-  const modal=$('admin-modal');
-  const inp=$('admin-pw-inp');
-  const err=$('admin-pw-err');
-  if(!modal)return;
-  modal.style.display='flex';
-  if(err) err.style.display='none';
-  if(inp){ inp.value=''; setTimeout(()=>inp.focus(),50); }
-}
 
-function closeAdminModal(){
-  const modal=$('admin-modal');
-  if(modal) modal.style.display='none';
-}
 
-function submitAdminPw(){
-  const inp=$('admin-pw-inp');
-  const err=$('admin-pw-err');
-  const pw=(inp?.value||'').trim();
-  if(!pw)return;
-  const hash=sha256(pw);
-  if(hash===ADMIN_HASH){
-    sessionStorage.setItem('admin_ok','1');
-    closeAdminModal();
-    _qMarkedView=false; setQTab(_qTab); updateReportedTabCount(); show('s-qbrowser');
-  } else {
-    if(err){ err.style.display='block'; }
-    if(inp){ inp.value=''; inp.focus(); }
-  }
-}
 
 function setQFilter(f){ _qFilter=f; }
 
-function toggleMarkedView(){
-  _qMarkedView=!_qMarkedView;
-  const btn=$('qb-marked-btn');
-  if(btn){
-    btn.style.background=_qMarkedView?'#534AB7':'#1e1b4b';
-    btn.style.color='#fff';
-  }
-  renderQBrowser();
-}
 
 function toggleCheck(idx){
   if(_qMarked.has(idx)) _qMarked.delete(idx);
@@ -2688,409 +2222,25 @@ function updateMarkedBtn(){
   if(countEl)countEl.textContent=n;
 }
 
-function copyMarkedForReview(){
-  const lines=['Zaznaczone pytania do sprawdzenia transformacji:\n'];
-  let i=1;
-  _qMarked.forEach(idx=>{
-    const item=QS[idx];
-    const hasName=item.q.includes('[imię]');
-    lines.push(`=== ${i++}. (index ${idx}) ===`);
-    lines.push(`ORYGINAŁ: ${item.q}`);
-    lines.push(`DLA INNYCH: ${item.q.replace(/\[imię\]/g,'[Temat]')}`);
-    if(hasName){
-      lines.push(`DLA TEMATU: ${item.qs||'—'}`);
-      lines.push('ODPOWIEDZI:');
-      item.a.forEach((a,j)=>lines.push(`  ${j+1}. oryg: ${a}  →  temat: ${item.as?item.as[j]:'—'}`));
-    } else {
-      lines.push('(pytanie bez [imię] — brak transformacji dla Tematu)');
-    }
-    lines.push('');
-  });
-  const text=lines.join('\n');
-  navigator.clipboard?.writeText(text).then(()=>{
-    const btn=$('qb-copy-btn');
-    if(btn){const orig=btn.textContent;btn.textContent='✓ Skopiowano!';btn.style.color='var(--c2)';setTimeout(()=>{btn.textContent=orig;btn.style.color='var(--muted)';},2000);}
-  }).catch(()=>alert(text));
-}
-
-function renderQBrowser(){
-  const list=$('qb-list');
-  const countEl=$('qb-count');
-  if(!list)return;
-  list.innerHTML='';
-
-  if(_qTab==='reported'){
-    // Re-read from localStorage to always be fresh
-    try{ _qReported=JSON.parse(localStorage.getItem('wiem_qreported')||'{}'); }catch(e){}
-    updateReportedTabCount();
-    const reportedIndices=Object.keys(_qReported).map(Number);
-    if(countEl) countEl.textContent=`${reportedIndices.length} zgłoszonych`;
-    if(reportedIndices.length===0){
-      list.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Brak zgłoszonych błędów</div>`;
-      return;
-    }
-    // Clear all button
-    const clearDiv=document.createElement('div');
-    clearDiv.style.cssText='display:flex;justify-content:flex-end';
-    clearDiv.innerHTML=`<button onclick="clearAllReports()" style="padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:var(--card);color:var(--muted);border:1.5px solid var(--rim)">🗑 Wyczyść wszystkie</button>`;
-    list.appendChild(clearDiv);
-    reportedIndices.forEach(realIdx=>{
-      const div=document.createElement('div');
-      div.id='qcard-'+realIdx;
-      div.style.cssText=`background:var(--card);border:1.5px solid #dc2626;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px`;
-      renderQCardReported(div, realIdx, false);
-      list.appendChild(div);
-      const colorRow=div.querySelector('[id^="qcolor-"]');
-      if(colorRow) updateColorBtns(colorRow, realIdx);
-    });
-    return;
-  }
-
-  let indices=QS.map((_,i)=>i).filter(i=>_qMarkedView?_qMarked.has(i):true);
-  // Apply category filter
-  if(_activeCatFilter){
-    indices=indices.filter(i=>(_qCatMap[i]||[]).includes(_activeCatFilter));
-  }
-  if(countEl) countEl.textContent=_qMarkedView?`${indices.length} zaznaczonych`:`${indices.length} pytań`;
-
-  indices.forEach(realIdx=>{
-    const div=document.createElement('div');
-    div.id='qcard-'+realIdx;
-    const border=_bulkSelected.has(realIdx)?'#f59e0b':getCardBorder(realIdx);
-    div.style.cssText=`background:var(--card);border:1.5px solid ${border};border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px`;
-    renderQCard(div, realIdx, _qMarkedView);
-    list.appendChild(div);
-    const colorRow=div.querySelector('[id^="qcolor-"]');
-    if(colorRow) updateColorBtns(colorRow, realIdx);
-  });
-
-  updateMarkedBtn();
-  updateBulkBar();
-}
-
-function renderQCardReported(div, idx, editing){
-  const item=QS[idx];
-  const qOther=item.q.replace(/\[imię\]/g,'[Temat]');
-  const qSubj=item.qs||'—';
-  if(!editing){
-    div.innerHTML=`
-      <div style="display:flex;align-items:flex-start;gap:8px">
-        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#f87171;font-weight:700;flex-shrink:0;margin-top:2px">⚑ ${idx+1}</div>
-        <div style="display:flex;flex-direction:column;gap:6px;flex:1">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div>
-              <div style="font-size:9px;color:var(--muted);margin-bottom:3px;letter-spacing:1px;text-transform:uppercase">Dla innych</div>
-              <div style="font-size:11px;font-weight:700;line-height:1.4;text-transform:uppercase">${qOther}</div>
-            </div>
-            <div>
-              <div style="font-size:9px;color:var(--muted);margin-bottom:3px;letter-spacing:1px;text-transform:uppercase">Dla Tematu</div>
-              <div style="font-size:11px;font-weight:700;line-height:1.4;text-transform:uppercase;color:#a78bfa">${qSubj}</div>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--rim);padding-top:6px">
-            ${[0,1,2].map(j=>`
-              <div style="font-size:11px;color:var(--muted)">${j+1}. ${item.a[j]}</div>
-              <div style="font-size:11px;color:#a78bfa66">${j+1}. ${item.as?item.as[j]:'—'}</div>`).join('')}
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;align-items:center">
-          <div id="qcolor-${idx}" style="display:flex;align-items:center;gap:4px"></div>
-          <button onclick="startEditQReported(${idx})" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:0;line-height:1" title="Edytuj">✏️</button>
-          <button onclick="dismissReport(${idx})" style="background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;padding:0;line-height:1" title="Usuń zgłoszenie">🗑</button>
-        </div>
-      </div>`;
-  } else {
-    div.innerHTML=`
-      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#f87171;font-weight:700">⚑ Edycja zgłoszonego pytania ${idx+1}</div>
-      <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Treść pytania <span style="color:var(--c3)">(użyj [imię] dla gracza Temat)</span></div>
-      <textarea id="eq-q-${idx}" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:12px;color:var(--text);font-family:inherit;resize:vertical;min-height:56px">${item.q}</textarea>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Odpowiedzi</div>
-        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#a78bfa66">Podgląd dla Tematu</div>
-      </div>
-      ${[0,1,2].map(j=>`
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:center">
-          <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${j+1}</div>
-            <input id="eq-a-${idx}-${j}" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" value="${item.a[j].replace(/"/g,'&quot;')}"
-              style="flex:1;min-width:0;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--text);font-family:inherit">
-          </div>
-          <div id="eq-prev-${idx}-${j}" style="font-size:11px;color:#a78bfa66;padding:0 4px;line-height:1.4">${item.as?item.as[j]||'—':'—'}</div>
-        </div>`).join('')}
-      <div style="display:flex;gap:8px;margin-top:2px">
-        <button onclick="saveEditQ(${idx});renderQCardReported($('qcard-${idx}'),${idx},false)" style="flex:1;background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Zapisz</button>
-        <button onclick="renderQCardReported($('qcard-${idx}'),${idx},false)" style="flex:1;background:var(--card);color:var(--muted);border:1.5px solid var(--rim);border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Anuluj</button>
-      </div>`;
-  }
-}
-
-function startEditQReported(idx){
-  const div=$('qcard-'+idx);
-  if(div) renderQCardReported(div, idx, true);
-}
-
-function clearAllReports(){
-  _qReported={};
-  try{ localStorage.setItem('wiem_qreported','{}'); }catch(e){}
-  updateReportedTabCount();
-  renderQBrowser();
-}
-
-function dismissReport(idx){
-  delete _qReported[idx];
-  try{ localStorage.setItem('wiem_qreported',JSON.stringify(_qReported)); }catch(e){}
-  updateReportedTabCount();
-  renderQBrowser();
-}
-
-function renderQCard(div, idx, editing){
-  const item=QS[idx];
-  // Both versions
-  const qOther=item.q.replace(/\[imię\]/g,'[Temat]');
-  const qSubj=item.qs||'—';
-  const hasName=item.q.includes('[imię]');
-
-  if(!editing){
-    // Build category chips
-    const myCats=(_qCatMap[idx]||[]).map(id=>_qCats[id]).filter(Boolean);
-    const isPlayerType=item.type==='players';
-    const catChips=myCats.length>0
-      ? `<div style="display:flex;flex-wrap:wrap;gap:4px;padding-top:4px">
-          ${myCats.map(c=>`<span style="padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;background:${c.color}22;color:${c.color};border:1px solid ${c.color}55">${c.name}</span>`).join('')}
-          <button onclick="removeCatFromQ(${idx},event)" style="padding:2px 6px;border-radius:99px;font-size:9px;background:none;border:1px solid var(--rim);color:var(--muted);cursor:pointer" title="Usuń z kategorii">✕</button>
-        </div>`
-      : '';
-    div.innerHTML=`
-      <div style="display:flex;align-items:flex-start;gap:8px">
-        <input type="checkbox" id="qbulk-${idx}" ${_bulkSelected.has(idx)?'checked':''} onchange="toggleBulkSelect(${idx})"
-          style="margin-top:3px;width:15px;height:15px;accent-color:#f59e0b;flex-shrink:0;cursor:pointer" title="Zaznacz do kategorii">
-        <input type="checkbox" id="qcb-${idx}" ${_qMarked.has(idx)?'checked':''} onchange="toggleCheck(${idx})"
-          style="margin-top:3px;width:15px;height:15px;accent-color:#7F77DD;flex-shrink:0;cursor:pointer">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;align-items:start">
-          <div style="font-size:11px;font-weight:700;line-height:1.4;text-transform:uppercase;letter-spacing:.3px;color:var(--text)">${qOther}</div>
-          <div style="font-size:11px;font-weight:700;line-height:1.4;text-transform:uppercase;letter-spacing:.3px;color:${isPlayerType?'#38bdf8':hasName?'#a78bfa':'var(--muted)'}">${isPlayerType?'Imiona graczy w danej rundzie':hasName?qSubj:'—'}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
-          <div id="qcolor-${idx}" style="display:flex;align-items:center;gap:4px"></div>
-          <button onclick="startEditQ(${idx})" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:0;line-height:1" title="Edytuj">✏️</button>
-        </div>
-      </div>
-      ${catChips}
-      ${isPlayerType?'':`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--rim);padding-top:8px">
-        ${[0,1,2].map(j=>`
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px">
-            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${j+1}</div>
-            <span style="color:var(--muted)">${item.a[j]||''}</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px">
-            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${j+1}</div>
-            <span style="color:${hasName?'#a78bfa66':'var(--muted)'}">${item.as?item.as[j]||'—':'—'}</span>
-          </div>`).join('')}
-      </div>`}`;
-  } else {
-    div.style.borderColor='#7F77DD';
-    const isPlayers=item.type==='players';
-    div.innerHTML=`
-      <div style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" id="qcb-${idx}" checked onchange="toggleCheck(${idx})"
-          style="width:15px;height:15px;accent-color:#7F77DD;cursor:pointer">
-        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#a78bfa;font-weight:700;flex:1">Edycja pytania</div>
-        <button onclick="toggleEditQType(${idx})" style="padding:3px 8px;border-radius:99px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid ${isPlayers?'#38bdf8':'var(--rim)'};background:${isPlayers?'#0c4a6e44':'transparent'};color:${isPlayers?'#38bdf8':'var(--muted)'}">${isPlayers?'👥 Gracze':'📝 Własne'}</button>
-      </div>
-      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Treść pytania <span style="color:var(--c3)">(użyj [imię] dla gracza Temat)</span></div>
-      <textarea id="eq-q-${idx}" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:12px;color:var(--text);font-family:inherit;resize:vertical;min-height:56px">${item.q}</textarea>
-      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#a78bfa">Pytanie dla Tematu (2. osoba)</div>
-      <textarea id="eq-qs-${idx}" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:12px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px">${item.qs||''}</textarea>
-      ${isPlayers?`
-        <div style="background:var(--bg);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--muted);text-align:center;line-height:1.6">
-          👥 Odpowiedziami będą <strong style="color:var(--text)">imiona graczy</strong> w danej rundzie
-        </div>
-      `:`
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Odpowiedzi (dla innych)</div>
-        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#a78bfa">Odpowiedzi (dla Tematu)</div>
-      </div>
-      ${[0,1,2].map(j=>`
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:center">
-          <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:18px;height:18px;border-radius:4px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${j+1}</div>
-            <input id="eq-a-${idx}-${j}" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" value="${(item.a[j]||'').replace(/"/g,'&quot;')}"
-              style="flex:1;min-width:0;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--text);font-family:inherit">
-          </div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:18px;height:18px;border-radius:4px;background:#3730a344;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#a78bfa">${j+1}</div>
-            <input id="eq-as-${idx}-${j}" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" value="${(item.as?item.as[j]||'':'').replace(/"/g,'&quot;')}"
-              style="flex:1;min-width:0;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:11px;color:#a78bfa;font-family:inherit">
-          </div>
-        </div>`).join('')}
-      `}
-      <div style="display:flex;gap:8px;margin-top:2px">
-        <button onclick="saveEditQ(${idx})" style="flex:1;background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Zapisz</button>
-        <button onclick="cancelEditQ(${idx})" style="flex:1;background:var(--card);color:var(--muted);border:1.5px solid var(--rim);border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Anuluj</button>
-      </div>`;
-  }
-}
 
 
 
-function toggleEditQType(idx){
-  QS[idx].type=QS[idx].type==='players'?undefined:'players';
-  if(QS[idx].type===undefined) delete QS[idx].type;
-  const div=$('qcard-'+idx);
-  if(div) renderQCard(div,idx,true);
-}
 
-function startEditQ(idx){
-  const div=$('qcard-'+idx);
-  if(div) renderQCard(div, idx, true);
-}
 
-function cancelEditQ(idx){
-  const div=$('qcard-'+idx);
-  if(div){
-    div.style.borderColor=getCardBorder(idx);
-    renderQCard(div, idx, false);
-    const colorRow=div.querySelector('[id^="qcolor-"]');
-    if(colorRow) updateColorBtns(colorRow, idx);
-  }
-}
+
+
+
+
+
+
 
 let _newQType='normal'; // 'normal' | 'players'
 
-function toggleNewQType(){
-  _newQType=_newQType==='normal'?'players':'normal';
-  const btn=$('nq-type-btn');
-  const ans=$('nq-answers-section');
-  const pl=$('nq-players-section');
-  if(_newQType==='players'){
-    if(btn){btn.textContent='👥 Gracze';btn.style.borderColor='#38bdf8';btn.style.color='#38bdf8';btn.style.background='#0c4a6e44';}
-    if(ans) ans.style.display='none';
-    if(pl) pl.style.display='block';
-  } else {
-    if(btn){btn.textContent='📝 Własne';btn.style.borderColor='var(--rim)';btn.style.color='var(--muted)';btn.style.background='transparent';}
-    if(ans) ans.style.display='block';
-    if(pl) pl.style.display='none';
-  }
-}
 
-function toggleAddQuestion(){
-  const form=$('qb-add-form');
-  const btn=$('qb-add-btn');
-  if(!form)return;
-  const opening=form.style.display==='none';
-  form.style.display=opening?'flex':'none';
-  if(btn) btn.style.color=opening?'#a78bfa':'var(--muted)';
-  if(opening){
-    _newQType='normal';
-    // Reset type toggle UI
-    const tBtn=$('nq-type-btn');
-    const ans=$('nq-answers-section');
-    const pl=$('nq-players-section');
-    if(tBtn){tBtn.textContent='📝 Własne';tBtn.style.borderColor='var(--rim)';tBtn.style.color='var(--muted)';tBtn.style.background='transparent';}
-    if(ans) ans.style.display='block';
-    if(pl) pl.style.display='none';
-    ['nq-q','nq-qs','nq-a1','nq-a2','nq-a3','nq-as1','nq-as2','nq-as3'].forEach(id=>{ const el=$(id); if(el) el.value=''; });
-    [1,2,3].forEach(j=>{ const el=$('nq-prev'+j); if(el) el.textContent='—'; });
-    setTimeout(()=>{ const q=$('nq-q'); if(q) q.focus(); },50);
-  }
-}
 
-function saveNewQuestion(){
-  const q=($('nq-q')?.value||'').trim();
-  if(!q){ const el=$('nq-q'); if(el){el.style.borderColor='var(--c0)';setTimeout(()=>el.style.borderColor='',1500);} return; }
 
-  let entry;
-  if(_newQType==='players'){
-    const qs=($('nq-qs')?.value||'').trim()||q;
-    entry={q,qs,a:[],type:'players'};
-  } else {
-    const a=[1,2,3].map(j=>($('nq-a'+j)?.value||'').trim());
-    if(a.some(v=>!v)){
-      [1,2,3].forEach(j=>{ const el=$('nq-a'+j); if(el&&!el.value.trim()){el.style.borderColor='var(--c0)';setTimeout(()=>el.style.borderColor='',1500);} });
-      return;
-    }
-    const qs=($('nq-qs')?.value||'').trim()||q;
-    const as=[1,2,3].map(j=>($('nq-as'+j)?.value||'').trim());
-    entry={q,qs,a,as};
-  }
-
-  QS.push(entry);
-  const idx=QS.length-1;
-  try{
-    const saved=JSON.parse(localStorage.getItem('wiem_qs')||'{}');
-    saved[idx]=entry;
-    localStorage.setItem('wiem_qs',JSON.stringify(saved));
-  }catch(e){}
-  toggleAddQuestion();
-  renderQBrowser();
-  setTimeout(()=>{
-    const card=$('qcard-'+idx);
-    if(card){ card.scrollIntoView({behavior:'smooth',block:'center'}); card.style.borderColor='var(--c2)'; }
-    setTimeout(()=>{ const card=$('qcard-'+idx); if(card) card.style.borderColor=getCardBorder(idx); },2000);
-  },100);
-}
-
-function saveEditQ(idx){
-  const qEl=$('eq-q-'+idx);
-  const newQ=qEl?qEl.value.trim():'';
-  if(!newQ)return;
-  const isPlayers=QS[idx]?.type==='players';
-  const newQs=($('eq-qs-'+idx)?.value||'').trim()||newQ;
-  let newA=[], newAs=[];
-  if(!isPlayers){
-    newA=[0,1,2].map(j=>{ const el=$('eq-a-'+idx+'-'+j); return el?el.value.trim():''; });
-    if(newA.some(a=>!a))return;
-    newAs=[0,1,2].map(j=>{ const el=$('eq-as-'+idx+'-'+j); return el?el.value.trim():''; });
-  }
-  const entry={q:newQ,qs:newQs,a:newA};
-  if(!isPlayers) entry.as=newAs;
-  if(isPlayers) entry.type='players';
-  QS[idx]=entry;
-  try{
-    const saved=JSON.parse(localStorage.getItem('wiem_qs')||'{}');
-    saved[idx]=entry;
-    localStorage.setItem('wiem_qs',JSON.stringify(saved));
-  }catch(e){}
-  const div=$('qcard-'+idx);
-  if(div){
-    div.style.borderColor='var(--c2)';
-    renderQCard(div, idx, _qMarkedView);
-    setTimeout(()=>{if(div)div.style.borderColor=getCardBorder(idx);},1500);
-  }
-}
 
 </script>
 <!-- ══ ADMIN PASSWORD MODAL ══ -->
-<div id="admin-modal" style="display:none;position:fixed;inset:0;background:#000a;z-index:9999;align-items:center;justify-content:center">
-  <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:16px;padding:24px;width:min(320px,90vw);display:flex;flex-direction:column;gap:14px">
-    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center">🔒 Panel administratora</div>
-    <input id="admin-pw-inp" type="password" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Hasło" autocomplete="off"
-      style="background:var(--bg);border:1.5px solid var(--rim);border-radius:10px;padding:12px;font-size:16px;color:var(--text);font-family:inherit;text-align:center;letter-spacing:3px"
-      onkeydown="event.stopPropagation();if(event.key==='Enter')submitAdminPw()">
-    <div id="admin-pw-err" style="display:none;color:var(--c0);font-size:12px;text-align:center">❌ Błędne hasło</div>
-    <div style="display:flex;gap:8px">
-      <button onclick="closeAdminModal()" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--rim);background:var(--card);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer">Anuluj</button>
-      <button onclick="submitAdminPw()" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--text);color:var(--bg);font-size:13px;font-weight:700;cursor:pointer">Wejdź →</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ CATEGORY MANAGER MODAL ══ -->
-<div id="cat-modal" style="display:none;position:fixed;inset:0;background:#000a;z-index:9999;align-items:center;justify-content:center">
-  <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:16px;padding:20px;width:min(340px,92vw);display:flex;flex-direction:column;gap:12px;max-height:80vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;gap:8px">
-      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex:1">🏷 Zarządzaj kategoriami</div>
-      <button onclick="closeCatManager()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0;line-height:1">×</button>
-    </div>
-    <div id="cat-list-mgr" style="display:flex;flex-direction:column;gap:6px"></div>
-    <div style="display:flex;gap:6px">
-      <input id="cat-new-inp" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Nowa kategoria…" maxlength="24"
-        style="flex:1;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);font-family:inherit"
-        onkeydown="event.stopPropagation();if(event.key==='Enter')addCategory()">
-      <button onclick="addCategory()" style="padding:8px 14px;border-radius:8px;border:none;background:var(--text);color:var(--bg);font-size:13px;font-weight:700;cursor:pointer">+</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
