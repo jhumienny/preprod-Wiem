@@ -2513,12 +2513,11 @@ async function authCheckRole(uid) {
         body: JSON.stringify({ email: user.email, role: 'user', createdAt: Date.now() })
       });
     }
-    if (userData && userData.displayName) {
-      const dn = userData.displayName;
-      if ($('inp-name') && !$('inp-name').value) $('inp-name').value = dn;
-      if ($('slots-name-inp') && !$('slots-name-inp').dataset.touched) $('slots-name-inp').value = dn;
-      if (!sessionStorage.getItem('ego_name')) sessionStorage.setItem('ego_name', dn);
-    }
+    const dn = (userData && userData.displayName) || '';
+    if ($('inp-name')) $('inp-name').value = dn;
+    if ($('slots-name-inp') && !$('slots-name-inp').dataset.touched) $('slots-name-inp').value = dn;
+    if (dn) sessionStorage.setItem('ego_name', dn);
+    else sessionStorage.removeItem('ego_name');
     window._currentUserRole = data;
     if (data === 'admin' || data === 'moderator') {
       if (adminBtn) adminBtn.style.display = '';
@@ -2644,6 +2643,8 @@ async function submitAuth() {
 async function authSignOut() {
   const auth = window._fbAuth;
   const fns  = window._fbAuthFns;
+  sessionStorage.removeItem('ego_name');
+  if ($('inp-name')) $('inp-name').value = '';
   if (auth && fns) await fns.signOut(auth);
 }
 
