@@ -2310,7 +2310,11 @@ window._onAuthStateChanged = function(user) {
 async function authCheckRole(uid) {
   const adminBtn = $('auth-admin-btn');
   try {
-    const data = await fbGet('users/' + uid + '/role');
+    const user = window._currentUser;
+    const token = user ? await user.getIdToken() : null;
+    const url = DB_URL + '/users/' + uid + '/role.json' + (token ? '?auth=' + token : '');
+    const r = await fetch(url);
+    const data = await r.json();
     if (data === 'admin' && adminBtn) adminBtn.style.display = '';
     else if (adminBtn) adminBtn.style.display = 'none';
   } catch(e) {
