@@ -843,7 +843,7 @@ function norm(gs){
   gs.ready      = gs.ready || {};
   gs.maxPlayers = gs.maxPlayers || 4;
   gs.swapAt     = gs.swapAt || null;
-  gs.gameMode   = gs.gameMode || 'rounds';
+  gs.gameMode   = gs.gameMode || 'pool';
   gs.qAnswers   = gs.qAnswers || {};
   gs.usedQs     = gs.usedQs ? (Array.isArray(gs.usedQs)?gs.usedQs:Object.values(gs.usedQs)) : [];
   // Normalize vote keys AND values to integers
@@ -1122,7 +1122,7 @@ async function handleGSUpdate(){
           }
         });
         next.pool=Math.max(0,(next.pool||0)+poolDelta);
-        const mode=next.gameMode||'rounds';
+        const mode=next.gameMode||'pool';
         const anyBroke=next.players.some(p=>p&&p.pts<=0);
         if(mode==='pool'&&(next.pool<=0||anyBroke)) next.phase='ended';
         else if(mode==='rounds'&&next.ri+1>=next.rt) next.phase='ended';
@@ -1314,7 +1314,7 @@ function renderLobby(){
     });
     _maxPlayers=max;
     // Sync game mode
-    const savedMode=GS.gameMode||'rounds';
+    const savedMode=GS.gameMode||'pool';
     if(savedMode!==_gameMode) setGameMode(savedMode);
     renderLobCatSelector();
   }
@@ -1950,7 +1950,7 @@ async function castVote(ans){
         }
       });
       next.pool=Math.max(0,(next.pool||0)+poolDelta);
-      const mode=next.gameMode||'rounds';
+      const mode=next.gameMode||'pool';
       const anyBroke=next.players.some(p=>p&&p.pts<=0);
       if(mode==='pool'&&(next.pool<=0||anyBroke)) next.phase='ended';
       else if(mode==='rounds'&&next.ri+1>=next.rt) next.phase='ended';
@@ -2129,7 +2129,7 @@ function renderReveal(){
     }).join('');
 
   const poolLeft=GS.pool??0;
-  const mode=GS.gameMode||'rounds';
+  const mode=GS.gameMode||'pool';
   const anyBroke=GS.players.some(p=>p&&p.pts<=0);
   const isLast=mode==='pool'?(poolLeft<=0||anyBroke):(GS.ri+1>=GS.rt);
   const modeInfo=mode==='pool'
@@ -2145,7 +2145,7 @@ async function nextRound(){
   try{
     const gs=await fbGet(`games/${gameId}`);
     GS=norm(dc(gs));
-    const mode=GS.gameMode||'rounds';
+    const mode=GS.gameMode||'pool';
     const anyBroke=GS.players.some(p=>p&&p.pts<=0);
     const poolGone=(GS.pool??0)<=0;
     const roundsDone=GS.ri+1>=GS.rt;
