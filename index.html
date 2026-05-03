@@ -183,6 +183,7 @@ onAuthStateChanged(auth, (user) => {
       <div id="auth-logged-in" style="display:none;align-items:center;gap:8px">
         <span id="auth-email" style="font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
         <button id="auth-admin-btn" onclick="show('s-admin')" style="display:none;padding:6px 12px;border-radius:8px;border:none;background:#534AB7;color:#fff;font-size:11px;font-weight:700;cursor:pointer">⚙ Panel</button>
+        <button id="auth-myq-btn" onclick="show('s-my-questions')" style="display:none;padding:6px 12px;border-radius:8px;border:none;background:var(--text);color:var(--bg);font-size:11px;font-weight:700;cursor:pointer">📝 Pytania</button>
         <button onclick="authSignOut()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer">Wyloguj</button>
       </div>
     </div>
@@ -468,6 +469,45 @@ onAuthStateChanged(auth, (user) => {
   </div>
 </div>
 
+<!-- ══ MY QUESTIONS ══ -->
+<div class="scr" id="s-my-questions">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onclick="show('s-home')" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0;line-height:1">←</button>
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex:1">📝 Moje pytania</div>
+  </div>
+
+  <!-- Formularz -->
+  <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:var(--rad);padding:18px;display:flex;flex-direction:column;gap:12px">
+    <div class="label">Dodaj pytanie</div>
+    <div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px"><span>Dla innych (z imieniem)</span><span>Dla tematu (2. osoba)</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <textarea id="myq-q" placeholder="Co [imię] robi gdy…" rows="3" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()"></textarea>
+      <textarea id="myq-qs" placeholder="Co robisz gdy…" rows="3" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:13px;color:#a78bfa;font-family:inherit;resize:vertical;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()"></textarea>
+    </div>
+    <div class="label">Odpowiedzi (3)</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <input id="myq-a0" type="text" placeholder="Odpowiedź 1 — dla innych" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:12px;color:var(--text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
+        <input id="myq-as0" type="text" placeholder="Odpowiedź 1 — dla tematu" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:12px;color:#a78bfa;font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <input id="myq-a1" type="text" placeholder="Odpowiedź 2 — dla innych" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:12px;color:var(--text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
+        <input id="myq-as1" type="text" placeholder="Odpowiedź 2 — dla tematu" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:12px;color:#a78bfa;font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <input id="myq-a2" type="text" placeholder="Odpowiedź 3 — dla innych" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:12px;color:var(--text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
+        <input id="myq-as2" type="text" placeholder="Odpowiedź 3 — dla tematu" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:12px;color:#a78bfa;font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
+      </div>
+    </div>
+    <div id="myq-err" style="display:none;color:var(--c0);font-size:12px"></div>
+    <button id="myq-submit" onclick="submitMyQuestion()" class="btn btn-lit">Wyślij pytanie →</button>
+  </div>
+
+  <!-- Lista -->
+  <div class="label">Historia moich pytań</div>
+  <div id="myq-list" style="display:flex;flex-direction:column;gap:10px"></div>
+</div>
+
 <!-- ══ END ══ -->
 <div class="scr" id="s-end">
   <div style="text-align:center;padding-top:12px">
@@ -724,6 +764,7 @@ const show=id=>{
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   $(id).classList.add('on');
   if(id==='s-admin' && typeof admOpen==='function') admOpen();
+  if(id==='s-my-questions' && typeof myqOpen==='function') myqOpen();
 };
 const shuf=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
 const dc=o=>JSON.parse(JSON.stringify(o));
@@ -2344,6 +2385,7 @@ window._onAuthStateChanged = function(user) {
   const loggedOut = $('auth-logged-out');
   const loggedIn  = $('auth-logged-in');
   const adminBtn  = $('auth-admin-btn');
+  const myqBtn    = $('auth-myq-btn');
   const emailEl   = $('auth-email');
   if (!loggedOut || !loggedIn) return;
   if (user) {
@@ -2355,21 +2397,29 @@ window._onAuthStateChanged = function(user) {
     loggedOut.style.display = 'flex';
     loggedIn.style.display  = 'none';
     if (adminBtn) adminBtn.style.display = 'none';
+    if (myqBtn)   myqBtn.style.display   = 'none';
   }
 };
 
 async function authCheckRole(uid) {
   const adminBtn = $('auth-admin-btn');
+  const myqBtn   = $('auth-myq-btn');
   try {
     const user = window._currentUser;
     const token = user ? await user.getIdToken() : null;
     const url = DB_URL + '/users/' + uid + '/role.json' + (token ? '?auth=' + token : '');
     const r = await fetch(url);
     const data = await r.json();
-    if (data === 'admin' && adminBtn) adminBtn.style.display = '';
-    else if (adminBtn) adminBtn.style.display = 'none';
+    if (data === 'admin') {
+      if (adminBtn) adminBtn.style.display = '';
+      if (myqBtn)   myqBtn.style.display   = 'none';
+    } else {
+      if (adminBtn) adminBtn.style.display = 'none';
+      if (myqBtn)   myqBtn.style.display   = '';
+    }
   } catch(e) {
     if (adminBtn) adminBtn.style.display = 'none';
+    if (myqBtn)   myqBtn.style.display   = 'none';
   }
 }
 
@@ -2444,7 +2494,13 @@ async function submitAuth() {
       const cred = await fns.createUserWithEmailAndPassword(auth, email, pass);
       const uid = cred.user.uid;
       const role = email === ADMIN_EMAIL ? 'admin' : 'user';
-      await fbSet('users/' + uid, { email: email, role: role, createdAt: Date.now() });
+      const regToken = await cred.user.getIdToken();
+      const regR = await fetch(DB_URL + '/users/' + uid + '.json?auth=' + regToken, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ email: email, role: role, createdAt: Date.now() })
+      });
+      if (!regR.ok) throw new Error('SET ' + regR.status);
     }
     closeAuthModal();
   } catch(e) {
@@ -2622,11 +2678,14 @@ function admDeleteQ(i) {
 }
 
 // ── TAB: PENDING USER QUESTIONS ──
+let _pendingData = {};
+
 async function admLoadPending() {
   const list = $('adm-pending-list');
   const empty = $('adm-pending-empty');
   if (!list) return;
   list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Ładowanie…</div>';
+  _pendingData = {};
 
   try {
     const data = await admFetch('userQuestions');
@@ -2634,29 +2693,24 @@ async function admLoadPending() {
     if (data) {
       Object.entries(data).forEach(([uid, qs]) => {
         Object.entries(qs||{}).forEach(([qid, q]) => {
-          if (q && q.status === 'pending') items.push({uid, qid, q});
+          if (q && q.status === 'pending') {
+            items.push({uid, qid, q});
+            _pendingData[qid] = {uid, q};
+          }
         });
       });
     }
+    items.sort((a, b) => (b.q.createdAt||0) - (a.q.createdAt||0));
+
     list.innerHTML = '';
-    if (items.length === 0) {
-      if (empty) empty.style.display = '';
-      return;
-    }
+    if (items.length === 0) { if (empty) empty.style.display = ''; return; }
     if (empty) empty.style.display = 'none';
+
     items.forEach(({uid, qid, q}) => {
       const card = document.createElement('div');
       card.className = 'adm-card';
       card.id = 'pend-' + qid;
-      const ans = (q.a||[]).map(a => '<span style="font-size:11px;background:var(--bg);border-radius:6px;padding:3px 8px;color:var(--muted)">' + escHtml(a) + '</span>').join('');
-      card.innerHTML =
-        '<div class="adm-card-meta">Od: ' + escHtml(q.authorEmail||uid) + ' · ' + new Date(q.createdAt||0).toLocaleDateString('pl') + '</div>' +
-        '<div class="adm-card-q">' + escHtml(q.q) + '</div>' +
-        (ans ? '<div style="display:flex;flex-wrap:wrap;gap:4px">' + ans + '</div>' : '') +
-        '<div style="display:flex;gap:8px">' +
-          '<button onclick="admApprovePending(\'' + uid + '\',\'' + qid + '\')" style="flex:1;padding:9px;border-radius:8px;border:none;background:#16a34a;color:#fff;font-size:12px;font-weight:700;cursor:pointer">✓ Zatwierdź</button>' +
-          '<button onclick="admRejectPending(\'' + uid + '\',\'' + qid + '\')" style="flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--c0)44;background:transparent;color:var(--c0);font-size:12px;font-weight:700;cursor:pointer">✗ Odrzuć</button>' +
-        '</div>';
+      card.innerHTML = admBuildPendCard(qid, q, false);
       list.appendChild(card);
     });
     admLoadPendingCount();
@@ -2665,25 +2719,83 @@ async function admLoadPending() {
   }
 }
 
-async function admApprovePending(uid, qid) {
-  try {
-    await admWrite('userQuestions/' + uid + '/' + qid + '/status', 'approved');
-    const data = await admFetch('userQuestions/' + uid + '/' + qid);
-    if (data) {
-      const q = {q: data.q, qs: data.qs||'', a: data.a||[], as: data.as||[], type: data.type||'custom'};
-      QS.push(q);
-    }
-    const card = $('pend-' + qid);
-    if (card) card.remove();
-    admLoadPendingCount();
-  } catch(e) { alert('Błąd: ' + e.message); }
+function admBuildPendCard(qid, q, editing) {
+  const createdStr = q.createdAt ? new Date(q.createdAt).toLocaleString('pl') : '—';
+  const meta = '<div class="adm-card-meta">Od: ' + escHtml(q.authorEmail||'') + ' · Wysłano: ' + createdStr + '</div>';
+
+  if (editing) {
+    const aRows = [0,1,2].map(i =>
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">' +
+        '<input class="pend-a-inp" data-i="' + i + '" value="' + escHtml((q.a||[])[i]||'') + '" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">' +
+        '<input class="pend-as-inp" data-i="' + i + '" value="' + escHtml((q.as||[])[i]||'') + '" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:12px;color:#a78bfa;font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">' +
+      '</div>'
+    ).join('');
+    return meta +
+      '<div style="font-size:9px;color:#a78bfa;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Dla innych</span><span>Dla tematu</span></div>' +
+      '<textarea id="pend-q-' + qid + '" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;min-height:52px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.q) + '</textarea>' +
+      '<textarea id="pend-qs-' + qid + '" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:13px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
+      '<div id="pend-arows-' + qid + '">' + aRows + '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+        '<button onclick="admActPending(\'' + qid + '\',\'approve\')" style="flex:1;min-width:110px;padding:9px;border-radius:8px;border:none;background:#16a34a;color:#fff;font-size:12px;font-weight:700;cursor:pointer">✓ Zatwierdź</button>' +
+        '<button onclick="admActPending(\'' + qid + '\',\'reject\')" style="flex:1;min-width:90px;padding:9px;border-radius:8px;border:1.5px solid var(--c0)44;background:transparent;color:var(--c0);font-size:12px;font-weight:700;cursor:pointer">✗ Odrzuć</button>' +
+        '<button onclick="admCancelPendEdit(\'' + qid + '\')" style="padding:9px 14px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer">Anuluj</button>' +
+      '</div>';
+  }
+
+  const ans = (q.a||[]).map(a => '<span style="font-size:11px;background:var(--bg);border-radius:6px;padding:3px 8px;color:var(--muted)">' + escHtml(a) + '</span>').join('');
+  return meta +
+    '<div class="adm-card-q">' + escHtml(q.q) + '</div>' +
+    (ans ? '<div style="display:flex;flex-wrap:wrap;gap:4px">' + ans + '</div>' : '') +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      '<button onclick="admEditPendCard(\'' + qid + '\')" style="padding:8px 14px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer">✏ Edytuj</button>' +
+      '<button onclick="admActPending(\'' + qid + '\',\'approve\')" style="flex:1;padding:9px;border-radius:8px;border:none;background:#16a34a;color:#fff;font-size:12px;font-weight:700;cursor:pointer">✓ Zatwierdź</button>' +
+      '<button onclick="admActPending(\'' + qid + '\',\'reject\')" style="flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--c0)44;background:transparent;color:var(--c0);font-size:12px;font-weight:700;cursor:pointer">✗ Odrzuć</button>' +
+    '</div>';
 }
 
-async function admRejectPending(uid, qid) {
+function admEditPendCard(qid) {
+  const d = _pendingData[qid];
+  if (!d) return;
+  const card = $('pend-' + qid);
+  if (card) card.innerHTML = admBuildPendCard(qid, d.q, true);
+}
+
+function admCancelPendEdit(qid) {
+  const d = _pendingData[qid];
+  if (!d) return;
+  const card = $('pend-' + qid);
+  if (card) card.innerHTML = admBuildPendCard(qid, d.q, false);
+}
+
+async function admActPending(qid, action) {
+  const d = _pendingData[qid];
+  if (!d) return;
+  const {uid, q} = d;
+
+  const card = $('pend-' + qid);
+  const isEditing = card && !!$('pend-q-' + qid);
+  let updatedQ = q.q, updatedQs = q.qs||'';
+  let updatedA = [...(q.a||[])], updatedAs = [...(q.as||[])];
+
+  if (isEditing) {
+    updatedQ  = ($('pend-q-'  + qid)?.value||'').trim() || updatedQ;
+    updatedQs = ($('pend-qs-' + qid)?.value||'').trim();
+    card.querySelectorAll('.pend-a-inp').forEach((inp,i)  => { updatedA[i]  = inp.value.trim(); });
+    card.querySelectorAll('.pend-as-inp').forEach((inp,i) => { updatedAs[i] = inp.value.trim(); });
+  }
+
   try {
-    await admWrite('userQuestions/' + uid + '/' + qid + '/status', 'rejected');
-    const card = $('pend-' + qid);
+    const resolvedAt = Date.now();
+    await admWrite('userQuestions/' + uid + '/' + qid, {
+      ...q, q: updatedQ, qs: updatedQs, a: updatedA, as: updatedAs,
+      status: action === 'approve' ? 'approved' : 'rejected',
+      resolvedAt
+    });
+    if (action === 'approve') {
+      QS.push({q: updatedQ, qs: updatedQs, a: updatedA, as: updatedAs, type: q.type||'custom'});
+    }
     if (card) card.remove();
+    delete _pendingData[qid];
     admLoadPendingCount();
   } catch(e) { alert('Błąd: ' + e.message); }
 }
@@ -2798,6 +2910,105 @@ async function admDeleteUser(uid) {
     await admDelete('users/' + uid);
     admLoadUsers();
   } catch(e) { alert('Błąd: ' + e.message); }
+}
+
+// ══════════════════════════════════════════════
+// ── MOJE PYTANIA ──
+// ══════════════════════════════════════════════
+
+function myqOpen() {
+  myqLoadList();
+}
+
+async function myqLoadList() {
+  const user = window._currentUser;
+  if (!user) return;
+  const list = $('myq-list');
+  if (!list) return;
+  list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Ładowanie…</div>';
+
+  try {
+    const token = await user.getIdToken();
+    const r = await fetch(DB_URL + '/userQuestions/' + user.uid + '.json?auth=' + token);
+    const data = await r.json();
+
+    list.innerHTML = '';
+    if (!data || Object.keys(data).length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:32px 0">Nie wysłałeś/aś jeszcze żadnych pytań 📭</div>';
+      return;
+    }
+
+    Object.entries(data)
+      .sort((a, b) => (b[1].createdAt||0) - (a[1].createdAt||0))
+      .forEach(([qid, q]) => {
+        const statusMap = {
+          pending:  {label:'⏳ Oczekuje',    bg:'#78350f22', color:'#fbbf24', border:'#f59e0b55'},
+          approved: {label:'✅ Zatwierdzone', bg:'#052e1622', color:'#4ade80', border:'#16a34a55'},
+          rejected: {label:'✗ Odrzucone',    bg:'#450a0a22', color:'#f87171', border:'#dc262655'}
+        };
+        const s = statusMap[q.status] || statusMap.pending;
+        const createdStr  = q.createdAt  ? new Date(q.createdAt).toLocaleString('pl')  : '—';
+        const resolvedStr = q.resolvedAt ? new Date(q.resolvedAt).toLocaleString('pl') : null;
+        const ans = (q.a||[]).map(a => '<span style="font-size:11px;background:var(--bg);border-radius:6px;padding:3px 8px;color:var(--muted)">' + escHtml(a) + '</span>').join('');
+
+        const card = document.createElement('div');
+        card.className = 'adm-card';
+        card.innerHTML =
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
+            '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:' + s.bg + ';color:' + s.color + ';border:1.5px solid ' + s.border + '">' + s.label + '</span>' +
+            '<span style="font-size:10px;color:var(--muted);margin-left:auto">Wysłano: ' + createdStr + '</span>' +
+          '</div>' +
+          '<div class="adm-card-q">' + escHtml(q.q) + '</div>' +
+          (ans ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">' + ans + '</div>' : '') +
+          (resolvedStr ? '<div style="font-size:11px;color:var(--muted);margin-top:6px">' + (q.status === 'approved' ? '✅ Zatwierdzone' : '✗ Odrzucone') + ': ' + resolvedStr + '</div>' : '');
+        list.appendChild(card);
+      });
+  } catch(e) {
+    list.innerHTML = '<div style="color:var(--c0);font-size:13px;text-align:center;padding:16px">Błąd: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+async function submitMyQuestion() {
+  const user = window._currentUser;
+  if (!user) { alert('Musisz być zalogowany!'); return; }
+
+  const q  = ($('myq-q')  ? $('myq-q').value  : '').trim();
+  const qs = ($('myq-qs') ? $('myq-qs').value : '').trim();
+  const a  = [0,1,2].map(i => ($('myq-a' +i) ? $('myq-a' +i).value : '').trim());
+  const as = [0,1,2].map(i => ($('myq-as'+i) ? $('myq-as'+i).value : '').trim());
+  const errEl = $('myq-err');
+
+  if (!q)             { errEl.textContent='Wpisz treść pytania dla innych.';          errEl.style.display='block'; return; }
+  if (!qs)            { errEl.textContent='Wpisz treść pytania dla tematu.';           errEl.style.display='block'; return; }
+  if (a.some(x=>!x)) { errEl.textContent='Wypełnij wszystkie 3 odpowiedzi dla innych.'; errEl.style.display='block'; return; }
+  if (as.some(x=>!x)){ errEl.textContent='Wypełnij wszystkie 3 odpowiedzi dla tematu.'; errEl.style.display='block'; return; }
+  errEl.style.display = 'none';
+
+  const btn = $('myq-submit');
+  btn.disabled = true; btn.textContent = '⏳ Wysyłanie…';
+
+  try {
+    const token = await user.getIdToken();
+    const r = await fetch(DB_URL + '/userQuestions/' + user.uid + '.json?auth=' + token, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({q, qs, a, as, status:'pending', authorEmail: user.email, createdAt: Date.now()})
+    });
+    if (!r.ok) throw new Error('POST ' + r.status);
+
+    ['myq-q','myq-qs'].forEach(id => { if($(id)) $(id).value=''; });
+    [0,1,2].forEach(i => {
+      if($('myq-a' +i)) $('myq-a' +i).value='';
+      if($('myq-as'+i)) $('myq-as'+i).value='';
+    });
+
+    btn.textContent = '✓ Wysłano!';
+    setTimeout(() => { if(btn){ btn.textContent='Wyślij pytanie →'; btn.disabled=false; } }, 2000);
+    myqLoadList();
+  } catch(e) {
+    errEl.textContent = 'Błąd: ' + e.message; errEl.style.display='block';
+    btn.disabled=false; btn.textContent='Wyślij pytanie →';
+  }
 }
 </script>
 <!-- ══ ADMIN PASSWORD MODAL ══ -->
