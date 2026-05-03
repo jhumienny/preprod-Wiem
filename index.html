@@ -2417,7 +2417,8 @@ async function authCheckRole(uid) {
         body: JSON.stringify({ email: user.email, role: 'user', createdAt: Date.now() })
       });
     }
-    if (data === 'admin') {
+    window._currentUserRole = data;
+    if (data === 'admin' || data === 'moderator') {
       if (adminBtn) adminBtn.style.display = '';
       if (myqBtn)   myqBtn.style.display   = 'none';
     } else {
@@ -2899,15 +2900,18 @@ async function admLoadUsers() {
       card.className = 'adm-card';
       card.id = 'usr-' + uid;
       const isAdmin = u.role === 'admin';
-      const isSelf = window._currentUser && window._currentUser.uid === uid;
+      const isMod   = u.role === 'moderator';
+      const isSelf  = window._currentUser && window._currentUser.uid === uid;
+      const curIsAdmin = window._currentUserRole === 'admin';
+      const roleLabel = isAdmin ? '⚙ Admin' : isMod ? '🛡 Moderator' : '👤 Użytkownik';
       card.innerHTML =
         '<div style="display:flex;align-items:center;gap:10px">' +
           '<div style="flex:1">' +
             '<div style="font-size:13px;font-weight:600;color:var(--text)">' + escHtml(u.email||uid) + (isSelf ? ' <span style="font-size:10px;color:#a78bfa">(ty)</span>' : '') + '</div>' +
-            '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + (isAdmin ? '⚙ Admin' : '👤 Użytkownik') + ' · ' + new Date(u.createdAt||0).toLocaleDateString('pl') + '</div>' +
+            '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + roleLabel + ' · ' + new Date(u.createdAt||0).toLocaleDateString('pl') + '</div>' +
           '</div>' +
-          (!isSelf ? '<button onclick="admToggleRole(\'' + uid + '\',\'' + (isAdmin?'user':'admin') + '\')" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer">' + (isAdmin ? '→ User' : '→ Admin') + '</button>' : '') +
-          (!isSelf ? '<button onclick="admDeleteUser(\'' + uid + '\')" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--c0)44;background:transparent;color:var(--c0);font-size:11px;font-weight:600;cursor:pointer">🗑</button>' : '') +
+          (!isSelf && curIsAdmin && !isAdmin ? '<button onclick="admToggleRole(\'' + uid + '\',\'' + (isMod?'user':'moderator') + '\')" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer">' + (isMod ? '→ User' : '→ Mod') + '</button>' : '') +
+          (!isSelf && !isAdmin ? '<button onclick="admDeleteUser(\'' + uid + '\')" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--c0)44;background:transparent;color:var(--c0);font-size:11px;font-weight:600;cursor:pointer">🗑</button>' : '') +
         '</div>';
       list.appendChild(card);
     });
