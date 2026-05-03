@@ -209,13 +209,11 @@ onAuthStateChanged(auth, (user) => {
       <input id="inp-code" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="np. AB3K"
         maxlength="4"
         style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:6px;text-transform:uppercase;"
-        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4)"
-        onkeydown="if(event.key==='Enter')joinGame()">
+        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);homeUpdateBtn()"
+        onkeydown="if(event.key==='Enter'){this.value.trim()?joinGame():createGame()}">
     </div>
-    <button class="btn btn-dim" onclick="joinGame()">→ Dołącz do gry</button>
+    <button id="btn-join-create" class="btn btn-lit" onclick="createGame()">🎮 Utwórz nową grę</button>
   </div>
-
-  <button class="btn btn-lit" onclick="createGame()">🎮 Utwórz nową grę</button>
 
   <div class="err-msg" id="home-err"></div>
 
@@ -1172,6 +1170,21 @@ async function handleGSUpdate(){
 }
 
 // ── CREATE ──
+function homeUpdateBtn() {
+  const code = ($('inp-code').value||'').trim();
+  const btn = $('btn-join-create');
+  if (!btn) return;
+  if (code.length > 0) {
+    btn.textContent = '→ Dołącz do gry';
+    btn.className = 'btn btn-dim';
+    btn.onclick = joinGame;
+  } else {
+    btn.textContent = '🎮 Utwórz nową grę';
+    btn.className = 'btn btn-lit';
+    btn.onclick = createGame;
+  }
+}
+
 async function createGame(){
   const name=($('inp-name').value.trim()||'Gracz 1');
   hideErr('home-err');
