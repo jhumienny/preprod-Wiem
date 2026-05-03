@@ -453,8 +453,13 @@ onAuthStateChanged(auth, (user) => {
 
   <!-- Tab: Pending user questions -->
   <div id="adm-pane-pending" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button id="pend-sub-btn-pending" onclick="admPendSubTab('pending')" style="padding:6px 14px;border-radius:8px;border:none;background:var(--text);color:var(--bg);font-size:12px;font-weight:700;cursor:pointer">Oczekujące</button>
+      <button id="pend-sub-btn-history" onclick="admPendSubTab('history')" style="padding:6px 14px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer">Historia</button>
+    </div>
     <div id="adm-pending-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:32px 0;display:none">Brak pytań do zatwierdzenia 🎉</div>
     <div id="adm-pending-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div id="adm-history-list" style="display:none;flex-direction:column;gap:10px"></div>
   </div>
 
   <!-- Tab: Reports -->
@@ -2699,6 +2704,72 @@ function admDeleteQ(i) {
 
 // ── TAB: PENDING USER QUESTIONS ──
 let _pendingData = {};
+
+function admPendSubTab(tab) {
+  const pendingList = $('adm-pending-list');
+  const historyList = $('adm-history-list');
+  const empty       = $('adm-pending-empty');
+  const btnP = $('pend-sub-btn-pending');
+  const btnH = $('pend-sub-btn-history');
+  if (tab === 'history') {
+    if (pendingList) pendingList.style.display = 'none';
+    if (empty)       empty.style.display       = 'none';
+    if (historyList) { historyList.style.display = 'flex'; }
+    if (btnP) { btnP.style.background = 'transparent'; btnP.style.color = 'var(--muted)'; btnP.style.border = '1.5px solid var(--rim)'; }
+    if (btnH) { btnH.style.background = 'var(--text)';  btnH.style.color = 'var(--bg)';   btnH.style.border = 'none'; }
+    admLoadHistory();
+  } else {
+    if (historyList) historyList.style.display = 'none';
+    if (pendingList) pendingList.style.display  = 'flex';
+    if (btnH) { btnH.style.background = 'transparent'; btnH.style.color = 'var(--muted)'; btnH.style.border = '1.5px solid var(--rim)'; }
+    if (btnP) { btnP.style.background = 'var(--text)';  btnP.style.color = 'var(--bg)';   btnP.style.border = 'none'; }
+  }
+}
+
+async function admLoadHistory() {
+  const list = $('adm-history-list');
+  if (!list) return;
+  list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Ładowanie…</div>';
+  try {
+    const data = await admFetch('userQuestions');
+    const items = [];
+    if (data) {
+      Object.entries(data).forEach(([uid, qs]) => {
+        Object.entries(qs||{}).forEach(([qid, q]) => {
+          if (q && (q.status === 'approved' || q.status === 'rejected')) {
+            items.push({uid, qid, q});
+          }
+        });
+      });
+    }
+    items.sort((a, b) => (b.q.resolvedAt||0) - (a.q.resolvedAt||0));
+    list.innerHTML = '';
+    if (items.length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:32px 0">Brak historii</div>';
+      return;
+    }
+    items.forEach(({q}) => {
+      const approved = q.status === 'approved';
+      const resolvedStr = q.resolvedAt ? new Date(q.resolvedAt).toLocaleString('pl') : '—';
+      const card = document.createElement('div');
+      card.className = 'adm-card';
+      card.innerHTML =
+        '<div style="display:flex;align-items:flex-start;gap:10px">' +
+          '<div style="flex:1">' +
+            '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">' + escHtml(q.q||'') + '</div>' +
+            '<div style="font-size:10px;color:var(--muted)">Od: ' + escHtml(q.authorEmail||'—') + ' · Rozpatrzono: ' + resolvedStr + '</div>' +
+          '</div>' +
+          '<span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;white-space:nowrap;' +
+            (approved ? 'background:#16a34a22;color:#4ade80' : 'background:#ef444422;color:#f87171') + '">' +
+            (approved ? '✓ Zatwierdzone' : '✗ Odrzucone') +
+          '</span>' +
+        '</div>';
+      list.appendChild(card);
+    });
+  } catch(e) {
+    list.innerHTML = '<div style="color:var(--c0);font-size:13px;text-align:center;padding:16px">Błąd: ' + e.message + '</div>';
+  }
+}
 
 async function admLoadPending() {
   const list = $('adm-pending-list');
