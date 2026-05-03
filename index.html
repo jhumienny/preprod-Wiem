@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="format-detection" content="telephone=no, date=no, email=no, address=no">
 <meta name="translation" content="no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.gstatic.com https://ego-gra-default-rtdb.europe-west1.firebasedatabase.app; img-src 'self' data:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.gstatic.com https://ego-gra-default-rtdb.europe-west1.firebasedatabase.app https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; img-src 'self' data:;">
 <title>Wiem!</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -136,13 +136,52 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .theme-btn{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:10px;border:1.5px solid var(--rim);background:var(--card);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:all .15s;}
 .theme-btn:active{transform:scale(.95);}
 </style>
+
+<!-- Firebase Auth SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getDatabase, ref, set, get, update } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCVL4u_qo23iQH27JM7aPXn9s2dr2H76AY",
+  authDomain: "ego-gra.firebaseapp.com",
+  databaseURL: "https://ego-gra-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "ego-gra"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+window._fbAuth = auth;
+window._fbAuthFns = { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged };
+window._fbDb = getDatabase(app);
+window._fbDbFns = { ref, set, get, update };
+
+onAuthStateChanged(auth, (user) => {
+  window._currentUser = user || null;
+  if (typeof window._onAuthStateChanged === 'function') window._onAuthStateChanged(user);
+});
+</script>
 </head>
 <body>
 <div class="app">
 
 <!-- ══ HOME ══ -->
 <div class="scr on" id="s-home">
-  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Zmień motyw">🌙</button>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Zmień motyw" style="position:static;flex-shrink:0">🌙</button>
+    <div id="auth-bar" style="display:flex;gap:6px;justify-content:flex-end;flex:1">
+      <div id="auth-logged-out" style="display:flex;gap:6px">
+        <button onclick="openAuthModal('login')" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer">Zaloguj się</button>
+        <button onclick="openAuthModal('register')" style="padding:6px 12px;border-radius:8px;border:none;background:var(--text);color:var(--bg);font-size:11px;font-weight:700;cursor:pointer">Zarejestruj się</button>
+      </div>
+      <div id="auth-logged-in" style="display:none;align-items:center;gap:8px">
+        <span id="auth-email" style="font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+        <button id="auth-admin-btn" onclick="show('s-admin')" style="display:none;padding:6px 12px;border-radius:8px;border:none;background:#534AB7;color:#fff;font-size:11px;font-weight:700;cursor:pointer">⚙ Panel</button>
+        <button onclick="authSignOut()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer">Wyloguj</button>
+      </div>
+    </div>
+  </div>
 
   <div style="padding-top:24px">
     <div class="logo">Wiem<em>!</em></div>
@@ -2240,7 +2279,165 @@ let _newQType='normal'; // 'normal' | 'players'
 
 
 
+
+
+// ══════════════════════════════════════════════
+// ── AUTH ──
+// ══════════════════════════════════════════════
+
+const ADMIN_EMAIL = 'jakub@humienny.com';
+
+let _authMode = 'login';
+
+window._onAuthStateChanged = function(user) {
+  const loggedOut = $('auth-logged-out');
+  const loggedIn  = $('auth-logged-in');
+  const adminBtn  = $('auth-admin-btn');
+  const emailEl   = $('auth-email');
+  if (!loggedOut || !loggedIn) return;
+  if (user) {
+    loggedOut.style.display = 'none';
+    loggedIn.style.display  = 'flex';
+    if (emailEl) emailEl.textContent = user.email;
+    authCheckRole(user.uid);
+  } else {
+    loggedOut.style.display = 'flex';
+    loggedIn.style.display  = 'none';
+    if (adminBtn) adminBtn.style.display = 'none';
+  }
+};
+
+async function authCheckRole(uid) {
+  const adminBtn = $('auth-admin-btn');
+  try {
+    const data = await fbGet('users/' + uid + '/role');
+    if (data === 'admin' && adminBtn) adminBtn.style.display = '';
+    else if (adminBtn) adminBtn.style.display = 'none';
+  } catch(e) {
+    if (adminBtn) adminBtn.style.display = 'none';
+  }
+}
+
+function openAuthModal(mode) {
+  _authMode = mode || 'login';
+  const modal = $('auth-modal');
+  if (!modal) return;
+  $('auth-err').style.display = 'none';
+  $('auth-inp-email').value = '';
+  $('auth-inp-pass').value = '';
+  updateAuthModalLabels();
+  modal.style.display = 'flex';
+  setTimeout(function(){ $('auth-inp-email').focus(); }, 80);
+}
+
+function closeAuthModal() {
+  const modal = $('auth-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function switchAuthMode() {
+  _authMode = _authMode === 'login' ? 'register' : 'login';
+  $('auth-err').style.display = 'none';
+  updateAuthModalLabels();
+}
+
+function updateAuthModalLabels() {
+  const isLogin = _authMode === 'login';
+  $('auth-modal-title').textContent = isLogin ? '\ud83d\udd11 Zaloguj si\u0119' : '\ud83d\udc64 Zarejestruj si\u0119';
+  $('auth-submit-btn').textContent  = isLogin ? 'Zaloguj si\u0119' : 'Zarejestruj si\u0119';
+  $('auth-switch-text').textContent = isLogin ? 'Nie masz konta?' : 'Masz ju\u017c konto?';
+  $('auth-switch-btn').textContent  = isLogin ? 'Zarejestruj si\u0119' : 'Zaloguj si\u0119';
+}
+
+function authShowErr(msg) {
+  const el = $('auth-err');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function authFirebaseErrMsg(code) {
+  const map = {
+    'auth/invalid-email':          'Nieprawid\u0142owy adres email.',
+    'auth/user-not-found':         'Nie znaleziono konta z tym emailem.',
+    'auth/wrong-password':         'B\u0142\u0119dne has\u0142o.',
+    'auth/invalid-credential':     'B\u0142\u0119dne dane logowania.',
+    'auth/email-already-in-use':   'Ten email jest ju\u017c zaj\u0119ty.',
+    'auth/weak-password':          'Has\u0142o musi mie\u0107 co najmniej 6 znak\u00f3w.',
+    'auth/too-many-requests':      'Za du\u017co pr\u00f3b. Spr\u00f3buj za chwil\u0119.',
+    'auth/network-request-failed': 'B\u0142\u0105d sieci. Sprawd\u017a po\u0142\u0105czenie.',
+  };
+  return map[code] || ('B\u0142\u0105d: ' + code);
+}
+
+async function submitAuth() {
+  const email = ($('auth-inp-email').value || '').trim();
+  const pass  = ($('auth-inp-pass').value  || '');
+  if (!email) { authShowErr('Wpisz adres email.'); return; }
+  if (!pass)  { authShowErr('Wpisz has\u0142o.'); return; }
+  const btn = $('auth-submit-btn');
+  btn.disabled = true;
+  btn.textContent = '\u23f3';
+  $('auth-err').style.display = 'none';
+  try {
+    const auth = window._fbAuth;
+    const fns  = window._fbAuthFns;
+    if (!auth || !fns) throw new Error('auth/not-ready');
+    if (_authMode === 'login') {
+      await fns.signInWithEmailAndPassword(auth, email, pass);
+    } else {
+      const cred = await fns.createUserWithEmailAndPassword(auth, email, pass);
+      const uid = cred.user.uid;
+      const role = email === ADMIN_EMAIL ? 'admin' : 'user';
+      await fbSet('users/' + uid, { email: email, role: role, createdAt: Date.now() });
+    }
+    closeAuthModal();
+  } catch(e) {
+    authShowErr(authFirebaseErrMsg(e.code || e.message));
+  } finally {
+    btn.disabled = false;
+    updateAuthModalLabels();
+  }
+}
+
+async function authSignOut() {
+  const auth = window._fbAuth;
+  const fns  = window._fbAuthFns;
+  if (auth && fns) await fns.signOut(auth);
+}
+
+async function fbSet(path, data) {
+  const r = await fetch(DB_URL + '/' + path + '.json', {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) throw new Error('SET ' + r.status);
+  return r.json();
+}
 </script>
 <!-- ══ ADMIN PASSWORD MODAL ══ -->
+
+<!-- ══ AUTH MODAL ══ -->
+<div id="auth-modal" style="display:none;position:fixed;inset:0;background:#000b;z-index:9999;align-items:center;justify-content:center">
+  <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:16px;padding:24px;width:min(340px,92vw);display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div id="auth-modal-title" style="font-size:13px;font-weight:700;flex:1"></div>
+      <button onclick="closeAuthModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0;line-height:1">×</button>
+    </div>
+    <input id="auth-inp-email" type="email" autocomplete="email" placeholder="Email"
+      style="background:var(--bg);border:1.5px solid var(--rim);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--text);font-family:inherit;width:100%;box-sizing:border-box"
+      onkeydown="event.stopPropagation();if(event.key==='Enter')$('auth-inp-pass').focus()">
+    <input id="auth-inp-pass" type="password" autocomplete="current-password" placeholder="Hasło (min. 6 znaków)"
+      style="background:var(--bg);border:1.5px solid var(--rim);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--text);font-family:inherit;width:100%;box-sizing:border-box"
+      onkeydown="event.stopPropagation();if(event.key==='Enter')submitAuth()">
+    <div id="auth-err" style="display:none;color:var(--c0);font-size:12px;text-align:center"></div>
+    <button id="auth-submit-btn" onclick="submitAuth()" style="background:var(--text);color:var(--bg);border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer"></button>
+    <div style="text-align:center;font-size:12px;color:var(--muted)">
+      <span id="auth-switch-text"></span>
+      <button id="auth-switch-btn" onclick="switchAuthMode()" style="background:none;border:none;color:var(--text);font-size:12px;font-weight:700;cursor:pointer;padding:0;margin-left:4px"></button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
