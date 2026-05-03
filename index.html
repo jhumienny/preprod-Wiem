@@ -27,6 +27,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--rim) 1px,transparent 1px),linear-gradient(90deg,var(--rim) 1px,transparent 1px);background-size:32px 32px;opacity:.18;pointer-events:none;z-index:0;}
 .app{position:relative;z-index:1;width:100%;max-width:440px;min-height:100dvh;display:flex;flex-direction:column;}
 .scr{display:none;flex-direction:column;flex:1;padding:20px 16px max(32px,calc(env(safe-area-inset-bottom) + 24px));gap:16px;animation:pop .28s ease;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.scr>*{flex-shrink:0;}
 .scr.on{display:flex;}
 @keyframes pop{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .logo{font-family:'Syne',sans-serif;font-size:62px;font-weight:800;letter-spacing:-1px;line-height:1;}
