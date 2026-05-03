@@ -2410,6 +2410,13 @@ async function authCheckRole(uid) {
     const url = DB_URL + '/users/' + uid + '/role.json' + (token ? '?auth=' + token : '');
     const r = await fetch(url);
     const data = await r.json();
+    if (data === null && user && token) {
+      await fetch(DB_URL + '/users/' + uid + '.json?auth=' + token, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ email: user.email, role: 'user', createdAt: Date.now() })
+      });
+    }
     if (data === 'admin') {
       if (adminBtn) adminBtn.style.display = '';
       if (myqBtn)   myqBtn.style.display   = 'none';
