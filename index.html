@@ -2832,19 +2832,21 @@ function admPendSubTab(tab) {
   }
 }
 
+let _historyData = {};
+let _histCounter = 0;
+
 async function admLoadHistory() {
   const list = $('adm-history-list');
   if (!list) return;
   list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Ładowanie…</div>';
+  _historyData = {}; _histCounter = 0;
   try {
     const data = await admFetch('userQuestions');
     const items = [];
     if (data) {
       Object.entries(data).forEach(([uid, qs]) => {
         Object.entries(qs||{}).forEach(([qid, q]) => {
-          if (q && (q.status === 'approved' || q.status === 'rejected')) {
-            items.push({uid, qid, q});
-          }
+          if (q && (q.status === 'approved' || q.status === 'rejected')) items.push({uid, qid, q});
         });
       });
     }
@@ -2854,27 +2856,120 @@ async function admLoadHistory() {
       list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:32px 0">Brak historii</div>';
       return;
     }
-    items.forEach(({q}) => {
-      const approved = q.status === 'approved';
-      const resolvedStr = q.resolvedAt ? new Date(q.resolvedAt).toLocaleString('pl') : '—';
+    items.forEach(({uid, qid, q}) => {
+      const hid = _histCounter++;
+      _historyData[hid] = {uid, qid, q};
       const card = document.createElement('div');
       card.className = 'adm-card';
-      card.innerHTML =
-        '<div style="display:flex;align-items:flex-start;gap:10px">' +
-          '<div style="flex:1">' +
-            '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">' + escHtml(q.q||'') + '</div>' +
-            '<div style="font-size:10px;color:var(--muted)">Od: ' + escHtml(q.authorEmail||'—') + ' · Rozpatrzono: ' + resolvedStr + '</div>' +
-          '</div>' +
-          '<span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;white-space:nowrap;' +
-            (approved ? 'background:#16a34a22;color:#4ade80' : 'background:#ef444422;color:#f87171') + '">' +
-            (approved ? '✓ Zatwierdzone' : '✗ Odrzucone') +
-          '</span>' +
-        '</div>';
+      card.id = 'hist-' + hid;
+      card.innerHTML = histBuildCard(hid, q);
       list.appendChild(card);
     });
   } catch(e) {
     list.innerHTML = '<div style="color:var(--c0);font-size:13px;text-align:center;padding:16px">Błąd: ' + e.message + '</div>';
   }
+}
+
+function histBuildCard(hid, q) {
+  const approved = q.status === 'approved';
+  const resolvedStr = q.resolvedAt ? new Date(q.resolvedAt).toLocaleString('pl') : '—';
+  return (
+    '<div style="display:flex;align-items:center;gap:10px">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:13px;font-weight:600;color:var(--text)">' + escHtml(q.q||'') + '</div>' +
+        '<div style="font-size:10px;color:var(--muted);margin-top:2px">Od: ' + escHtml(q.authorEmail||'—') + ' · Rozpatrzono: ' + resolvedStr + '</div>' +
+      '</div>' +
+      '<span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;white-space:nowrap;flex-shrink:0;' +
+        (approved ? 'background:#16a34a22;color:#4ade80' : 'background:#ef444422;color:#f87171') + '">' +
+        (approved ? '✓ Zatwierdzone' : '✗ Odrzucone') +
+      '</span>' +
+      '<button id="hist-arrow-' + hid + '" onclick="histToggle(' + hid + ')" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0;transition:transform .2s">▼</button>' +
+    '</div>' +
+    '<div id="hist-exp-' + hid + '" style="display:none;margin-top:12px;border-top:1px solid var(--rim);padding-top:12px">' +
+      histBuildExpanded(hid, q) +
+    '</div>'
+  );
+}
+
+function histBuildExpanded(hid, q) {
+  const ans = [0,1,2].map(i =>
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">' +
+      '<span style="font-size:12px;background:var(--bg);border-radius:6px;padding:4px 8px;color:var(--muted)">' + escHtml((q.a||[])[i]||'—') + '</span>' +
+      '<span style="font-size:12px;background:#3730a322;border-radius:6px;padding:4px 8px;color:#a78bfa">' + escHtml((q.as||[])[i]||'—') + '</span>' +
+    '</div>'
+  ).join('');
+  return (
+    (q.qs ? '<div style="font-size:11px;color:var(--muted);margin-bottom:3px">Pytanie dla graczy:</div>' +
+      '<div style="font-size:13px;color:var(--text);margin-bottom:10px">' + escHtml(q.qs) + '</div>' : '') +
+    '<div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px"><span>Dla innych</span><span>Dla tematu</span></div>' +
+    ans +
+    '<div style="margin-top:10px">' +
+      '<button onclick="histRestore(' + hid + ')" style="padding:7px 14px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer">↩ Przywróć do puli</button>' +
+    '</div>'
+  );
+}
+
+function histBuildEditForm(hid, q) {
+  const aRows = [0,1,2].map(i =>
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">' +
+      '<input class="hist-a-inp" value="' + escHtml((q.a||[])[i]||'') + '" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--text);font-family:inherit" onkeydown="event.stopPropagation()">' +
+      '<input class="hist-as-inp" value="' + escHtml((q.as||[])[i]||'') + '" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:12px;color:#a78bfa;font-family:inherit" onkeydown="event.stopPropagation()">' +
+    '</div>'
+  ).join('');
+  return (
+    '<div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Pytanie dla graczy</span><span>Pytanie do tematu</span></div>' +
+    '<textarea id="hist-q-inp-' + hid + '" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;min-height:52px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.q||'') + '</textarea>' +
+    '<textarea id="hist-qs-inp-' + hid + '" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:13px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box;margin-top:6px" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
+    '<div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 2px"><span>Odpowiedź dla innych</span><span>Odpowiedź do tematu</span></div>' +
+    '<div id="hist-a-rows-' + hid + '">' + aRows + '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:8px">' +
+      '<button onclick="histAddToPool(' + hid + ')" style="flex:1;background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">+ Dodaj do puli</button>' +
+      '<button onclick="histCancelRestore(' + hid + ')" style="padding:9px 14px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer">Anuluj</button>' +
+    '</div>'
+  );
+}
+
+function histToggle(hid) {
+  const exp = $('hist-exp-' + hid);
+  const arrow = $('hist-arrow-' + hid);
+  if (!exp) return;
+  const isOpen = exp.style.display !== 'none';
+  exp.style.display = isOpen ? 'none' : '';
+  if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+function histRestore(hid) {
+  const d = _historyData[hid];
+  if (!d) return;
+  const exp = $('hist-exp-' + hid);
+  if (exp) exp.innerHTML = histBuildEditForm(hid, d.q);
+}
+
+function histCancelRestore(hid) {
+  const d = _historyData[hid];
+  if (!d) return;
+  const exp = $('hist-exp-' + hid);
+  if (exp) exp.innerHTML = histBuildExpanded(hid, d.q);
+}
+
+function histAddToPool(hid) {
+  const d = _historyData[hid];
+  if (!d) return;
+  const card = $('hist-' + hid);
+  const newQ  = ($('hist-q-inp-'  + hid)?.value || '').trim() || d.q.q;
+  const newQs = ($('hist-qs-inp-' + hid)?.value || '').trim();
+  const aInps  = card ? [...card.querySelectorAll('.hist-a-inp')]  : [];
+  const asInps = card ? [...card.querySelectorAll('.hist-as-inp')] : [];
+  const newA  = aInps.map(inp => inp.value.trim()).filter(Boolean);
+  const newAs = asInps.map(inp => inp.value.trim());
+  QS.push({q: newQ, qs: newQs, a: newA, as: newAs, type: d.q.type || 'custom'});
+  const exp = $('hist-exp-' + hid);
+  if (exp) exp.innerHTML = '<div style="text-align:center;color:#4ade80;font-size:13px;padding:8px 0">✓ Dodano do puli pytań</div>';
+  setTimeout(() => {
+    if (exp) exp.style.display = 'none';
+    const arrow = $('hist-arrow-' + hid);
+    if (arrow) arrow.style.transform = '';
+  }, 1500);
 }
 
 async function admLoadPending() {
