@@ -387,18 +387,18 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div style="display:flex;flex-direction:column;gap:8px">
       <label style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Tryb gry</label>
       <div style="display:flex;gap:8px">
-        <button id="mode-rounds" class="mode-btn mode-btn-active" onclick="setGameMode('rounds')">
+        <button id="mode-rounds" class="mode-btn" onclick="setGameMode('rounds')">
           <span style="font-size:18px">🔢</span>
           <span style="font-size:13px;font-weight:700">Na rundy</span>
           <span style="font-size:10px;opacity:.65">X rund na gracza</span>
         </button>
-        <button id="mode-pool" class="mode-btn" onclick="setGameMode('pool')">
+        <button id="mode-pool" class="mode-btn mode-btn-active" onclick="setGameMode('pool')">
           <span style="font-size:18px">🪙</span>
           <span style="font-size:13px;font-weight:700">Żetonowy</span>
           <span style="font-size:10px;opacity:.65">do bankructwa</span>
         </button>
       </div>
-      <div id="rpp-row" style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:10px 12px">
+      <div id="rpp-row" style="display:none;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:10px 12px">
         <span style="font-size:13px;color:var(--muted);flex:1">Rund na gracza</span>
         <div style="display:flex;align-items:center;gap:8px">
           <button onclick="adjustRpp(-1)" style="width:28px;height:28px;border-radius:8px;border:1.5px solid var(--rim);background:var(--card);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">−</button>
@@ -887,7 +887,7 @@ function stopCountdown(){
   if(_countdownTimer){clearInterval(_countdownTimer);_countdownTimer=null;}
 }
 let _maxPlayers=4; // host-controlled, 2-8
-let _gameMode='rounds'; // 'rounds' | 'pool'
+let _gameMode='pool'; // 'rounds' | 'pool'
 let _selectedCat=null; // null = wszystkie, or catId
 
 function renderLobCatSelector(){
