@@ -2140,12 +2140,18 @@ function renderSubj(){
   $('qc-sj').style.setProperty('--ac',C(si));
   const ri=GS.ri+1,tot=GS.rt;
 
-  // Non-subject players see wait screen
+  // Non-subject players see locked answers while subject picks
   if(!amSJ()){
-    setWait(C(si),sp.name,`${sp.name} wybiera odpowiedź…`,
-      'Twoja kolej zaraz — poczekaj!',
-      q.type==='players'?q.q:q.q.replace('[imię]',sp.name));
-    show('s-wait'); return;
+    mkSbar('sb-v');
+    $('qc-v').style.setProperty('--ac',C(si));
+    $('v-meta').textContent=`Runda ${ri} / ${tot}`;
+    $('v-about').innerHTML=`Pytanie o: <strong style="color:${C(si)}">${sp.name}</strong>`;
+    setQText('v-q',q.type==='players'?q.q:q.q.replace('[imię]',sp.name));
+    buildAns('v-ans',getQAnswers(GS.ri),true,null,null,null);
+    $('btn-vote').style.display='none';
+    $('v-bet').style.display='none';
+    $('v-st').innerHTML=`<div style="color:var(--muted);font-size:13px;text-align:center;padding:8px 0">${sp.name} wybiera odpowiedź…</div>`;
+    resetReportBtns(); show('s-vote'); return;
   }
 
   // Subject screen
@@ -3622,5 +3628,6 @@ async function submitMyQuestion() {
     </div>
   </div>
 </div>
+<div id="env-badge" style="position:fixed;bottom:12px;right:12px;background:rgba(255,140,0,0.12);border:1px solid rgba(255,140,0,0.45);color:rgba(255,140,0,0.85);font-size:10px;font-family:'DM Sans',sans-serif;letter-spacing:1.5px;padding:3px 9px;border-radius:6px;z-index:9999;pointer-events:none;text-transform:uppercase">preprod</div>
 </body>
 </html>
