@@ -1371,10 +1371,16 @@ async function joinGame(){
       $('home-err').style.color='var(--c0)';return;
     }
     gameId=code;GS=norm(gs);
+    const firstFreeSlot=findFirstFreeSlot(GS);
+    if(firstFreeSlot===-1){
+      showErr('home-err','❌ Ta gra jest już pełna.');
+      $('home-err').style.color='var(--c0)';
+      return;
+    }
     sessionStorage.setItem('ego_name',name);
     hideErr('home-err');
-    renderSlots(gs,name);show('s-slots');
     startPoll();
+    await claimSlot(firstFreeSlot,name);
   }catch(e){
     console.error('joinGame error:',e);
     showErr('home-err','❌ Błąd: '+e.message);
@@ -1383,6 +1389,14 @@ async function joinGame(){
 }
 
 // ── SLOTS ──
+function findFirstFreeSlot(gs){
+  const max=gs.maxPlayers||4;
+  for(let i=0;i<max;i++){
+    if(!gs.players[i]) return i;
+  }
+  return -1;
+}
+
 function renderSlots(gs,name){
   const ni=$('slots-name-inp');
   // Only set input value on first load, never overwrite while user is typing
