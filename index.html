@@ -88,7 +88,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .abtn{background:var(--card);border:2px solid var(--rim);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);text-align:left;width:100%;}
 .abtn:not(.locked):active{transform:scale(.98);background:var(--rim);}
 .anum{width:36px;height:36px;border-radius:9px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;flex-shrink:0;transition:all .15s;}
-.abtn.locked{pointer-events:none;}
+.abtn.locked{pointer-events:none;opacity:0.45;filter:grayscale(0.4);}
 .abtn.chosen{border-color:var(--text);}
 .abtn.chosen .anum{background:var(--text);color:var(--bg);}
 .abtn.correct{border-color:var(--c2);}
@@ -2153,7 +2153,7 @@ function renderSubj(){
     buildAns('v-ans',getQAnswers(GS.ri),true,null,null,null);
     $('btn-vote').style.display='none';
     $('v-bet').style.display='none';
-    $('v-st').innerHTML=`<div style="color:var(--muted);font-size:13px;text-align:center;padding:8px 0">${sp.name} wybiera odpowiedź…</div>`;
+    $('v-st').innerHTML=`<div style="background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:14px 16px;text-align:center"><div style="font-size:22px;margin-bottom:6px">🔒</div><div style="font-weight:700;font-size:14px;margin-bottom:4px">${sp.name} wybiera odpowiedź…</div><div style="color:var(--muted);font-size:12px">Odpowiedzi zostaną odblokowane gdy ${sp.name} zagłosuje</div></div>`;
     resetReportBtns(); show('s-vote'); return;
   }
 
