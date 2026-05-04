@@ -394,6 +394,7 @@ onAuthStateChanged(auth, (user) => {
   </div>
   <div class="vstatus" id="v-st"></div>
   <button class="btn btn-lit" id="btn-vote" style="display:none" onclick="confirmVote()">Zatwierdź odpowiedź ✓</button>
+  <button id="btn-report-v" onclick="reportQuestion(this)" style="background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px">⚑ Zgłoś błąd w pytaniu/odpowiedzi</button>
   <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
 </div>
 
@@ -421,6 +422,7 @@ onAuthStateChanged(auth, (user) => {
   <div class="ans-list" id="sj-ans"></div>
   <button class="btn btn-dim" id="btn-swap-sj" style="display:none" onclick="swapQuestionSJ()"></button>
   <button class="btn btn-lit" id="btn-sj" style="display:none" onclick="submitSJ()">Zatwierdź i pozwól innym odpowiedzieć →</button>
+  <button id="btn-report-sj" onclick="reportQuestion(this)" style="background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px">⚑ Zgłoś błąd w pytaniu/odpowiedzi</button>
   <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
 </div>
 
@@ -1900,7 +1902,7 @@ function renderVoting(){
       $('v-st').textContent='Jak twoim zdaniem odpowie?';
     }
   }
-  show('s-vote');
+  resetReportBtns(); show('s-vote');
 }
 
 // ── SWAP QUESTION ──
@@ -2094,7 +2096,7 @@ function renderSubj(){
   $('btn-sj').style.display=_sjPending!==null?'block':'none';
   $('btn-sj').textContent='Zatwierdź i pozwól innym odpowiedzieć →';
 
-  show('s-subj');
+  resetReportBtns(); show('s-subj');
 }
 
 async function submitSJ(){
@@ -3103,6 +3105,34 @@ async function admLoadPendingCount() {
 }
 
 // ── TAB: REPORTS ──
+async function reportQuestion(btn) {
+  if (!btn || btn.disabled) return;
+  btn.disabled = true;
+  const origText = btn.textContent;
+  btn.textContent = '⏳';
+  try {
+    const qIdx  = GS ? GS.ri : 0;
+    const qText = (GS && GS.qSeq) ? (QS[GS.qSeq[qIdx]]?.q || '') : '';
+    const reporterName = (GS && mySlot !== null) ? (GS.players[mySlot]?.name || 'Gracz') : 'Gracz';
+    await fetch(DB_URL + '/reports.json', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ qText, qIdx, gameId, reporterName, reportedAt: Date.now(), resolved: false })
+    });
+    btn.textContent = '✓ Zgłoszono';
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = origText;
+  }
+}
+
+function resetReportBtns() {
+  ['btn-report-v', 'btn-report-sj'].forEach(id => {
+    const btn = $(id);
+    if (btn) { btn.disabled = false; btn.textContent = '⚑ Zgłoś błąd w pytaniu/odpowiedzi'; }
+  });
+}
+
 async function admLoadReports() {
   const list = $('adm-reports-list');
   const empty = $('adm-reports-empty');
