@@ -2896,8 +2896,10 @@ async function admCreateRoom(){
   if(!code){alert('Wpisz kod pokoju');return;}
   if(!name){alert('Wpisz nazwę pokoju');return;}
   try{
-    const existing=await admFetch('permanentRooms/'+code);
-    if(existing){alert('Pokój o tym kodzie już istnieje!');return;}
+    // Check existence — graceful fallback if permanentRooms not yet in Firebase rules
+    let existing=null;
+    try{existing=await admFetch('permanentRooms/'+code);}catch(e){}
+    if(existing&&!confirm('Pokój '+code+' już istnieje. Nadpisać ustawienia?'))return;
     const room={name,createdBy:window._currentUser?.uid||'',created:Date.now()};
     if(hostEmail) room.hostEmail=hostEmail;
     await admWrite('permanentRooms/'+code,room);
@@ -2905,8 +2907,7 @@ async function admCreateRoom(){
     if($('adm-room-name'))$('adm-room-name').value='';
     if($('adm-room-host'))$('adm-room-host').value='';
     admLoadRooms();
-  }catch(e){alert('Błąd tworzenia: '+e.message);}
-}
+  }catch(e){alert('Błąd tworzenia: '+e.message+'\n\nSprawdź czy reguły Firebase zawierają ścieżkę "permanentRooms".');}
 
 async function admResetRoom(code){
   if(!confirm('Zresetować grę w pokoju '+code+'?\nAktywna gra zostanie usunięta — gracze mogą zacząć od nowa.'))return;
