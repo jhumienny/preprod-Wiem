@@ -29,6 +29,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .scr{display:none;flex-direction:column;flex:1;padding:20px 16px max(32px,calc(env(safe-area-inset-bottom) + 24px));gap:16px;animation:pop .28s ease;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .scr.on{display:flex;}
 @keyframes pop{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes scrOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-10px)}}
 .logo{font-family:'Syne',sans-serif;font-size:62px;font-weight:800;letter-spacing:-1px;line-height:1;}
 .logo em{color:var(--c0);font-style:normal;}
 .sub{color:var(--muted);font-size:13px;}
@@ -519,6 +520,12 @@ onAuthStateChanged(auth, (user) => {
     <button id="myq-submit" onclick="submitMyQuestion()" class="btn btn-lit">Wyślij pytanie →</button>
   </div>
 
+  <!-- Stats -->
+  <div id="myq-stats" style="display:none;background:var(--card);border:1.5px solid var(--rim);border-radius:var(--rad);padding:16px;flex-direction:column;gap:10px">
+    <div class="label">Moje statystyki</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="myq-stats-grid"></div>
+  </div>
+
   <!-- Lista -->
   <div class="label">Historia moich pytań</div>
   <div id="myq-list" style="display:flex;flex-direction:column;gap:10px"></div>
@@ -542,56 +549,127 @@ onAuthStateChanged(auth, (user) => {
    📚  BAZA PYTAŃ — dodawaj tutaj!
    Format: { q: "Pytanie o [imię]?", a: ["Opcja 1","Opcja 2","Opcja 3"] }
 ═══════════════════════════════════════════════════════════════ */
+const BUILTIN_CATS={
+  'cat_demo':      {name:'Demo',       color:'#a78bfa'},
+  'cat_zyciowki':  {name:'Życiówki',   color:'#fb923c'},
+  'cat_gracze':    {name:'Kto z Was?', color:'#38bdf8'},
+  'cat_osobowosc': {name:'Osobowość',  color:'#4ade80'},
+};
 const QS=[
-  {q:"Co [imię] robi gdy jest mu/jej nudno na imprezie?",                          qs:"Co robisz gdy jest ci nudno na imprezie?",                                           a:["Scrolluje telefon w kącie","Udaje że dobrze się bawi","Szczerze mówi że jedzie do domu"],                                                                                     as:["Scrolluję telefon w kącie","Udaje że dobrze się bawię","Szczerze mówię że jadę do domu"]},
-  {q:"Jak [imię] reaguje gdy ktoś zrobi mu/jej niespodziankę?",                    qs:"Jak reagujesz gdy ktoś zrobi ci niespodziankę?",                                     a:["Płacze ze wzruszenia","Śmieje się nerwowo","Udaje zachwyt, a w środku stres"],                                                                                            as:["Płaczę ze wzruszenia","Śmieję się nerwowo","Udaję zachwyt, a w środku stres"]},
-  {q:"Co [imię] robi gdy ktoś zje jego/jej jedzenie w lodówce?",                   qs:"Co robisz gdy ktoś zje twoje jedzenie w lodówce?",                                   a:["Mówi spokojnie że to było jego/jej","Milczy, ale pamięta","Wybucha od razu"],                                                                                             as:["Mówię spokojnie że to było moje","Milczę, ale pamiętam","Wybucham od razu"]},
-  {q:"Ile czasu [imię] spędza w łazience rano?",                                   qs:"Ile czasu spędzasz w łazience rano?",                                                 a:["Minimum – 5 minut i wypad","Pół godziny to norma","Godzina – rytuał jest rytuałem"],                                                                                      as:["Minimum – 5 minut i wypad","Pół godziny to norma","Godzina – rytuał jest rytuałem"]},
-  {q:"Jak [imię] zachowuje się gdy wygra w grę planszową?",                        qs:"Jak zachowujesz się gdy wygrasz w grę planszową?",                                   a:["Świętuje głośno i długo","Skromnie uśmiecha się","Od razu chce zagrać jeszcze raz"],                                                                                      as:["Świętuję głośno i długo","Skromnie uśmiecham się","Od razu chcę zagrać jeszcze raz"]},
-  {q:"Czego [imię] nigdy nie powiedziałby/aby rodzicom?",                          qs:"Czego nigdy nie powiedziałbyś/abyś rodzicom?",                                       a:["Ile naprawdę wydaje na głupoty","Co naprawdę myśli o ich znajomych","Co robił/a ostatni weekend"],                                                                         as:["Ile naprawdę wydaję na głupoty","Co naprawdę myślę o ich znajomych","Co robiłem/am ostatni weekend"]},
-  {q:"Jak [imię] zachowuje się w pierwszej godzinie po przebudzeniu?",             qs:"Jak zachowujesz się w pierwszej godzinie po przebudzeniu?",                          a:["Nie odzywaj się do mnie – to strefa ciszy","Normalnie – od razu gotowy/a do działania","Potrzebuje kawy zanim stanie się człowiekiem"],                                    as:["Nie odzywaj się do mnie – to strefa ciszy","Normalnie – od razu gotowy/a do działania","Potrzebuję kawy zanim stanę się człowiekiem"]},
-  {q:"Co [imię] robi gdy film w kinie jest zły?",                                   qs:"Co robisz gdy film w kinie jest zły?",                                               a:["Siedzi cierpliwie – kupił/a bilet","Komentuje pod nosem","Wychodzi bez wyrzutów sumienia"],                                                                               as:["Siedzę cierpliwie – kupiłem/am bilet","Komentuję pod nosem","Wychodzę bez wyrzutów sumienia"]},
-  {q:"Jak [imię] reaguje gdy ktoś go/ją ignoruje na grupowym czacie?",             qs:"Jak reagujesz gdy ktoś cię ignoruje na grupowym czacie?",                            a:["Pisze jeszcze raz – może nie zobaczyli","Milczy z urazą","Olewa – nie będzie się narzucać"],                                                                               as:["Piszę jeszcze raz – może nie zobaczyli","Milczę z urazą","Olewam – nie będę się narzucać"]},
-  {q:"Co [imię] kupuje impulsywnie czego potem żałuje?",                           qs:"Co kupujesz impulsywnie czego potem żałujesz?",                                      a:["Jedzenie o późnej porze","Ubrania których nie nosi","Gadżety których nie potrzebuje"],                                                                                    as:["Jedzenie o późnej porze","Ubrania których nie noszę","Gadżety których nie potrzebuję"]},
-  {q:"Jak [imię] zachowuje się gdy jest na diecie?",                               qs:"Jak zachowujesz się gdy jesteś na diecie?",                                          a:["Trzyma się ściśle przez tydzień potem odpuszcza","Mówi że jest na diecie ale je wszystko","Naprawdę się trzyma i jest z siebie dumny/a"],                                as:["Trzymam się ściśle przez tydzień potem odpuszczam","Mówię że jestem na diecie ale jem wszystko","Naprawdę się trzymam i jestem z siebie dumny/a"]},
-  {q:"Co [imię] robi gdy słyszy nieprawdziwą plotkę o sobie?",                     qs:"Co robisz gdy słyszysz nieprawdziwą plotkę o sobie?",                               a:["Prostuje od razu i głośno","Udaje że nie słyszał/a","Śmieje się bo jest lepsza od prawdy"],                                                                               as:["Prostuję od razu i głośno","Udaję że nie słyszałem/am","Śmieję się bo jest lepsza od prawdy"]},
-  {q:"Jak [imię] zachowuje się na pikniku gdy zaczyna padać?",                     qs:"Jak zachowujesz się na pikniku gdy zaczyna padać?",                                  a:["Natychmiast pakuje manatki","Zostaje – trochę deszczu nie zaszkodzi","Już wcześniej wiedział/a że tak będzie i mówi to wszystkim"],                                      as:["Natychmiast pakuję manatki","Zostaję – trochę deszczu nie zaszkodzi","Już wcześniej wiedziałem/am że tak będzie i mówię to wszystkim"]},
-  {q:"Co [imię] robi gdy dostanie dziwny prezent którego nie chce?",               qs:"Co robisz gdy dostaniesz dziwny prezent którego nie chcesz?",                       a:["Dziękuje szczerze i wyrzuca po tygodniu","Pyta wprost skąd taki pomysł","Trzyma na widoku gdy tamta osoba przychodzi"],                                                   as:["Dziękuję szczerze i wyrzucam po tygodniu","Pytam wprost skąd taki pomysł","Trzymam na widoku gdy tamta osoba przychodzi"]},
-  {q:"Jak [imię] spędza ostatnią godzinę przed snem?",                             qs:"Jak spędzasz ostatnią godzinę przed snem?",                                          a:["Scrolluje telefon mimo że wie że nie powinien/powinna","Czyta lub ogląda coś spokojnego","Leży i myśli o wszystkich niezręcznych sytuacjach z przeszłości"],              as:["Scrolluję telefon mimo że wiem że nie powinienem/powinnam","Czytam lub oglądam coś spokojnego","Leżę i myślę o wszystkich niezręcznych sytuacjach z przeszłości"]},
-  {q:"Co [imię] robi gdy automat z kawą nie wydaje reszty?",                       qs:"Co robisz gdy automat z kawą nie wydaje reszty?",                                   a:["Potrząsa automatem ze złością","Wzrusza ramionami i idzie dalej","Szuka obsługi technicznej przez pół godziny"],                                                           as:["Potrząsam automatem ze złością","Wzruszam ramionami i idę dalej","Szukam obsługi technicznej przez pół godziny"]},
-  {q:"Jak [imię] zachowuje się gdy ktoś spoileruje mu/jej serial?",                qs:"Jak zachowujesz się gdy ktoś spoileruje ci serial?",                                 a:["Wybucha i nie może się uspokoić","Udaje że mu/jej to nie przeszkadza","Spokojnie mówi że woli nie wiedzieć"],                                                             as:["Wybucham i nie mogę się uspokoić","Udaję że mi to nie przeszkadza","Spokojnie mówię że wolę nie wiedzieć"]},
-  {q:"Co [imię] robi gdy musi zadzwonić na infolinię?",                            qs:"Co robisz gdy musisz zadzwonić na infolinię?",                                      a:["Odkłada to tygodniami","Dzwoni od razu – chce mieć to z głowy","Prosi kogoś bliskiego żeby zadzwonił/a za niego/nią"],                                                   as:["Odkładam to tygodniami","Dzwonię od razu – chcę mieć to z głowy","Proszę kogoś bliskiego żeby zadzwonił/a za mnie"]},
-  {q:"Jak [imię] tłumaczy się gdy spóźni się na spotkanie?",                       qs:"Jak tłumaczysz się gdy spóźnisz się na spotkanie?",                                 a:["Szczerze mówi że po prostu za późno wyszedł/wyszła","Zawsze ma gotową historyjkę","Pisze że jest już blisko gdy dopiero wychodzi"],                                      as:["Szczerze mówię że po prostu za późno wyszedłem/wyszłam","Zawsze mam gotową historyjkę","Piszę że jestem już blisko gdy dopiero wychodzę"]},
-  {q:"Co [imię] robi gdy ktoś pyta go/ją o zdanie a jemu/jej naprawdę wszystko jedno?", qs:"Co robisz gdy ktoś pyta cię o zdanie a tobie naprawdę wszystko jedno?",      a:["Mówi wprost że nie ma preferencji","Wymyśla jakąś odpowiedź żeby skończyć temat","Pyta co tamta osoba woli i popiera jej wybór"],                                          as:["Mówię wprost że nie mam preferencji","Wymyślam jakąś odpowiedź żeby skończyć temat","Pytam co tamta osoba woli i popieram jej wybór"]},
-  {q:"Jak [imię] zachowuje się gdy ktoś przy nim/niej fałszuje piosenkę?",         qs:"Jak zachowujesz się gdy ktoś przy tobie fałszuje piosenkę?",                        a:["Subtelnie przestaje śpiewać sam/a","Śpiewa głośniej żeby zagłuszyć","Mówi wprost że to trochę nie ta tonacja"],                                                            as:["Subtelnie przestaję śpiewać sam/a","Śpiewam głośniej żeby zagłuszyć","Mówię wprost że to trochę nie ta tonacja"]},
-  {q:"Co [imię] robi ostatniego dnia urlopu?",                                      qs:"Co robisz ostatniego dnia urlopu?",                                                 a:["Myśli o pracy i się nakręca","Żyje chwilą do ostatniej sekundy","Ma wszystko w dupie"],                                                                                    as:["Myślę o pracy i się nakręcam","Żyję chwilą do ostatniej sekundy","Mam wszystko w dupie"]},
-  {q:"Jak [imię] reaguje gdy ktoś mówi że jego/jej ulubiony zespół jest kiepski?", qs:"Jak reagujesz gdy ktoś mówi że twój ulubiony zespół jest kiepski?",                 a:["Broni zajadle z faktami","Wzrusza ramionami – każdy ma swój gust","Urywa kontakt z tą osobą na jakiś czas"],                                                               as:["Bronię zajadle z faktami","Wzruszam ramionami – każdy ma swój gust","Urywam kontakt z tą osobą na jakiś czas"]},
-  {q:"Co [imię] robi gdy nie może zasnąć z powodu głośnych sąsiadów?",            qs:"Co robisz gdy nie możesz zasnąć z powodu głośnych sąsiadów?",                       a:["Zakłada słuchawki i próbuje dalej","Puka do ściany albo dzwoni do drzwi","Leży wściekły/a ale nic nie robi"],                                                             as:["Zakładam słuchawki i próbuję dalej","Pukam do ściany albo dzwonię do drzwi","Leżę wściekły/a ale nic nie robię"]},
-  {q:"Jak [imię] zachowuje się gdy ma coś zrobić pierwszy raz?",                   qs:"Jak zachowujesz się gdy masz coś zrobić pierwszy raz?",                              a:["Szuka informacji przez tydzień zanim zacznie","Rzuca się na głęboką wodę bez przygotowania","Pyta kogoś kto już to robił"],                                               as:["Szukam informacji przez tydzień zanim zacznę","Rzucam się na głęboką wodę bez przygotowania","Pytam kogoś kto już to robił"]},
-  {q:"Kto z graczy jako pierwszy rzuciłby wszystko i wyjechał w Bieszczady?",              qs:"Kto z graczy jako pierwszy rzuciłby wszystko i wyjechał w Bieszczady?",              a:[],type:"players"},
-  {q:"Kto z graczy najdłużej potrafi milczeć gdy jest na kogoś zły?",                     qs:"Kto z graczy najdłużej potrafi milczeć gdy jest na kogoś zły?",                     a:[],type:"players"},
-  {q:"Kto z graczy byłby najlepszym politykiem?",                                          qs:"Kto z graczy byłby najlepszym politykiem?",                                          a:[],type:"players"},
-  {q:"Kto z graczy najszybciej przepije wszystkie żetony na prawdziwej imprezie?",        qs:"Kto z graczy najszybciej przepije wszystkie żetony na prawdziwej imprezie?",        a:[],type:"players"},
-  {q:"Kto z graczy ma największy chaos w telefonie?",                                      qs:"Kto z graczy ma największy chaos w telefonie?",                                      a:[],type:"players"},
-  {q:"Kto z graczy jako ostatni przyznałby się do błędu?",                                qs:"Kto z graczy jako ostatni przyznałby się do błędu?",                                a:[],type:"players"},
-  {q:"Kto z graczy przeżyłby najdłużej na bezludnej wyspie?",                            qs:"Kto z graczy przeżyłby najdłużej na bezludnej wyspie?",                            a:[],type:"players"},
-  {q:"Kto z graczy jest najbardziej prawdopodobnym autorem anonimowego donosu?",          qs:"Kto z graczy jest najbardziej prawdopodobnym autorem anonimowego donosu?",          a:[],type:"players"},
-  {q:"Kto z graczy płakałby na ślubie obcej osoby?",                                      qs:"Kto z graczy płakałby na ślubie obcej osoby?",                                      a:[],type:"players"},
-  {q:"Kto z graczy jako pierwszy zasnąłby na nudnym wykładzie?",                          qs:"Kto z graczy jako pierwszy zasnąłby na nudnym wykładzie?",                          a:[],type:"players"},
-  {q:"Kto z graczy najchętniej kłamie że już jedzie gdy jeszcze nawet nie wstał z kanapy?", qs:"Kto z graczy najchętniej kłamie że już jedzie gdy jeszcze nawet nie wstał z kanapy?", a:[],type:"players"},
-  {q:"Kto z graczy byłby najgroźniejszy jako szef?",                                      qs:"Kto z graczy byłby najgroźniejszy jako szef?",                                      a:[],type:"players"},
-  {q:"Kto z graczy ma największy talent do wchodzenia w kłopoty bez złych intencji?",    qs:"Kto z graczy ma największy talent do wchodzenia w kłopoty bez złych intencji?",    a:[],type:"players"},
-  {q:"Kto z graczy jako pierwszy zdradza tajemnicę gdy jest pod wpływem?",               qs:"Kto z graczy jako pierwszy zdradza tajemnicę gdy jest pod wpływem?",               a:[],type:"players"},
-  {q:"Kto z graczy najlepiej poradziłby sobie w apokalipsie zombie?",                     qs:"Kto z graczy najlepiej poradziłby sobie w apokalipsie zombie?",                     a:[],type:"players"},
-  {q:"Kto z graczy skończyłby w więzieniu?",                                               qs:"Kto z graczy skończyłby w więzieniu?",                                               a:[],type:"players"},
-  {q:"Kto z graczy jest najbardziej prawdopodobnym przyszłym miliarderem?",               qs:"Kto z graczy jest najbardziej prawdopodobnym przyszłym miliarderem?",               a:[],type:"players"},
-  {q:"Kto z graczy nagrałby TikToka z tańcem i wrzucił bez mrugnięcia okiem?",           qs:"Kto z graczy nagrałby TikToka z tańcem i wrzucił bez mrugnięcia okiem?",           a:[],type:"players"},
-  {q:"Kto z graczy najpewniej płakałby przy reklamie z psem?",                            qs:"Kto z graczy najpewniej płakałby przy reklamie z psem?",                            a:[],type:"players"},
-  {q:"Kto z graczy byłby pierwszą ofiarą w horrorze?",                                    qs:"Kto z graczy byłby pierwszą ofiarą w horrorze?",                                    a:[],type:"players"},
+  // ── ŻYCIÓWKI (demo) ──
+  {cats:['cat_zyciowki','cat_demo'],q:"Co [imię] robi gdy jest mu/jej nudno na imprezie?",qs:"Co robisz gdy jest ci nudno na imprezie?",a:["Scrolluje telefon w kącie","Udaje że dobrze się bawi","Szczerze mówi że jedzie do domu"],as:["Scrolluję telefon w kącie","Udaję że dobrze się bawię","Szczerze mówię że jadę do domu"]},
+  {cats:['cat_zyciowki','cat_demo'],q:"Jak [imię] reaguje gdy ktoś zrobi mu/jej niespodziankę?",qs:"Jak reagujesz gdy ktoś zrobi ci niespodziankę?",a:["Płacze ze wzruszenia","Śmieje się nerwowo","Udaje zachwyt, a w środku stres"],as:["Płaczę ze wzruszenia","Śmieję się nerwowo","Udaję zachwyt, a w środku stres"]},
+  {cats:['cat_zyciowki','cat_demo'],q:"Co [imię] robi gdy ktoś zje jego/jej jedzenie w lodówce?",qs:"Co robisz gdy ktoś zje twoje jedzenie w lodówce?",a:["Mówi spokojnie że to było jego/jej","Milczy, ale pamięta","Wybucha od razu"],as:["Mówię spokojnie że to było moje","Milczę, ale pamiętam","Wybucham od razu"]},
+  {cats:['cat_zyciowki','cat_demo'],q:"Jak [imię] zachowuje się gdy wygra w grę planszową?",qs:"Jak zachowujesz się gdy wygrasz w grę planszową?",a:["Świętuje głośno i długo","Skromnie uśmiecha się","Od razu chce zagrać jeszcze raz"],as:["Świętuję głośno i długo","Skromnie uśmiecham się","Od razu chcę zagrać jeszcze raz"]},
+  {cats:['cat_zyciowki','cat_demo'],q:"Jak [imię] spędza ostatnią godzinę przed snem?",qs:"Jak spędzasz ostatnią godzinę przed snem?",a:["Scrolluje telefon mimo że wie że nie powinien/powinna","Czyta lub ogląda coś spokojnego","Leży i myśli o wszystkich niezręcznych sytuacjach z przeszłości"],as:["Scrolluję telefon mimo że wiem że nie powinienem/powinnam","Czytam lub oglądam coś spokojnego","Leżę i myślę o wszystkich niezręcznych sytuacjach z przeszłości"]},
+  // ── ŻYCIÓWKI ──
+  {cats:['cat_zyciowki'],q:"Ile czasu [imię] spędza w łazience rano?",qs:"Ile czasu spędzasz w łazience rano?",a:["Minimum – 5 minut i wypad","Pół godziny to norma","Godzina – rytuał jest rytuałem"],as:["Minimum – 5 minut i wypad","Pół godziny to norma","Godzina – rytuał jest rytuałem"]},
+  {cats:['cat_zyciowki'],q:"Czego [imię] nigdy nie powiedziałby/aby rodzicom?",qs:"Czego nigdy nie powiedziałbyś/abyś rodzicom?",a:["Ile naprawdę wydaje na głupoty","Co naprawdę myśli o ich znajomych","Co robił/a ostatni weekend"],as:["Ile naprawdę wydaję na głupoty","Co naprawdę myślę o ich znajomych","Co robiłem/am ostatni weekend"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] zachowuje się w pierwszej godzinie po przebudzeniu?",qs:"Jak zachowujesz się w pierwszej godzinie po przebudzeniu?",a:["Nie odzywaj się do mnie – to strefa ciszy","Normalnie – od razu gotowy/a do działania","Potrzebuje kawy zanim stanie się człowiekiem"],as:["Nie odzywaj się do mnie – to strefa ciszy","Normalnie – od razu gotowy/a do działania","Potrzebuję kawy zanim stanę się człowiekiem"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy film w kinie jest zły?",qs:"Co robisz gdy film w kinie jest zły?",a:["Siedzi cierpliwie – kupił/a bilet","Komentuje pod nosem","Wychodzi bez wyrzutów sumienia"],as:["Siedzę cierpliwie – kupiłem/am bilet","Komentuję pod nosem","Wychodzę bez wyrzutów sumienia"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] reaguje gdy ktoś go/ją ignoruje na grupowym czacie?",qs:"Jak reagujesz gdy ktoś cię ignoruje na grupowym czacie?",a:["Pisze jeszcze raz – może nie zobaczyli","Milczy z urazą","Olewa – nie będzie się narzucać"],as:["Piszę jeszcze raz – może nie zobaczyli","Milczę z urazą","Olewam – nie będę się narzucać"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] kupuje impulsywnie czego potem żałuje?",qs:"Co kupujesz impulsywnie czego potem żałujesz?",a:["Jedzenie o późnej porze","Ubrania których nie nosi","Gadżety których nie potrzebuje"],as:["Jedzenie o późnej porze","Ubrania których nie noszę","Gadżety których nie potrzebuję"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] zachowuje się gdy jest na diecie?",qs:"Jak zachowujesz się gdy jesteś na diecie?",a:["Trzyma się ściśle przez tydzień potem odpuszcza","Mówi że jest na diecie ale je wszystko","Naprawdę się trzyma i jest z siebie dumny/a"],as:["Trzymam się ściśle przez tydzień potem odpuszczam","Mówię że jestem na diecie ale jem wszystko","Naprawdę się trzymam i jestem z siebie dumny/a"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy słyszy nieprawdziwą plotkę o sobie?",qs:"Co robisz gdy słyszysz nieprawdziwą plotkę o sobie?",a:["Prostuje od razu i głośno","Udaje że nie słyszał/a","Śmieje się bo jest lepsza od prawdy"],as:["Prostuję od razu i głośno","Udaję że nie słyszałem/am","Śmieję się bo jest lepsza od prawdy"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] zachowuje się na pikniku gdy zaczyna padać?",qs:"Jak zachowujesz się na pikniku gdy zaczyna padać?",a:["Natychmiast pakuje manatki","Zostaje – trochę deszczu nie zaszkodzi","Już wcześniej wiedział/a że tak będzie i mówi to wszystkim"],as:["Natychmiast pakuję manatki","Zostaję – trochę deszczu nie zaszkodzi","Już wcześniej wiedziałem/am że tak będzie i mówię to wszystkim"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy dostanie dziwny prezent którego nie chce?",qs:"Co robisz gdy dostaniesz dziwny prezent którego nie chcesz?",a:["Dziękuje szczerze i wyrzuca po tygodniu","Pyta wprost skąd taki pomysł","Trzyma na widoku gdy tamta osoba przychodzi"],as:["Dziękuję szczerze i wyrzucam po tygodniu","Pytam wprost skąd taki pomysł","Trzymam na widoku gdy tamta osoba przychodzi"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy automat z kawą nie wydaje reszty?",qs:"Co robisz gdy automat z kawą nie wydaje reszty?",a:["Potrząsa automatem ze złością","Wzrusza ramionami i idzie dalej","Szuka obsługi technicznej przez pół godziny"],as:["Potrząsam automatem ze złością","Wzruszam ramionami i idę dalej","Szukam obsługi technicznej przez pół godziny"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] zachowuje się gdy ktoś spoileruje mu/jej serial?",qs:"Jak zachowujesz się gdy ktoś spoileruje ci serial?",a:["Wybucha i nie może się uspokoić","Udaje że mu/jej to nie przeszkadza","Spokojnie mówi że woli nie wiedzieć"],as:["Wybucham i nie mogę się uspokoić","Udaję że mi to nie przeszkadza","Spokojnie mówię że wolę nie wiedzieć"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy musi zadzwonić na infolinię?",qs:"Co robisz gdy musisz zadzwonić na infolinię?",a:["Odkłada to tygodniami","Dzwoni od razu – chce mieć to z głowy","Prosi kogoś bliskiego żeby zadzwonił/a za niego/nią"],as:["Odkładam to tygodniami","Dzwonię od razu – chcę mieć to z głowy","Proszę kogoś bliskiego żeby zadzwonił/a za mnie"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] tłumaczy się gdy spóźni się na spotkanie?",qs:"Jak tłumaczysz się gdy spóźnisz się na spotkanie?",a:["Szczerze mówi że po prostu za późno wyszedł/wyszła","Zawsze ma gotową historyjkę","Pisze że jest już blisko gdy dopiero wychodzi"],as:["Szczerze mówię że po prostu za późno wyszedłem/wyszłam","Zawsze mam gotową historyjkę","Piszę że jestem już blisko gdy dopiero wychodzę"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy ktoś pyta go/ją o zdanie a jemu/jej naprawdę wszystko jedno?",qs:"Co robisz gdy ktoś pyta cię o zdanie a tobie naprawdę wszystko jedno?",a:["Mówi wprost że nie ma preferencji","Wymyśla jakąś odpowiedź żeby skończyć temat","Pyta co tamta osoba woli i popiera jej wybór"],as:["Mówię wprost że nie mam preferencji","Wymyślam jakąś odpowiedź żeby skończyć temat","Pytam co tamta osoba woli i popieram jej wybór"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] zachowuje się gdy ktoś przy nim/niej fałszuje piosenkę?",qs:"Jak zachowujesz się gdy ktoś przy tobie fałszuje piosenkę?",a:["Subtelnie przestaje śpiewać sam/a","Śpiewa głośniej żeby zagłuszyć","Mówi wprost że to trochę nie ta tonacja"],as:["Subtelnie przestaję śpiewać sam/a","Śpiewam głośniej żeby zagłuszyć","Mówię wprost że to trochę nie ta tonacja"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi ostatniego dnia urlopu?",qs:"Co robisz ostatniego dnia urlopu?",a:["Myśli o pracy i się nakręca","Żyje chwilą do ostatniej sekundy","Ma wszystko w dupie"],as:["Myślę o pracy i się nakręcam","Żyję chwilą do ostatniej sekundy","Mam wszystko w dupie"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] reaguje gdy ktoś mówi że jego/jej ulubiony zespół jest kiepski?",qs:"Jak reagujesz gdy ktoś mówi że twój ulubiony zespół jest kiepski?",a:["Broni zajadle z faktami","Wzrusza ramionami – każdy ma swój gust","Urywa kontakt z tą osobą na jakiś czas"],as:["Bronię zajadle z faktami","Wzruszam ramionami – każdy ma swój gust","Urywam kontakt z tą osobą na jakiś czas"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy nie może zasnąć z powodu głośnych sąsiadów?",qs:"Co robisz gdy nie możesz zasnąć z powodu głośnych sąsiadów?",a:["Zakłada słuchawki i próbuje dalej","Puka do ściany albo dzwoni do drzwi","Leży wściekły/a ale nic nie robi"],as:["Zakładam słuchawki i próbuję dalej","Pukam do ściany albo dzwonię do drzwi","Leżę wściekły/a ale nic nie robię"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] zachowuje się gdy ma coś zrobić pierwszy raz?",qs:"Jak zachowujesz się gdy masz coś zrobić pierwszy raz?",a:["Szuka informacji przez tydzień zanim zacznie","Rzuca się na głęboką wodę bez przygotowania","Pyta kogoś kto już to robił"],as:["Szukam informacji przez tydzień zanim zacznę","Rzucam się na głęboką wodę bez przygotowania","Pytam kogoś kto już to robił"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy straci zasięg w kluczowym momencie?",qs:"Co robisz gdy stracisz zasięg w kluczowym momencie?",a:["Panikuje i szuka wiFi na każdym rogu","Wzrusza ramionami – zadzwonią jak będzie zasięg","Idzie w miejsce gdzie wie że jest sygnał"],as:["Paniuję i szukam wiFi na każdym rogu","Wzruszam ramionami – zadzwonią jak będzie zasięg","Idę w miejsce gdzie wiem że jest sygnał"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] reaguje gdy ktoś pyta go/ją o wiek?",qs:"Jak reagujesz gdy ktoś pyta cię o wiek?",a:["Mówi od razu bez problemu","Uśmiecha się zagadkowo i nic nie mówi","Podaje liczbę z komentarzem że to nie ma znaczenia"],as:["Mówię od razu bez problemu","Uśmiecham się zagadkowo i nic nie mówię","Podaję liczbę z komentarzem że to nie ma znaczenia"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] zachowuje się gdy jest jedyną trzeźwą osobą na imprezie?",qs:"Jak zachowujesz się gdy jesteś jedyną trzeźwą osobą na imprezie?",a:["Bawi się równie dobrze – alkohol mu/jej niepotrzebny","Czuje się nieswojo i odlicza godziny do wyjścia","Zostaje dyskretnym opiekunem grupy"],as:["Bawię się równie dobrze – alkohol mi niepotrzebny","Czuję się nieswojo i odliczam godziny do wyjścia","Zostaję dyskretnym opiekunem grupy"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy hotel okazuje się gorszy niż na zdjęciach?",qs:"Co robisz gdy hotel okazuje się gorszy niż na zdjęciach?",a:["Natychmiast pisze negatywną recenzję","Przystosowuje się – wakacje są wakacjami","Idzie do recepcji i żąda zmiany pokoju"],as:["Natychmiast piszę negatywną recenzję","Przystosuję się – wakacje są wakacjami","Idę do recepcji i żądam zmiany pokoju"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] tłumaczy zakup czegoś drogiego komuś bliskiemu?",qs:"Jak tłumaczysz zakup czegoś drogiego komuś bliskiemu?",a:["Mówi wprost że to było drogie ale tego chciał/a","Mówi że to było na przecenie","Ukrywa i ma nadzieję że nikt nie zapyta"],as:["Mówię wprost że to było drogie ale tego chciałem/am","Mówię że to było na przecenie","Ukrywam i mam nadzieję że nikt nie zapyta"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy musi czekać ponad 20 minut w kolejce?",qs:"Co robisz gdy musisz czekać ponad 20 minut w kolejce?",a:["Spokojnie scrolluje telefon","Pyta co się dzieje i kiedy będzie jego/jej kolej","Rezygnuje i wychodzi – nie warto"],as:["Spokojnie scrolluję telefon","Pytam co się dzieje i kiedy będzie moja kolej","Rezygnuję i wychodzę – nie warto"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy film który polecił/a okazuje się słaby?",qs:"Co robisz gdy film który poleciłeś/aś okazuje się słaby?",a:["Przeprasza i tłumaczy że mu/jej się podobał","Broni go do końca – to inni nie rozumieją","Przełamuje się i przyznaje że był słaby"],as:["Przepraszam i tłumaczę że mi się podobał","Bronię go do końca – to inni nie rozumieją","Przełamuję się i przyznaję że był słaby"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy ktoś odwołuje plany w ostatniej chwili?",qs:"Co robisz gdy ktoś odwołuje plany w ostatniej chwili?",a:["Szczerze mówi że to nieuprzejme","Udaje że nic się nie stało i cieszy się z wolnego","Milczy ale zapamiętuje"],as:["Szczerze mówię że to nieuprzejme","Udaję że nic się nie stało i cieszę się z wolnego","Milczę ale zapamiętuje"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy przypadkowo wyśle wiadomość nie do tej osoby?",qs:"Co robisz gdy przypadkowo wyślesz wiadomość nie do tej osoby?",a:["Szybko przeprasza i tłumaczy","Udaje że to żart","Liczy że ta osoba nie zrozumie kontekstu"],as:["Szybko przepraszam i tłumaczę","Udaję że to żart","Liczę że ta osoba nie zrozumie kontekstu"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] zachowuje się gdy musi przemówić przed grupą?",qs:"Jak zachowujesz się gdy musisz przemówić przed grupą?",a:["Przygotowuje się tygodniami i nadal się stresuje","Improwizuje na bieżąco – jakoś to będzie","Mówi pewnie – lubi być w centrum uwagi"],as:["Przygotowuję się tygodniami i nadal się stresuję","Improwizuję na bieżąco – jakoś to będzie","Mówię pewnie – lubię być w centrum uwagi"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] spędza wolną niedzielę bez planów?",qs:"Jak spędzasz wolną niedzielę bez planów?",a:["Leży i nie robi absolutnie nic","Spontanicznie coś organizuje – nie znosi nudy","Robi zaległości – sprząta, odpowiada na maile"],as:["Leżę i nie robię absolutnie nic","Spontanicznie coś organizuję – nie znoszę nudy","Robię zaległości – sprzątam, odpowiadam na maile"]},
+  {cats:['cat_zyciowki'],q:"Co [imię] robi gdy ktoś pyta o pożyczkę pieniędzy?",qs:"Co robisz gdy ktoś pyta cię o pożyczkę pieniędzy?",a:["Daje bez pytania jeśli może","Odmawia grzecznie ale stanowczo","Daje ale zapisuje żeby nie zapomnieć"],as:["Daję bez pytania jeśli mogę","Odmawiam grzecznie ale stanowczo","Daję ale zapisuję żeby nie zapomnieć"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] reaguje gdy ktoś zepsuje jego/jej żart tłumacząc go?",qs:"Jak reagujesz gdy ktoś zepsuje twój żart tłumacząc go?",a:["Śmieje się razem – to już inny żart","Czuje irytację ale milczy","Mówi wprost że to niestosowne"],as:["Śmieję się razem – to już inny żart","Czuję irytację ale milczę","Mówię wprost że to niestosowne"]},
+  {cats:['cat_zyciowki'],q:"Jak [imię] zachowuje się gdy ktoś inny dostaje nagrodę na którą liczył/a?",qs:"Jak zachowujesz się gdy ktoś inny dostaje nagrodę na którą liczyłeś/aś?",a:["Szczerze gratuluje choć w środku piecze","Milczy z kamienną twarzą","Mówi że zasługiwał/a bardziej – wprost lub żartem"],as:["Szczerze gratuluję choć w środku piecze","Milczę z kamienną twarzą","Mówię że zasługiwałem/am bardziej – wprost lub żartem"]},
+  // ── KTO Z WAS? (demo) ──
+  {cats:['cat_gracze','cat_demo'],type:"players",q:"Kto z graczy jako pierwszy rzuciłby wszystko i wyjechał w Bieszczady?",qs:"Kto z graczy jako pierwszy rzuciłby wszystko i wyjechał w Bieszczady?",a:[]},
+  {cats:['cat_gracze','cat_demo'],type:"players",q:"Kto z graczy najdłużej potrafi milczeć gdy jest na kogoś zły?",qs:"Kto z graczy najdłużej potrafi milczeć gdy jest na kogoś zły?",a:[]},
+  {cats:['cat_gracze','cat_demo'],type:"players",q:"Kto z graczy byłby najlepszym politykiem?",qs:"Kto z graczy byłby najlepszym politykiem?",a:[]},
+  {cats:['cat_gracze','cat_demo'],type:"players",q:"Kto z graczy najszybciej przepije wszystkie żetony na prawdziwej imprezie?",qs:"Kto z graczy najszybciej przepije wszystkie żetony na prawdziwej imprezie?",a:[]},
+  {cats:['cat_gracze','cat_demo'],type:"players",q:"Kto z graczy ma największy chaos w telefonie?",qs:"Kto z graczy ma największy chaos w telefonie?",a:[]},
+  // ── KTO Z WAS? ──
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy jako ostatni przyznałby się do błędu?",qs:"Kto z graczy jako ostatni przyznałby się do błędu?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy przeżyłby najdłużej na bezludnej wyspie?",qs:"Kto z graczy przeżyłby najdłużej na bezludnej wyspie?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy jest najbardziej prawdopodobnym autorem anonimowego donosu?",qs:"Kto z graczy jest najbardziej prawdopodobnym autorem anonimowego donosu?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy płakałby na ślubie obcej osoby?",qs:"Kto z graczy płakałby na ślubie obcej osoby?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy jako pierwszy zasnąłby na nudnym wykładzie?",qs:"Kto z graczy jako pierwszy zasnąłby na nudnym wykładzie?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy najchętniej kłamie że już jedzie gdy jeszcze nawet nie wstał z kanapy?",qs:"Kto z graczy najchętniej kłamie że już jedzie gdy jeszcze nawet nie wstał z kanapy?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy byłby najgroźniejszy jako szef?",qs:"Kto z graczy byłby najgroźniejszy jako szef?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy ma największy talent do wchodzenia w kłopoty bez złych intencji?",qs:"Kto z graczy ma największy talent do wchodzenia w kłopoty bez złych intencji?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy jako pierwszy zdradza tajemnicę gdy jest pod wpływem?",qs:"Kto z graczy jako pierwszy zdradza tajemnicę gdy jest pod wpływem?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy najlepiej poradziłby sobie w apokalipsie zombie?",qs:"Kto z graczy najlepiej poradziłby sobie w apokalipsie zombie?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy skończyłby w więzieniu?",qs:"Kto z graczy skończyłby w więzieniu?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy jest najbardziej prawdopodobnym przyszłym miliarderem?",qs:"Kto z graczy jest najbardziej prawdopodobnym przyszłym miliarderem?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy nagrałby TikToka z tańcem i wrzucił bez mrugnięcia okiem?",qs:"Kto z graczy nagrałby TikToka z tańcem i wrzucił bez mrugnięcia okiem?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy najpewniej płakałby przy reklamie z psem?",qs:"Kto z graczy najpewniej płakałby przy reklamie z psem?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy byłby pierwszą ofiarą w horrorze?",qs:"Kto z graczy byłby pierwszą ofiarą w horrorze?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy najszybciej zostałby influencerem?",qs:"Kto z graczy najszybciej zostałby influencerem?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy byłby najlepszym nauczycielem?",qs:"Kto z graczy byłby najlepszym nauczycielem?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy najpewniej zapłakałby ze szczęścia?",qs:"Kto z graczy najpewniej zapłakałby ze szczęścia?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy najdłużej utrzymałby dietę bez oszukiwania?",qs:"Kto z graczy najdłużej utrzymałby dietę bez oszukiwania?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy byłby najtrudniejszym współlokatorem?",qs:"Kto z graczy byłby najtrudniejszym współlokatorem?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy najszybciej znalazłby sposób na wyjście z zamkniętego pokoju?",qs:"Kto z graczy najszybciej znalazłby sposób na wyjście z zamkniętego pokoju?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy napisałby bestseller?",qs:"Kto z graczy napisałby bestseller?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy jako pierwszy kupił/a by dom w górach?",qs:"Kto z graczy jako pierwszy kupił/a by dom w górach?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy nigdy nie przyznałby się że czegoś nie rozumie?",qs:"Kto z graczy nigdy nie przyznałby się że czegoś nie rozumie?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy zostałby guru fitness?",qs:"Kto z graczy zostałby guru fitness?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy najbardziej lubi mieć rację?",qs:"Kto z graczy najbardziej lubi mieć rację?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy jako pierwszy wyskoczyłby ze spadochronem?",qs:"Kto z graczy jako pierwszy wyskoczyłby ze spadochronem?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy najlepiej poradziłby sobie jako kucharz na wyjeździe survivalowym?",qs:"Kto z graczy najlepiej poradziłby sobie jako kucharz na wyjeździe survivalowym?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy płakałby na filmie animowanym dla dzieci?",qs:"Kto z graczy płakałby na filmie animowanym dla dzieci?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy dożyje 100 lat?",qs:"Kto z graczy dożyje 100 lat?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy zostałby mistrzem karaoke?",qs:"Kto z graczy zostałby mistrzem karaoke?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy byłby najskuteczniejszym negocjatorem?",qs:"Kto z graczy byłby najskuteczniejszym negocjatorem?",a:[]},
+  {cats:['cat_gracze'],type:"players",q:"Kto z graczy ukrywa największy talent?",qs:"Kto z graczy ukrywa największy talent?",a:[]},
+  // ── OSOBOWOŚĆ (demo) ──
+  {cats:['cat_osobowosc','cat_demo'],q:"Jaką rolę [imię] zwykle przyjmuje w grupie znajomych?",qs:"Jaką rolę zwykle przyjmujesz w grupie znajomych?",a:["Organizator — bez niego/niej nic by nie działało","Dusza towarzystwa — zawsze rozbawia","Spokojny obserwator — mówi mało, ale trafnie"],as:["Organizator — beze mnie nic by nie działało","Dusza towarzystwa — zawsze rozbawiał/am","Spokojny obserwator — mówię mało, ale trafnie"]},
+  {cats:['cat_osobowosc','cat_demo'],q:"Jak [imię] podejmuje ważne decyzje?",qs:"Jak podejmujesz ważne decyzje?",a:["Analizuje długo i zbiera opinie","Ufa intuicji i decyduje szybko","Odkłada decyzję tak długo jak się da"],as:["Analizuję długo i zbieram opinie","Ufam intuicji i decyduję szybko","Odkładam decyzję tak długo jak się da"]},
+  {cats:['cat_osobowosc','cat_demo'],q:"Co [imię] lubi bardziej?",qs:"Co lubisz bardziej?",a:["Rutyna i plan — bezpieczeństwo przede wszystkim","Spontaniczność — nudzi się gdy wie co będzie za godzinę","Zależy od humoru — raz tak raz tak"],as:["Rutyna i plan — bezpieczeństwo przede wszystkim","Spontaniczność — nudzę się gdy wiem co będzie za godzinę","Zależy od humoru — raz tak raz tak"]},
+  {cats:['cat_osobowosc','cat_demo'],q:"Jak [imię] reaguje gdy zmieni zdanie publicznie?",qs:"Jak reagujesz gdy zmienisz zdanie publicznie?",a:["Przyznaje wprost — zmiana zdania to oznaka dojrzałości","Stara się żeby nikt nie zauważył","Tłumaczy dlaczego miał/a rację w obu przypadkach"],as:["Przyznaję wprost — zmiana zdania to oznaka dojrzałości","Staram się żeby nikt nie zauważył","Tłumaczę dlaczego miałem/am rację w obu przypadkach"]},
+  {cats:['cat_osobowosc','cat_demo'],q:"Co bardziej motywuje [imię] do działania?",qs:"Co bardziej cię motywuje do działania?",a:["Nagroda i uznanie na końcu","Strach przed porażką lub krytyką","Ciekawość i chęć nauczenia się czegoś nowego"],as:["Nagroda i uznanie na końcu","Strach przed porażką lub krytyką","Ciekawość i chęć nauczenia się czegoś nowego"]},
+  {cats:['cat_osobowosc'],q:"Czy [imię] jest raczej introwertykiem czy ekstrawertykiem?",qs:"Czy jesteś raczej introwertykiem czy ekstrawertykiem?",a:["Typowy introwertyk — impreza to dla niego/niej praca","Typowy ekstrawertyk — im więcej ludzi tym lepiej","Ambivert — zależy od dnia i towarzystwa"],as:["Typowy introwertyk — impreza to dla mnie praca","Typowy ekstrawertyk — im więcej ludzi tym lepiej","Ambivert — zależy od dnia i towarzystwa"]},
+  {cats:['cat_osobowosc'],q:"Jak [imię] zachowuje się gdy coś mu/jej nie wychodzi?",qs:"Jak zachowujesz się gdy coś ci nie wychodzi?",a:["Analizuje co poszło nie tak i próbuje ponownie","Zrzuca winę na okoliczności","Odpuszcza — nie wszystko jest warte wysiłku"],as:["Analizuję co poszło nie tak i próbuję ponownie","Zrzucam winę na okoliczności","Odpuszczam — nie wszystko jest warte wysiłku"]},
+  {cats:['cat_osobowosc'],q:"Jaki jest stosunek [imię] do zasad i regulaminów?",qs:"Jaki masz stosunek do zasad i regulaminów?",a:["Zasady są po to żeby ich przestrzegać","Zasady są po to żeby je naginać gdy sytuacja tego wymaga","Zależy od tego kto zasadę wymyślił"],as:["Zasady są po to żeby ich przestrzegać","Zasady są po to żeby je naginać gdy sytuacja tego wymaga","Zależy od tego kto zasadę wymyślił"]},
+  {cats:['cat_osobowosc'],q:"Jak [imię] reaguje na konstruktywną krytykę?",qs:"Jak reagujesz na konstruktywną krytykę?",a:["Dziękuje i bierze sobie do serca","Przyjmuje spokojnie, ale w środku trochę boli","Odruchowo się broni, potem przemyśla"],as:["Dziękuję i biorę sobie do serca","Przyjmuję spokojnie, ale w środku trochę boli","Odruchowo się bronię, potem przemyślam"]},
+  {cats:['cat_osobowosc'],q:"Co [imię] woli towarzysko?",qs:"Co wolisz towarzysko?",a:["Głęboka rozmowa z jedną osobą przez cały wieczór","Small talk z dużą grupą ludzi","Jedno i drugie — zależy od nastroju"],as:["Głęboka rozmowa z jedną osobą przez cały wieczór","Small talk z dużą grupą ludzi","Jedno i drugie — zależy od nastroju"]},
+  {cats:['cat_osobowosc'],q:"Jak [imię] podchodzi do pracy w zespole?",qs:"Jak podchodzisz do pracy w zespole?",a:["Lubi być liderem i koordynować innych","Woli dostawać konkretne zadania i je realizować","Dobrze mu/jej w obu rolach — dostosowuje się"],as:["Lubię być liderem i koordynować innych","Wolę dostawać konkretne zadania i je realizować","Dobrze mi w obu rolach — dostosuję się"]},
+  {cats:['cat_osobowosc'],q:"Czy [imię] najpierw myśli a potem mówi?",qs:"Czy najpierw myślisz a potem mówisz?",a:["Zdecydowanie — nigdy nie mówi bez przemyślenia","Raczej tak, ale zdarzają mu/jej się wpadki","Raczej odwrotnie — myśl i słowo wychodzą jednocześnie"],as:["Zdecydowanie — nigdy nie mówię bez przemyślenia","Raczej tak, ale zdarzają mi się wpadki","Raczej odwrotnie — myśl i słowo wychodzą mi jednocześnie"]},
+  {cats:['cat_osobowosc'],q:"Jak [imię] reaguje gdy ktoś jest na niego/nią zły?",qs:"Jak reagujesz gdy ktoś jest na ciebie zły?",a:["Natychmiast chce wyjaśnić i naprawić sytuację","Daje tej osobie czas i przestrzeń","Nie potrafi tego znieść i robi wszystko żeby odgadnąć dlaczego"],as:["Natychmiast chcę wyjaśnić i naprawić sytuację","Daję tej osobie czas i przestrzeń","Nie potrafię tego znieść i robię wszystko żeby odgadnąć dlaczego"]},
+  {cats:['cat_osobowosc'],q:"Co [imię] robi gdy popełni błąd?",qs:"Co robisz gdy popełnisz błąd?",a:["Przyznaje się od razu i przeprasza","Analizuje skąd się wziął błąd zanim cokolwiek powie","Długo to przeżywa w środku nawet jeśli na zewnątrz nic nie widać"],as:["Przyznam się od razu i przepraszam","Analizuję skąd się wziął błąd zanim cokolwiek powiem","Długo to przeżywam w środku nawet jeśli na zewnątrz nic nie widać"]},
+  {cats:['cat_osobowosc'],q:"Co [imię] robi gdy nagle ma cały wolny dzień bez planów?",qs:"Co robisz gdy nagle masz cały wolny dzień bez planów?",a:["Cieszy się i relaksuje bez poczucia winy","Szybko wypełnia go jakimiś zadaniami — pustka go/ją niepokoi","Najpierw czuje się świetnie, ale po paru godzinach szuka zajęcia"],as:["Cieszę się i relasuję bez poczucia winy","Szybko wypełniam go jakimiś zadaniami — pustka mnie niepokoi","Najpierw czuję się świetnie, ale po paru godzinach szukam zajęcia"]},
 ];
 /* ═══════════════════════════════════════════════════════════════ */
 
 const COLORS=['#a78bfa','#38bdf8','#fb923c','#e879f9','#f43f5e','#34d399','#facc15','#60a5fa'];
+
+async function updateUserStats(uid,delta){
+  try{
+    const cur=await fbGet(`users/${uid}/stats`)||{};
+    const patch={};
+    if(delta.gamesPlayed) patch['stats/gamesPlayed']=(cur.gamesPlayed||0)+1;
+    if(delta.totalGuesses) patch['stats/totalGuesses']=(cur.totalGuesses||0)+delta.totalGuesses;
+    if(delta.correctGuesses) patch['stats/correctGuesses']=(cur.correctGuesses||0)+delta.correctGuesses;
+    if(delta.timesInSpotlight) patch['stats/timesInSpotlight']=(cur.timesInSpotlight||0)+1;
+    if(delta.bestTokens!==undefined) patch['stats/bestTokens']=Math.max(cur.bestTokens||0,delta.bestTokens);
+    await fbPatch(`users/${uid}`,patch);
+  }catch(e){}
+}
 
 /* ── MOTYW ── */
 function applyTheme(t, persist=true){
@@ -777,10 +855,18 @@ document.addEventListener('keydown', e=>{
   }
 }, true);
 const show=id=>{
-  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
-  $(id).classList.add('on');
-  if(id==='s-admin' && typeof admOpen==='function') admOpen();
-  if(id==='s-my-questions' && typeof myqOpen==='function') myqOpen();
+  const prev=document.querySelector('.scr.on');
+  const doShow=()=>{
+    document.querySelectorAll('.scr').forEach(s=>{s.classList.remove('on');s.style.animation='';});
+    const next=$(id);
+    next.style.animation='none';next.offsetHeight;next.style.animation='';
+    next.classList.add('on');
+    if(id==='s-admin'&&typeof admOpen==='function') admOpen();
+    if(id==='s-my-questions'&&typeof myqOpen==='function') myqOpen();
+  };
+  if(!prev||prev.id===id){doShow();return;}
+  prev.style.animation='scrOut .18s ease forwards';
+  setTimeout(doShow,180);
 };
 const shuf=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
 const dc=o=>JSON.parse(JSON.stringify(o));
@@ -904,6 +990,7 @@ let pollTimer=null;
 let _kickCheckTimer=null; // dedicated timer to detect if player was removed from lobby
 let _sjPick=null;
 let _lastRi=null; // track round index to reset local state on round change
+let _statsTrackedRi=-1;
 let _allVotedAt=null; // timestamp when all votes first detected
 let _countdownTimer=null; // drives timed transitions under SSE
 let _voteRetryTimer=null; // retry fetch if last vote missed by race condition
@@ -922,27 +1009,29 @@ function stopCountdown(){
 }
 let _maxPlayers=4; // host-controlled, 2-8
 let _gameMode='pool'; // 'rounds' | 'pool'
-let _selectedCat=null; // null = wszystkie, or catId
+let _selectedCats=['cat_demo'];
 
 function renderLobCatSelector(){
   const row=$('lob-cat-row');
   if(!row)return;
-  const cats=Object.entries(_qCats||{});
-  if(cats.length===0){ row.innerHTML=''; return; }
   row.innerHTML=`
-    <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Kategoria pytań</div>
+    <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Kategorie pytań</div>
     <div style="display:flex;flex-wrap:wrap;gap:6px">
-      <button onclick="setLobCat(null)" style="padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid ${_selectedCat===null?'var(--text)':'var(--rim)'};background:${_selectedCat===null?'var(--text)':'transparent'};color:${_selectedCat===null?'var(--bg)':'var(--muted)'}">Wszystkie</button>
-      ${cats.map(([id,cat])=>{
-        const active=_selectedCat===id;
-        const count=Object.values(_qCatMap||{}).filter(arr=>arr&&arr.includes(id)).length;
-        return`<button onclick="setLobCat('${id}')" style="padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid ${active?cat.color:cat.color+'55'};background:${active?cat.color+'33':'transparent'};color:${active?cat.color:'var(--muted)'}">${cat.name} <span style="opacity:.6">${count}</span></button>`;
+      ${Object.entries(BUILTIN_CATS).map(([id,cat])=>{
+        const active=_selectedCats.includes(id);
+        const count=QS.filter(q=>q.cats&&q.cats.includes(id)).length;
+        return`<button onclick="toggleLobCat('${id}')" style="padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid ${active?cat.color:cat.color+'55'};background:${active?cat.color+'33':'transparent'};color:${active?cat.color:'var(--muted)'}">${cat.name} <span style="opacity:.6">${count}</span></button>`;
       }).join('')}
     </div>`;
 }
 
-function setLobCat(id){
-  _selectedCat=id;
+function toggleLobCat(id){
+  const idx=_selectedCats.indexOf(id);
+  if(idx>=0){
+    if(_selectedCats.length>1) _selectedCats.splice(idx,1);
+  } else {
+    _selectedCats.push(id);
+  }
   renderLobCatSelector();
 }
 
@@ -1114,7 +1203,7 @@ async function handleGSUpdate(){
           let sub=[];
           if(mode==='rounds'){const rpp=Math.max(1,parseInt($('rpp')?.value)||3);for(let r=0;r<rpp;r++)sub=[...sub,...[...idx]];}
           else{for(let r=0;r<100;r++)sub=[...sub,...[...idx]];}
-          const qPool=_selectedCat?QS.map((_,i)=>i).filter(i=>(_qCatMap[i]||[]).includes(_selectedCat)):QS.map((_,i)=>i);
+          const qPool=_selectedCats.length>0?QS.map((_,i)=>i).filter(i=>(QS[i].cats||[]).some(c=>_selectedCats.includes(c))):QS.map((_,i)=>i);
           const qPoolFinal=qPool.length>0?qPool:QS.map((_,i)=>i);
           if(qPoolFinal.length===0) return;
           let qp=shuf([...qPoolFinal]),_s=0;
@@ -1622,9 +1711,9 @@ async function hostStart(){
   } else {
     for(let r=0;r<100;r++) sub=[...(sub||[]),...[...idx]];
   }
-  const qPool=_selectedCat
-    ? QS.map((_,i)=>i).filter(i=>(_qCatMap[i]||[]).includes(_selectedCat))
-    : QS.map((_,i)=>i);
+  const qPool=_selectedCats.length>0
+    ?QS.map((_,i)=>i).filter(i=>(QS[i].cats||[]).some(c=>_selectedCats.includes(c)))
+    :QS.map((_,i)=>i);
   const qPoolFinal=qPool.length>0?qPool:QS.map((_,i)=>i);
   if(qPoolFinal.length===0){alert('Brak pytań w bazie! Dodaj pytania aby rozpocząć grę.');return;}
   qp=shuf([...qPoolFinal]);
@@ -2124,6 +2213,16 @@ function renderReveal(){
   const iAmSubject=amSJ();
   const myName=GS.players[mySlot]?.name||'';
 
+  // Track stats once per round for logged-in user
+  const _statsUser=window._currentUser;
+  if(_statsUser&&GS.ri!==_statsTrackedRi){
+    _statsTrackedRi=GS.ri;
+    const _sd={};
+    if(iAmSubject){_sd.timesInSpotlight=1;}
+    else if(amI&&myVote!==undefined){_sd.totalGuesses=1;if(myVote==correct)_sd.correctGuesses=1;}
+    if(Object.keys(_sd).length>0) updateUserStats(_statsUser.uid,_sd);
+  }
+
   // ── BANNER ──
   let bannerHtml='';
   if(amI && !iAmSubject && myVote!==undefined){
@@ -2214,7 +2313,7 @@ function renderReveal(){
     : `Runda <strong>${GS.ri+1}</strong> z <strong>${GS.rt}</strong>`;
   $('rv-btn').innerHTML=`
     <div style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:8px">${modeInfo}</div>
-    <button class="btn btn-lit" onclick="nextRound()">${isLast?'🏆 Wyniki końcowe':'Następna runda →'}</button>`;
+    ${isHost?`<button class="btn btn-lit" onclick="nextRound()">${isLast?'🏆 Wyniki końcowe':'Przejdź do następnej rundy →'}</button>`:'<div style="text-align:center;font-size:14px;color:var(--muted);padding:14px 0">⏳ Czekaj — host przejdzie do następnej rundy</div>'}`;
   show('s-reveal');
 }
 
@@ -2235,6 +2334,11 @@ async function nextRound(){
 
 // ── END ──
 function renderEnd(){
+  const _endUser=window._currentUser;
+  if(_endUser&&mySlot!==null){
+    const myPts=GS.players[mySlot]?.pts||0;
+    updateUserStats(_endUser.uid,{gamesPlayed:1,bestTokens:myPts});
+  }
   const ps=[...GS.players.entries()].filter(([,p])=>p).map(([i,p])=>({...p,i})).sort((a,b)=>b.pts-a.pts);
   const med=['🥇','🥈','🥉',''];
   const maxPts=Math.max(...ps.map(p=>p.pts),1);
@@ -2336,45 +2440,13 @@ document.addEventListener('visibilitychange', ()=>{
 // ── QUESTION BROWSER ──
 let _qMarked=new Set();
 let _qColors={};
-let _qCats={};        // {catId: {name, color}} — category definitions
-let _qCatMap={};      // {idx: [catId, ...]} — which cats each question belongs to
-let _activeCatFilter=null; // null = all, or catId
-let _bulkSelected=new Set(); // indices selected for bulk category assign
+let _activeCatFilter=null;
+let _bulkSelected=new Set();
 
-// Load saved colors, reported, categories
+// Load saved question colors
 (()=>{
   try{ _qColors=JSON.parse(localStorage.getItem('wiem_qcolors')||'{}'); }catch(e){}
-  try{ _qCats=JSON.parse(localStorage.getItem('wiem_cats')||'{}'); }catch(e){}
-  try{ _qCatMap=JSON.parse(localStorage.getItem('wiem_catmap')||'{}'); }catch(e){}
-
-  // Ensure "Gracze" category always exists
-  if(!_qCats['cat_players']){
-    _qCats['cat_players']={name:'Gracze',color:'#38bdf8'};
-    try{ localStorage.setItem('wiem_cats',JSON.stringify(_qCats)); }catch(e){}
-  }
-
-  // Auto-assign all player-type questions to "Gracze" category
-  let catMapChanged=false;
-  QS.forEach((q,i)=>{
-    if(q.type==='players'){
-      if(!_qCatMap[i]) _qCatMap[i]=[];
-      if(!_qCatMap[i].includes('cat_players')){
-        _qCatMap[i].push('cat_players');
-        catMapChanged=true;
-      }
-    }
-  });
-  if(catMapChanged){
-    try{ localStorage.setItem('wiem_catmap',JSON.stringify(_qCatMap)); }catch(e){}
-  }
 })();
-
-const CAT_COLORS=['#7c3aed','#0891b2','#059669','#d97706','#dc2626','#db2777','#4338ca','#0284c7'];
-
-function saveCats(){
-  try{ localStorage.setItem('wiem_cats',JSON.stringify(_qCats)); }catch(e){}
-  try{ localStorage.setItem('wiem_catmap',JSON.stringify(_qCatMap)); }catch(e){}
-}
 
 // ── CATEGORY MANAGER ──
 
@@ -2754,11 +2826,19 @@ function admBuildQCard(q, i, editing) {
         '<input data-ai="' + ai + '" class="adm-as-inp" value="' + escHtml((q.as||[])[ai]||'') + '" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:12px;color:#a78bfa;font-family:inherit" onkeydown="event.stopPropagation()">' +
       '</div>'
     ).join('');
+    const catChecks = Object.entries(BUILTIN_CATS).map(([cid,cd]) =>
+      '<label style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1.5px solid ' + cd.color + '44;cursor:pointer;font-size:11px;font-weight:600;color:' + cd.color + '">' +
+        '<input type="checkbox" value="' + cid + '"' + ((q.cats||[]).includes(cid)?' checked':'') + ' style="accent-color:' + cd.color + ';width:13px;height:13px">' +
+        cd.name +
+      '</label>'
+    ).join('');
     return '<div class="adm-card-meta">#' + (i+1) + ' — edycja</div>' +
       '<div style="font-size:9px;color:#a78bfa;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Dla innych</span><span>Dla Ciebie</span></div>' +
       '<textarea id="adm-q-inp-' + i + '" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;min-height:52px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.q) + '</textarea>' +
       '<textarea id="adm-qs-inp-' + i + '" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:13px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
       '<div id="adm-a-rows-' + i + '">' + aRows + '</div>' +
+      '<div style="font-size:10px;color:var(--muted);margin:6px 0 3px">Kategorie:</div>' +
+      '<div id="adm-cat-row-' + i + '" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">' + catChecks + '</div>' +
       '<div style="display:flex;gap:8px">' +
         '<button onclick="admSaveQ(' + i + ')" style="flex:1;background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Zapisz ✓</button>' +
         '<button onclick="admCancelEditQ(' + i + ')" style="flex:1;background:var(--card);color:var(--muted);border:1.5px solid var(--rim);border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Anuluj</button>' +
@@ -2766,7 +2846,8 @@ function admBuildQCard(q, i, editing) {
   }
 
   const ans = (q.a||[]).map((a,ai) => '<span style="font-size:11px;background:var(--bg);border-radius:6px;padding:3px 8px;color:var(--muted)">' + escHtml(a) + '</span>').join('');
-  return '<div class="adm-card-meta">#' + (i+1) + (q.type==='players'?' · 👥 Gracze':''  ) + '</div>' +
+  const catLabel=(q.cats||[]).map(c=>BUILTIN_CATS[c]?.name).filter(Boolean).join(', ');
+  return '<div class="adm-card-meta">#' + (i+1) + (catLabel?' · '+catLabel:'') + '</div>' +
     '<div class="adm-card-q">' + escHtml(q.q) + '</div>' +
     (ans ? '<div style="display:flex;flex-wrap:wrap;gap:4px">' + ans + '</div>' : '') +
     '<div style="display:flex;gap:8px">' +
@@ -2800,6 +2881,8 @@ function admSaveQ(i) {
   if (qsInp) QS[i].qs = qsInp.value.trim();
   aInps.forEach((inp, ai) => { if (QS[i].a) QS[i].a[ai] = inp.value.trim(); });
   asInps.forEach((inp, ai) => { if (QS[i].as) QS[i].as[ai] = inp.value.trim(); });
+  const catChecked = card.querySelectorAll('#adm-cat-row-' + i + ' input[type=checkbox]:checked');
+  QS[i].cats = Array.from(catChecked).map(cb => cb.value);
   card.innerHTML = admBuildQCard(QS[i], i, false);
   // Note: edits to built-in QS are in-memory only (no backend for built-in questions)
 }
@@ -3117,7 +3200,7 @@ async function reportQuestion(btn) {
     await fetch(DB_URL + '/reports.json', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ qText, qIdx, gameId, reporterName, reportedAt: Date.now(), resolved: false })
+      body: JSON.stringify({ qText, qIdx, gameId, reporterName, reporterUid: window._currentUser?.uid||null, reportedAt: Date.now(), resolved: false })
     });
     btn.textContent = '✓ Zgłoszono';
   } catch(e) {
@@ -3133,55 +3216,127 @@ function resetReportBtns() {
   });
 }
 
-async function admLoadReports() {
-  const list = $('adm-reports-list');
-  const empty = $('adm-reports-empty');
-  if (!list) return;
-  list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Ładowanie…</div>';
+let _repShowHistory=false;
 
-  try {
-    const data = await admFetch('reports');
-    const items = [];
-    if (data) Object.entries(data).forEach(([rid, r]) => { if (r && !r.resolved) items.push({rid, r}); });
+function admFmtDate(ts){
+  if(!ts) return '—';
+  const d=new Date(ts);
+  return d.toLocaleDateString('pl')+' '+d.toLocaleTimeString('pl',{hour:'2-digit',minute:'2-digit'});
+}
 
-    list.innerHTML = '';
-    if (items.length === 0) { if (empty) empty.style.display = ''; return; }
-    if (empty) empty.style.display = 'none';
+function admBuildRepCard(rid,r,editing){
+  const dt=admFmtDate(r.reportedAt);
+  const reporter=r.reporterName?' · '+escHtml(r.reporterName):'';
+  const meta='Pytanie #'+((r.qIdx||0)+1)+' · '+dt+reporter;
+  const resolvedInfo=r.resolved?'<div style="font-size:11px;color:var(--muted);margin-top:2px">Rozpatrzono: '+admFmtDate(r.resolvedAt)+'</div>':'';
+  if(editing){
+    return '<div class="adm-card-meta">'+meta+'</div>'+
+      resolvedInfo+
+      '<div style="font-size:11px;color:var(--muted);margin-bottom:4px">Edytuj treść pytania:</div>'+
+      '<textarea id="rep-edit-q-'+rid+'" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;min-height:52px;box-sizing:border-box" onkeydown="event.stopPropagation()">'+escHtml(r.qText||'')+'</textarea>'+
+      '<div style="display:flex;gap:8px">'+
+        '<button onclick="admRepEditSave(\''+rid+'\',\''+escHtml(r.qText||'').replace(/'/g,"\\'")+'\')" style="flex:1;background:var(--c2);color:#000;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Zatwierdź zmianę ✓</button>'+
+        '<button onclick="admLoadReports()" style="flex:1;background:transparent;color:var(--muted);border:1.5px solid var(--rim);border-radius:8px;padding:9px;font-size:12px;cursor:pointer">Anuluj</button>'+
+      '</div>';
+  }
+  const btns=r.resolved?'':
+    '<div style="display:flex;gap:8px">'+
+      '<button onclick="admRepEdit(\''+rid+'\','+JSON.stringify(r)+')" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer">✏ Edytuj i zatwierdź</button>'+
+      '<button onclick="admRepAck(\''+rid+'\')" style="flex:1;padding:8px;border-radius:8px;border:none;background:var(--c2);color:#000;font-size:12px;font-weight:700;cursor:pointer">✓ Potwierdź</button>'+
+      '<button onclick="admRepReject(\''+rid+'\')" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--c0)44;background:transparent;color:var(--c0);font-size:12px;font-weight:700;cursor:pointer">✕</button>'+
+    '</div>';
+  return '<div class="adm-card-meta">'+meta+'</div>'+
+    resolvedInfo+
+    '<div class="adm-card-q">'+escHtml(r.qText||'(brak treści)')+'</div>'+
+    (r.message?'<div style="font-size:12px;color:var(--muted);font-style:italic">"'+escHtml(r.message)+'"</div>':'')+
+    btns;
+}
 
-    items.forEach(({rid, r}) => {
-      const card = document.createElement('div');
-      card.className = 'adm-card';
-      card.id = 'rep-' + rid;
-      card.innerHTML =
-        '<div class="adm-card-meta">Pytanie #' + ((r.qIdx||0)+1) + ' · ' + new Date(r.reportedAt||0).toLocaleDateString('pl') + '</div>' +
-        '<div class="adm-card-q">' + escHtml(r.qText||'(brak treści)') + '</div>' +
-        (r.message ? '<div style="font-size:12px;color:var(--muted);font-style:italic">"' + escHtml(r.message) + '"</div>' : '') +
-        '<button onclick="admResolveReport(\'' + rid + '\')" style="padding:9px;border-radius:8px;border:none;background:var(--text);color:var(--bg);font-size:12px;font-weight:700;cursor:pointer">✓ Oznacz jako rozwiązane</button>';
+async function admLoadReports(){
+  const list=$('adm-reports-list');
+  const empty=$('adm-reports-empty');
+  if(!list)return;
+  list.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Ładowanie…</div>';
+  try{
+    const data=await admFetch('reports');
+    const pending=[],history=[];
+    if(data) Object.entries(data).forEach(([rid,r])=>{
+      if(!r)return;
+      if(r.resolved)history.push({rid,r});
+      else pending.push({rid,r});
+    });
+    list.innerHTML='';
+    const items=_repShowHistory?history:pending;
+    if(items.length===0&&pending.length===0&&history.length===0){if(empty)empty.style.display='';return;}
+    if(empty)empty.style.display='none';
+    const tabHtml='<div style="display:flex;gap:8px;margin-bottom:12px">'+
+      '<button onclick="_repShowHistory=false;admLoadReports()" style="padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:'+(_repShowHistory?'1.5px solid var(--rim)':'none')+';background:'+(!_repShowHistory?'var(--text)':'transparent')+';color:'+(!_repShowHistory?'var(--bg)':'var(--muted)')+'">Oczekujące ('+pending.length+')</button>'+
+      '<button onclick="_repShowHistory=true;admLoadReports()" style="padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:'+(!_repShowHistory?'1.5px solid var(--rim)':'none')+';background:'+(_repShowHistory?'var(--text)':'transparent')+';color:'+(_repShowHistory?'var(--bg)':'var(--muted)')+'">Historia ('+history.length+')</button>'+
+    '</div>';
+    list.innerHTML=tabHtml;
+    if(items.length===0){list.innerHTML+=`<div style="text-align:center;color:var(--muted);font-size:13px;padding:24px 0">${_repShowHistory?'Brak historii':'Brak zgłoszeń ✅'}</div>`;}
+    items.forEach(({rid,r})=>{
+      const card=document.createElement('div');
+      card.className='adm-card';card.id='rep-'+rid;
+      card.innerHTML=admBuildRepCard(rid,r,false);
       list.appendChild(card);
     });
     admLoadReportsCount();
-  } catch(e) {
-    list.innerHTML = '<div style="color:var(--c0);font-size:13px;text-align:center;padding:16px">Błąd: ' + e.message + '</div>';
+  }catch(e){
+    list.innerHTML='<div style="color:var(--c0);font-size:13px;text-align:center;padding:16px">Błąd: '+e.message+'</div>';
   }
 }
 
-async function admResolveReport(rid) {
-  try {
-    await admWrite('reports/' + rid + '/resolved', true);
-    const card = $('rep-' + rid);
-    if (card) card.remove();
-    admLoadReportsCount();
-  } catch(e) { alert('Błąd: ' + e.message); }
+function admRepEdit(rid,r){
+  const card=$('rep-'+rid);
+  if(!card)return;
+  card.innerHTML=admBuildRepCard(rid,r,true);
 }
 
-async function admLoadReportsCount() {
-  try {
-    const data = await admFetch('reports');
-    let n = 0;
-    if (data) Object.values(data).forEach(r => { if (r && !r.resolved) n++; });
-    const el = $('adm-reports-count');
-    if (el) { el.textContent = n; el.style.display = n > 0 ? 'inline' : 'none'; }
-  } catch(e) {}
+async function admRepEditSave(rid,origText){
+  const inp=$('rep-edit-q-'+rid);
+  if(!inp)return;
+  const newText=inp.value.trim();
+  if(!newText)return;
+  try{
+    await admWrite('reports/'+rid+'/resolved',true);
+    await admWrite('reports/'+rid+'/status','fixed');
+    await admWrite('reports/'+rid+'/resolvedAt',Date.now());
+    await admWrite('reports/'+rid+'/qTextFixed',newText);
+    admLoadReports();
+  }catch(e){alert('Błąd: '+e.message);}
+}
+
+async function admRepAck(rid){
+  try{
+    await admWrite('reports/'+rid+'/resolved',true);
+    await admWrite('reports/'+rid+'/status','acknowledged');
+    await admWrite('reports/'+rid+'/resolvedAt',Date.now());
+    admLoadReports();
+  }catch(e){alert('Błąd: '+e.message);}
+}
+
+async function admRepReject(rid){
+  try{
+    await admWrite('reports/'+rid+'/resolved',true);
+    await admWrite('reports/'+rid+'/status','rejected');
+    await admWrite('reports/'+rid+'/resolvedAt',Date.now());
+    admLoadReports();
+  }catch(e){alert('Błąd: '+e.message);}
+}
+
+async function admResolveReport(rid){
+  await admRepAck(rid);
+}
+
+async function admLoadReportsCount(){
+  try{
+    const data=await admFetch('reports');
+    let n=0;
+    if(data)Object.values(data).forEach(r=>{if(r&&!r.resolved)n++;});
+    const el=$('adm-reports-count');
+    if(el){el.textContent=n;el.style.display=n>0?'inline':'none';}
+  }catch(e){}
 }
 
 // ── TAB: USERS ──
@@ -3242,6 +3397,22 @@ async function admDeleteUser(uid) {
 // ══════════════════════════════════════════════
 
 function myqOpen() {
+  const user = window._currentUser;
+  const statsEl=$('myq-stats');
+  if(user&&statsEl){
+    statsEl.style.display='flex';
+    fbGet('users/'+user.uid+'/stats').then(st=>{
+      st=st||{};
+      const pct=st.totalGuesses>0?Math.round((st.correctGuesses||0)/st.totalGuesses*100):0;
+      const grid=$('myq-stats-grid');
+      if(grid) grid.innerHTML=[
+        ['🎮 Rozegrane gry',st.gamesPlayed||0],
+        ['🎯 Trafność',(st.totalGuesses||0)>0?pct+'%':'—'],
+        ['🏆 Rekord żetonów',st.bestTokens||0],
+        ['✨ Razy w centrum uwagi',st.timesInSpotlight||0],
+      ].map(([label,val])=>`<div style="background:var(--bg);border-radius:10px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">${label}</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px">${val}</div></div>`).join('');
+    }).catch(()=>{});
+  }else if(statsEl){statsEl.style.display='none';}
   myqLoadList();
 }
 
