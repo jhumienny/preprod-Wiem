@@ -493,7 +493,7 @@ onAuthStateChanged(auth, (user) => {
   <!-- Formularz -->
   <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:var(--rad);padding:18px;display:flex;flex-direction:column;gap:12px">
     <div class="label">Dodaj pytanie</div>
-    <div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px"><span>Dla innych (z imieniem)</span><span>Dla głównego gracza rundy</span></div>
+    <div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px"><span>Dla innych — pamiętaj, żeby zawrzeć [imię] w pytaniu</span><span>Dla Ciebie</span></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
       <textarea id="myq-q" placeholder="Co [imię] robi gdy…" rows="3" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()"></textarea>
       <textarea id="myq-qs" placeholder="Co robisz gdy…" rows="3" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:13px;color:#a78bfa;font-family:inherit;resize:vertical;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()"></textarea>
@@ -2753,7 +2753,7 @@ function admBuildQCard(q, i, editing) {
       '</div>'
     ).join('');
     return '<div class="adm-card-meta">#' + (i+1) + ' — edycja</div>' +
-      '<div style="font-size:9px;color:#a78bfa;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Dla innych</span><span>Dla tematu</span></div>' +
+      '<div style="font-size:9px;color:#a78bfa;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Dla innych</span><span>Dla Ciebie</span></div>' +
       '<textarea id="adm-q-inp-' + i + '" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;min-height:52px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.q) + '</textarea>' +
       '<textarea id="adm-qs-inp-' + i + '" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:13px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
       '<div id="adm-a-rows-' + i + '">' + aRows + '</div>' +
@@ -2901,7 +2901,7 @@ function histBuildExpanded(hid, q) {
   return (
     (q.qs ? '<div style="font-size:11px;color:var(--muted);margin-bottom:3px">Pytanie dla graczy:</div>' +
       '<div style="font-size:13px;color:var(--text);margin-bottom:10px">' + escHtml(q.qs) + '</div>' : '') +
-    '<div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px"><span>Dla innych</span><span>Dla tematu</span></div>' +
+    '<div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px"><span>Dla innych</span><span>Dla Ciebie</span></div>' +
     ans +
     '<div style="margin-top:10px">' +
       '<button onclick="histRestore(' + hid + ')" style="padding:7px 14px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer">↩ Przywróć do puli</button>' +
@@ -3023,7 +3023,7 @@ function admBuildPendCard(qid, q, editing) {
       '</div>'
     ).join('');
     return meta +
-      '<div style="font-size:9px;color:#a78bfa;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Dla innych</span><span>Dla tematu</span></div>' +
+      '<div style="font-size:9px;color:#a78bfa;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Dla innych</span><span>Dla Ciebie</span></div>' +
       '<textarea id="pend-q-' + qid + '" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;min-height:52px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.q) + '</textarea>' +
       '<textarea id="pend-qs-' + qid + '" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:13px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
       '<div id="pend-arows-' + qid + '">' + aRows + '</div>' +
