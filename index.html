@@ -3215,12 +3215,15 @@ function myqOpen() {
   myqLoadList();
 }
 
+let _myqData = {};
+
 async function myqLoadList() {
   const user = window._currentUser;
   if (!user) return;
   const list = $('myq-list');
   if (!list) return;
   list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Ładowanie…</div>';
+  _myqData = {};
 
   try {
     const token = await user.getIdToken();
@@ -3236,30 +3239,100 @@ async function myqLoadList() {
     Object.entries(data)
       .sort((a, b) => (b[1].createdAt||0) - (a[1].createdAt||0))
       .forEach(([qid, q]) => {
-        const statusMap = {
-          pending:  {label:'⏳ Oczekuje',    bg:'#78350f22', color:'#fbbf24', border:'#f59e0b55'},
-          approved: {label:'✅ Zatwierdzone', bg:'#052e1622', color:'#4ade80', border:'#16a34a55'},
-          rejected: {label:'✗ Odrzucone',    bg:'#450a0a22', color:'#f87171', border:'#dc262655'}
-        };
-        const s = statusMap[q.status] || statusMap.pending;
-        const createdStr  = q.createdAt  ? new Date(q.createdAt).toLocaleString('pl')  : '—';
-        const resolvedStr = q.resolvedAt ? new Date(q.resolvedAt).toLocaleString('pl') : null;
-        const ans = (q.a||[]).map(a => '<span style="font-size:11px;background:var(--bg);border-radius:6px;padding:3px 8px;color:var(--muted)">' + escHtml(a) + '</span>').join('');
-
+        _myqData[qid] = q;
         const card = document.createElement('div');
         card.className = 'adm-card';
-        card.innerHTML =
-          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
-            '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:' + s.bg + ';color:' + s.color + ';border:1.5px solid ' + s.border + '">' + s.label + '</span>' +
-            '<span style="font-size:10px;color:var(--muted);margin-left:auto">Wysłano: ' + createdStr + '</span>' +
-          '</div>' +
-          '<div class="adm-card-q">' + escHtml(q.q) + '</div>' +
-          (ans ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">' + ans + '</div>' : '') +
-          (resolvedStr ? '<div style="font-size:11px;color:var(--muted);margin-top:6px">' + (q.status === 'approved' ? '✅ Zatwierdzone' : '✗ Odrzucone') + ': ' + resolvedStr + '</div>' : '');
+        card.id = 'myqcard-' + qid;
+        card.innerHTML = myqBuildView(qid, q);
         list.appendChild(card);
       });
   } catch(e) {
     list.innerHTML = '<div style="color:var(--c0);font-size:13px;text-align:center;padding:16px">Błąd: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+function myqBuildView(qid, q) {
+  const statusMap = {
+    pending:  {label:'⏳ Oczekuje',    bg:'#78350f22', color:'#fbbf24', border:'#f59e0b55'},
+    approved: {label:'✅ Zatwierdzone', bg:'#052e1622', color:'#4ade80', border:'#16a34a55'},
+    rejected: {label:'✗ Odrzucone',    bg:'#450a0a22', color:'#f87171', border:'#dc262655'}
+  };
+  const s = statusMap[q.status] || statusMap.pending;
+  const createdStr  = q.createdAt  ? new Date(q.createdAt).toLocaleString('pl')  : '—';
+  const resolvedStr = q.resolvedAt ? new Date(q.resolvedAt).toLocaleString('pl') : null;
+  const ans = (q.a||[]).map(a => '<span style="font-size:11px;background:var(--bg);border-radius:6px;padding:3px 8px;color:var(--muted)">' + escHtml(a) + '</span>').join('');
+  return (
+    '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
+      '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:' + s.bg + ';color:' + s.color + ';border:1.5px solid ' + s.border + '">' + s.label + '</span>' +
+      '<span style="font-size:10px;color:var(--muted);margin-left:auto">Wysłano: ' + createdStr + '</span>' +
+    '</div>' +
+    '<div class="adm-card-q">' + escHtml(q.q) + '</div>' +
+    (ans ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">' + ans + '</div>' : '') +
+    (resolvedStr ? '<div style="font-size:11px;color:var(--muted);margin-top:6px">' + (q.status === 'approved' ? '✅ Zatwierdzone' : '✗ Odrzucone') + ': ' + resolvedStr + '</div>' : '') +
+    (q.status === 'pending' ?
+      '<button onclick="myqEditCard(\'' + qid + '\')" style="margin-top:10px;padding:7px 14px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer">✏ Edytuj</button>'
+      : '')
+  );
+}
+
+function myqEditCard(qid) {
+  const q = _myqData[qid];
+  if (!q) return;
+  const card = $('myqcard-' + qid);
+  if (!card) return;
+  const aRows = [0,1,2].map(i =>
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">' +
+      '<input class="myq-edit-a" value="' + escHtml((q.a||[])[i]||'') + '" placeholder="Odpowiedź ' + (i+1) + ' — dla innych" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">' +
+      '<input class="myq-edit-as" value="' + escHtml((q.as||[])[i]||'') + '" placeholder="Odpowiedź ' + (i+1) + ' — dla Ciebie" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:12px;color:#a78bfa;font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">' +
+    '</div>'
+  ).join('');
+  card.innerHTML =
+    '<div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Dla innych — pamiętaj o [imię]</span><span>Dla Ciebie</span></div>' +
+    '<textarea id="myq-edit-q-' + qid + '" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;min-height:52px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.q||'') + '</textarea>' +
+    '<textarea id="myq-edit-qs-' + qid + '" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:13px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box;margin-top:6px" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
+    '<div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 2px"><span>Odpowiedź dla innych</span><span>Odpowiedź dla Ciebie</span></div>' +
+    aRows +
+    '<div style="display:flex;gap:8px;margin-top:8px">' +
+      '<button onclick="myqSaveEdit(\'' + qid + '\')" style="flex:1;background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Zapisz</button>' +
+      '<button onclick="myqCancelEdit(\'' + qid + '\')" style="padding:9px 14px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer">Anuluj</button>' +
+    '</div>';
+}
+
+function myqCancelEdit(qid) {
+  const q = _myqData[qid];
+  const card = $('myqcard-' + qid);
+  if (card && q) card.innerHTML = myqBuildView(qid, q);
+}
+
+async function myqSaveEdit(qid) {
+  const user = window._currentUser;
+  if (!user) return;
+  const card = $('myqcard-' + qid);
+  const newQ  = ($('myq-edit-q-'  + qid)?.value || '').trim();
+  const newQs = ($('myq-edit-qs-' + qid)?.value || '').trim();
+  const aInps  = card ? [...card.querySelectorAll('.myq-edit-a')]  : [];
+  const asInps = card ? [...card.querySelectorAll('.myq-edit-as')] : [];
+  const newA  = aInps.map(inp => inp.value.trim());
+  const newAs = asInps.map(inp => inp.value.trim());
+
+  if (!newQ)            { alert('Wpisz treść pytania dla innych.');  return; }
+  if (!newQs)           { alert('Wpisz treść pytania dla Ciebie.'); return; }
+  if (newA.some(x=>!x)) { alert('Wypełnij wszystkie 3 odpowiedzi dla innych.'); return; }
+  if (newAs.some(x=>!x)){ alert('Wypełnij wszystkie 3 odpowiedzi dla Ciebie.'); return; }
+
+  try {
+    const token = await user.getIdToken();
+    const updated = {..._myqData[qid], q: newQ, qs: newQs, a: newA, as: newAs};
+    const r = await fetch(DB_URL + '/userQuestions/' + user.uid + '/' + qid + '.json?auth=' + token, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(updated)
+    });
+    if (!r.ok) throw new Error('PUT ' + r.status);
+    _myqData[qid] = updated;
+    if (card) card.innerHTML = myqBuildView(qid, updated);
+  } catch(e) {
+    alert('Błąd: ' + e.message);
   }
 }
 
