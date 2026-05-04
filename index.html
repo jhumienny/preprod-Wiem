@@ -440,6 +440,7 @@ onAuthStateChanged(auth, (user) => {
     <button class="adm-tab" id="adm-tab-pending" onclick="admSetTab('pending')">⏳ Do zatwierdzenia <span id="adm-pending-count" style="display:none;background:#f59e0b;color:#000;font-size:9px;padding:1px 5px;border-radius:99px;margin-left:3px"></span></button>
     <button class="adm-tab" id="adm-tab-reports" onclick="admSetTab('reports')">⚑ Zgłoszenia <span id="adm-reports-count" style="display:none;background:#ef4444;color:#fff;font-size:9px;padding:1px 5px;border-radius:99px;margin-left:3px"></span></button>
     <button class="adm-tab" id="adm-tab-users" onclick="admSetTab('users')">👥 Użytkownicy</button>
+    <button class="adm-tab" id="adm-tab-rooms" onclick="admSetTab('rooms')">🏠 Pokoje</button>
   </div>
 
   <!-- Tab: All questions -->
@@ -473,6 +474,24 @@ onAuthStateChanged(auth, (user) => {
   <!-- Tab: Users -->
   <div id="adm-pane-users" style="display:none">
     <div id="adm-users-list" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <!-- Tab: Permanent Rooms -->
+  <div id="adm-pane-rooms" style="display:none">
+    <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:14px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:12px;font-weight:700;color:var(--text)">Utwórz stały pokój</div>
+      <input id="adm-room-code" type="text" placeholder="Kod pokoju (np. 2137)" maxlength="10" autocomplete="off" data-1p-ignore data-lpignore="true"
+        style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);font-family:inherit"
+        onkeydown="event.stopPropagation()">
+      <input id="adm-room-name" type="text" placeholder="Nazwa pokoju (np. Wieczór gier)" maxlength="30" autocomplete="off"
+        style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);font-family:inherit"
+        onkeydown="event.stopPropagation()">
+      <input id="adm-room-host" type="email" placeholder="E-mail hosta — tylko ta osoba może hostować (opcjonalnie)" autocomplete="off"
+        style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);font-family:inherit"
+        onkeydown="event.stopPropagation()">
+      <button onclick="admCreateRoom()" style="background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:700;cursor:pointer">Utwórz pokój ＋</button>
+    </div>
+    <div id="adm-rooms-list" style="display:flex;flex-direction:column;gap:8px"></div>
   </div>
 </div>
 
@@ -1355,6 +1374,8 @@ async function createGame(){
 }
 
 // ── JOIN ──
+let _currentRoom=null;
+
 async function joinGame(){
   const name=($('inp-name').value.trim());
   if(!name){showErr('home-err','Wpisz swoje imię');return;}
@@ -1364,12 +1385,17 @@ async function joinGame(){
   showErr('home-err','⏳ Łączę…');
   $('home-err').style.color='var(--muted)';
   try{
-    const gs=await fbGet(`games/${code}`);
-    if(!gs){showErr('home-err','❌ Nie znaleziono gry. Sprawdź kod.');$('home-err').style.color='var(--c0)';return;}
+    let gs=await fbGet(`games/${code}`);
+    if(!gs||gs.phase==='ended'){
+      const room=await fbGet(`permanentRooms/${code}`);
+      if(room){await _enterPermanentRoom(code,room,name,gs);return;}
+      if(!gs){showErr('home-err','❌ Nie znaleziono gry. Sprawdź kod.');$('home-err').style.color='var(--c0)';return;}
+    }
     if(gs.phase && gs.phase!=='lobby'){
       showErr('home-err','❌ Ta gra już się rozpoczęła. Poczekaj na kolejną rozgrywkę.');
       $('home-err').style.color='var(--c0)';return;
     }
+    _currentRoom=null;
     gameId=code;GS=norm(gs);
     sessionStorage.setItem('ego_name',name);
     hideErr('home-err');
@@ -1380,6 +1406,20 @@ async function joinGame(){
     showErr('home-err','❌ Błąd: '+e.message);
     $('home-err').style.color='var(--c0)';
   }
+}
+
+async function _enterPermanentRoom(code,room,name,existingGs){
+  _currentRoom={...room,code};
+  if(!existingGs||existingGs.phase==='ended'){
+    const freshGs={phase:'lobby',players:[null,null,null,null],subjects:[],qSeq:[],rt:0,ri:0,votes:{},bets:{},sa:-1,ready:{},maxPlayers:4,pool:0,hostSlot:0,permanentRoom:code};
+    await fbPut(`games/${code}`,freshGs);
+    existingGs=freshGs;
+  }
+  gameId=code;GS=norm(existingGs);
+  sessionStorage.setItem('ego_name',name);
+  hideErr('home-err');
+  renderSlots(existingGs,name);show('s-slots');
+  startPoll();
 }
 
 // ── SLOTS ──
@@ -1430,7 +1470,16 @@ function renderSlotsGrid(gs,name){
       <div class="slot-pts">${p?p.pts+' 🪙':'Kliknij aby dołączyć'}</div>
       ${isMine?'<span class="slot-badge sb-you">ty</span>':(p?'':'<span class="slot-badge sb-free">wolny</span>')}
     `;
-    if(!p||isMine)div.onclick=()=>{
+    const hostRestricted=_currentRoom?.hostEmail&&i===0;
+    const userEmail=(window._currentUser?.email||'').toLowerCase();
+    const isAdm=window._currentUserRole==='admin';
+    const canTakeHostSlot=!hostRestricted||(isAdm||userEmail===_currentRoom.hostEmail.toLowerCase());
+    if(hostRestricted&&!p&&!isMine){
+      div.querySelector('.slot-pts').textContent='Zarezerwowany dla hosta';
+      const badge=div.querySelector('.slot-badge');
+      if(badge){badge.textContent='host';badge.style.background='#534AB7';badge.style.color='#fff';}
+    }
+    if((!p||isMine)&&canTakeHostSlot)div.onclick=()=>{
       const n=($('slots-name-inp')?.value||'').trim()||name||'Gracz';
       claimSlot(i,n);
     };
@@ -1440,6 +1489,14 @@ function renderSlotsGrid(gs,name){
 
 async function claimSlot(slot,name){
   try{
+    // Host-slot restriction for permanent rooms
+    if(_currentRoom?.hostEmail&&slot===0){
+      const userEmail=(window._currentUser?.email||'').toLowerCase();
+      const isAdm=window._currentUserRole==='admin';
+      if(!isAdm&&userEmail!==_currentRoom.hostEmail.toLowerCase()){
+        alert('Slot hosta jest zarezerwowany dla: '+_currentRoom.hostEmail);return;
+      }
+    }
     // Re-fetch fresh state to prevent race condition
     const gs=await fbGet(`games/${gameId}`);
     const fresh=norm(gs);
@@ -1494,6 +1551,19 @@ function renderLobby(){
   const activePlayers=players.slice(0,max);
   const filled=activePlayers.filter(Boolean).length;
   $('lob-cnt').textContent=`Gracze (${filled}/${max})`;
+  // Permanent room banner
+  let roomBanner=$('lob-room-banner');
+  if(_currentRoom){
+    if(!roomBanner){
+      roomBanner=document.createElement('div');
+      roomBanner.id='lob-room-banner';
+      roomBanner.style.cssText='background:#1e1b4b;border:1.5px solid #534AB7;border-radius:10px;padding:8px 14px;font-size:12px;color:#a5b4fc;display:flex;align-items:center;gap:8px';
+      $('lob-cnt').insertAdjacentElement('afterend',roomBanner);
+    }
+    roomBanner.innerHTML=`🏠 <strong>Stały pokój:</strong> ${_currentRoom.name||gameId}`+(_currentRoom.hostEmail?` &nbsp;·&nbsp; Host: ${_currentRoom.hostEmail}`:'');
+  } else if(roomBanner){
+    roomBanner.remove();
+  }
 
   // Sync maxp-btn active state for host
   if(isHost){
@@ -1659,7 +1729,7 @@ async function leaveGame(){
   stopPoll();
   sessionStorage.removeItem('ego_sess');
   sessionStorage.removeItem('ego_name');
-  gameId=null; mySlot=null; isHost=false; GS=null;
+  gameId=null; mySlot=null; isHost=false; GS=null; _currentRoom=null;
   _localVote=null; _confirmedVote=null; _sjPick=null; _lastRi=null;
   show('s-home');
 }
@@ -2765,7 +2835,7 @@ async function admDelete(path) {
 
 function admSetTab(tab) {
   _admTab = tab;
-  ['questions','pending','reports','users'].forEach(t => {
+  ['questions','pending','reports','users','rooms'].forEach(t => {
     const btn = $('adm-tab-' + t);
     const pane = $('adm-pane-' + t);
     if (btn) btn.classList.toggle('adm-tab-active', t === tab);
@@ -2775,6 +2845,84 @@ function admSetTab(tab) {
   if (tab === 'pending')   admLoadPending();
   if (tab === 'reports')   admLoadReports();
   if (tab === 'users')     admLoadUsers();
+  if (tab === 'rooms')     admLoadRooms();
+}
+
+// ── TAB: PERMANENT ROOMS ──
+async function admLoadRooms(){
+  const list=$('adm-rooms-list');
+  if(!list)return;
+  list.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">⏳ Ładowanie…</div>';
+  try{
+    const rooms=await admFetch('permanentRooms')||{};
+    if(!Object.keys(rooms).length){
+      list.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Brak stałych pokoi</div>';
+      return;
+    }
+    list.innerHTML='';
+    for(const [code,room] of Object.entries(rooms)){
+      let status='—';
+      try{
+        const gs=await fbGet(`games/${code}`);
+        if(!gs) status='⚪ Brak aktywnej gry';
+        else if(gs.phase==='lobby') status='🟡 Lobby ('+((gs.players||[]).filter(Boolean).length)+' graczy)';
+        else if(gs.phase==='ended') status='🔴 Zakończona';
+        else status='🟢 Gra w toku';
+      }catch(e){}
+      const card=document.createElement('div');
+      card.style.cssText='background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px';
+      card.innerHTML=
+        '<div style="display:flex;align-items:center;gap:8px">'+
+          '<span style="font-family:\'Bebas Neue\',sans-serif;font-size:24px;letter-spacing:2px;color:#a5b4fc">'+code+'</span>'+
+          '<span style="font-size:14px;font-weight:700;flex:1">'+escHtml(room.name||'Bez nazwy')+'</span>'+
+        '</div>'+
+        (room.hostEmail?'<div style="font-size:11px;color:var(--muted)">🔒 Host: '+escHtml(room.hostEmail)+'</div>':'')+
+        '<div style="font-size:11px;color:var(--muted)">Status: '+status+'</div>'+
+        '<div style="display:flex;gap:6px">'+
+          '<button onclick="admResetRoom(\''+code+'\')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer">↺ Resetuj grę</button>'+
+          '<button onclick="admDeleteRoom(\''+code+'\')" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--c0)44;background:transparent;color:var(--c0);font-size:12px;font-weight:600;cursor:pointer">🗑 Usuń</button>'+
+        '</div>';
+      list.appendChild(card);
+    }
+  }catch(e){
+    list.innerHTML='<div style="color:var(--c0);font-size:12px;padding:10px">Błąd: '+e.message+'</div>';
+  }
+}
+
+async function admCreateRoom(){
+  const code=($('adm-room-code')?.value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const name=($('adm-room-name')?.value||'').trim();
+  const hostEmail=($('adm-room-host')?.value||'').trim().toLowerCase();
+  if(!code){alert('Wpisz kod pokoju');return;}
+  if(!name){alert('Wpisz nazwę pokoju');return;}
+  try{
+    const existing=await admFetch('permanentRooms/'+code);
+    if(existing){alert('Pokój o tym kodzie już istnieje!');return;}
+    const room={name,createdBy:window._currentUser?.uid||'',created:Date.now()};
+    if(hostEmail) room.hostEmail=hostEmail;
+    await admWrite('permanentRooms/'+code,room);
+    if($('adm-room-code'))$('adm-room-code').value='';
+    if($('adm-room-name'))$('adm-room-name').value='';
+    if($('adm-room-host'))$('adm-room-host').value='';
+    admLoadRooms();
+  }catch(e){alert('Błąd tworzenia: '+e.message);}
+}
+
+async function admResetRoom(code){
+  if(!confirm('Zresetować grę w pokoju '+code+'?\nAktywna gra zostanie usunięta — gracze mogą zacząć od nowa.'))return;
+  try{
+    await admWrite('games/'+code,null,'DELETE');
+    admLoadRooms();
+  }catch(e){alert('Błąd resetu: '+e.message);}
+}
+
+async function admDeleteRoom(code){
+  if(!confirm('Usunąć pokój '+code+'?\nSpowoduje to też usunięcie aktywnej gry w tym pokoju.'))return;
+  try{
+    await admWrite('permanentRooms/'+code,null,'DELETE');
+    await admWrite('games/'+code,null,'DELETE').catch(()=>{});
+    admLoadRooms();
+  }catch(e){alert('Błąd usuwania: '+e.message);}
 }
 
 // ── Show admin panel ──
