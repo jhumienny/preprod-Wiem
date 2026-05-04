@@ -2908,6 +2908,7 @@ async function admCreateRoom(){
     if($('adm-room-host'))$('adm-room-host').value='';
     admLoadRooms();
   }catch(e){alert('Błąd tworzenia: '+e.message+'\n\nSprawdź czy reguły Firebase zawierają ścieżkę "permanentRooms".');}
+}
 
 async function admResetRoom(code){
   if(!confirm('Zresetować grę w pokoju '+code+'?\nAktywna gra zostanie usunięta — gracze mogą zacząć od nowa.'))return;
