@@ -1778,7 +1778,10 @@ function render(){
     return;
   }
   switch(GS.phase){
-    case'lobby':   renderLobby(); show('s-lobby'); break;
+    case'lobby':
+      if(mySlot===null){renderSlots(GS,sessionStorage.getItem('ego_name')||'Gracz');show('s-slots');}
+      else{renderLobby();show('s-lobby');}
+      break;
     case'voting':  renderVoting(); break;
     case'subject': renderSubj();   break;
     case'reveal':  renderReveal(); break;
