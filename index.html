@@ -1027,6 +1027,7 @@ function toggleLobCat(id){
   } else {
     _selectedCats.push(id);
   }
+  if(gameId) fbPatch(`games/${gameId}`,{selectedCats:_selectedCats}).catch(()=>{});
   renderLobCatSelector();
 }
 
@@ -1050,6 +1051,7 @@ function adjustRpp(delta){
   const val=Math.min(10,Math.max(1,(parseInt(inp.value)||3)+delta));
   inp.value=val;
   if(display) display.textContent=val;
+  if(gameId) fbPatch(`games/${gameId}`,{roundsPerPlayer:val}).catch(()=>{});
 }
 
 function setMaxPlayers(n){
@@ -1149,6 +1151,53 @@ async function patchGS(fields){
   Object.assign(GS,fields);
 }
 
+function getLobbyReadyState(gs){
+  const max=gs.maxPlayers||4;
+  const players=(gs.players||[]).slice(0,max);
+  const ready=gs.ready||{};
+  const filled=players.filter(Boolean).length;
+  const allReady=filled>=2 && players.every((p,i)=>!p||!!ready[i]);
+  return {max,players,ready,filled,allReady};
+}
+
+function buildStartedGame(gs){
+  const mode=gs.gameMode||_gameMode;
+  const idx=gs.players.map((p,i)=>p?i:null).filter(i=>i!==null);
+  let sub=[];
+  if(mode==='rounds'){
+    const rpp=Math.max(1,parseInt(gs.roundsPerPlayer)||parseInt($('rpp')?.value)||3);
+    for(let r=0;r<rpp;r++)sub=[...sub,...[...idx]];
+  } else {
+    for(let r=0;r<100;r++)sub=[...sub,...[...idx]];
+  }
+  const selectedCats=gs.selectedCats||_selectedCats;
+  const qPool=selectedCats.length>0?QS.map((_,i)=>i).filter(i=>(QS[i].cats||[]).some(c=>selectedCats.includes(c))):QS.map((_,i)=>i);
+  const qPoolFinal=qPool.length>0?qPool:QS.map((_,i)=>i);
+  if(qPoolFinal.length===0) return null;
+  let qp=shuf([...qPoolFinal]),_s=0;
+  while(qp.length<sub.length&&_s++<200)qp=[...qp,...shuf([...qPoolFinal])];
+  const qSeq=qp.slice(0,sub.length);
+  const playerCount=gs.players.filter(Boolean).length;
+  const playerNames=gs.players.map((p,i)=>p?{name:p.name,slot:i}:null).filter(Boolean);
+  const qAnswers={};
+  qSeq.forEach((qIdx,ri)=>{const qq=QS[qIdx];if(qq&&qq.type==='players'){const opts=playerNames.map(p=>p.name);if(opts.length>0)qAnswers[ri]=opts;}});
+  return {...gs,phase:'subject',gameMode:mode,subjects:sub,qSeq,qAnswers,rt:sub.length,ri:0,votes:{},bets:{},sa:-1,ready:{},pool:playerCount*10};
+}
+
+async function tryStartIfReady(){
+  if(!gameId)return false;
+  const fresh=norm(await fbGet(`games/${gameId}`));
+  if(!fresh||fresh.phase!=='lobby')return false;
+  const {allReady}=getLobbyReadyState(fresh);
+  if(!allReady)return false;
+  const next=buildStartedGame(fresh);
+  if(!next)return false;
+  GS=next;
+  await writeGS();
+  render();
+  return true;
+}
+
 async function handleGSUpdate(){
   // Detect if this player's slot was cleared (kicked by host or removed)
   if(mySlot!==null && !isHost && !GS.players[mySlot]){
@@ -1178,9 +1227,7 @@ async function handleGSUpdate(){
     const si=GS.subjects[GS.ri]??0;
 
     if(GS.phase==='lobby'){
-      const filled=GS.players.filter(Boolean);
-      const ready=GS.ready||{};
-      const allReady=filled.length>=2 && GS.players.every((p,i)=>!p||!!ready[i]);
+      const {allReady}=getLobbyReadyState(GS);
       if(allReady){
         if(!_allVotedAt){
           _allVotedAt=Date.now();
@@ -1193,23 +1240,7 @@ async function handleGSUpdate(){
         if(remaining<=0){
           stopCountdown();
           _allVotedAt=null;
-          const mode=_gameMode;
-          const idx=GS.players.map((p,i)=>p?i:null).filter(i=>i!==null);
-          let sub=[];
-          if(mode==='rounds'){const rpp=Math.max(1,parseInt($('rpp')?.value)||3);for(let r=0;r<rpp;r++)sub=[...sub,...[...idx]];}
-          else{for(let r=0;r<100;r++)sub=[...sub,...[...idx]];}
-          const qPool=_selectedCats.length>0?QS.map((_,i)=>i).filter(i=>(QS[i].cats||[]).some(c=>_selectedCats.includes(c))):QS.map((_,i)=>i);
-          const qPoolFinal=qPool.length>0?qPool:QS.map((_,i)=>i);
-          if(qPoolFinal.length===0) return;
-          let qp=shuf([...qPoolFinal]),_s=0;
-          while(qp.length<sub.length&&_s++<200)qp=[...qp,...shuf([...qPoolFinal])];
-          const qSeq=qp.slice(0,sub.length);
-          const playerCount=GS.players.filter(Boolean).length;
-          const playerNames=GS.players.map((p,i)=>p?{name:p.name,slot:i}:null).filter(Boolean);
-          const qAnswers={};
-          qSeq.forEach((qIdx,ri)=>{const qq=QS[qIdx];if(qq&&qq.type==='players'){const opts=playerNames.map(p=>p.name);if(opts.length>0)qAnswers[ri]=opts;}});
-          GS={...GS,phase:'subject',gameMode:mode,subjects:sub,qSeq,qAnswers,rt:sub.length,ri:0,votes:{},bets:{},sa:-1,ready:{},pool:playerCount*10};
-          await writeGS();
+          await tryStartIfReady();
         }
       } else { if(_allVotedAt) stopCountdown(); _allVotedAt=null; }
     }
@@ -1345,7 +1376,7 @@ async function createGame(){
   $('home-err').style.color='var(--muted)';
   try{
     gameId=rnd4();
-    GS={phase:'lobby',players:[{name,pts:10},null,null,null],subjects:[],qSeq:[],rt:0,ri:0,votes:{},bets:{},sa:-1,ready:{},maxPlayers:4,pool:0,hostSlot:0};
+    GS={phase:'lobby',players:[{name,pts:10},null,null,null],subjects:[],qSeq:[],rt:0,ri:0,votes:{},bets:{},sa:-1,ready:{},maxPlayers:4,pool:0,hostSlot:0,gameMode:_gameMode,selectedCats:_selectedCats,roundsPerPlayer:parseInt($('rpp')?.value)||3};
     await fbPut(`games/${gameId}`,GS);
     mySlot=0;isHost=true;
     sessionStorage.setItem('ego_sess',JSON.stringify({gameId,mySlot}));
@@ -1523,6 +1554,11 @@ function renderLobby(){
     // Sync game mode
     const savedMode=GS.gameMode||'pool';
     if(savedMode!==_gameMode) setGameMode(savedMode);
+    if(GS.selectedCats&&Array.isArray(GS.selectedCats)) _selectedCats=[...GS.selectedCats];
+    if(GS.roundsPerPlayer&&$('rpp')){
+      $('rpp').value=GS.roundsPerPlayer;
+      if($('rpp-display')) $('rpp-display').textContent=GS.roundsPerPlayer;
+    }
     renderLobCatSelector();
   }
 
@@ -1609,8 +1645,12 @@ async function toggleReady(){
     const gs=await fbGet(`games/${gameId}`);
     GS=norm(dc(gs));
     if(!GS.ready) GS.ready={};
-    GS.ready[mySlot]=!GS.ready[mySlot];
-    await fbPatch(`games/${gameId}`,{ready:GS.ready});
+    const nextReady=!GS.ready[mySlot];
+    GS.ready[mySlot]=nextReady;
+    const patch={};
+    patch[`ready/${mySlot}`]=nextReady;
+    await fbPatch(`games/${gameId}`,patch);
+    if(await tryStartIfReady())return;
     renderLobby();
   }catch(e){console.error('toggleReady',e);}
 }
@@ -1706,47 +1746,11 @@ function getQAnswers(ri){
 
 async function hostStart(){
   if(!isHost)return;
-  const ps=GS.players.filter(Boolean);
-  if(ps.length<2){alert('Potrzeba co najmniej 2 graczy!');return;}
-  const ready=GS.ready||{};
-  const allReady=GS.players.every((p,i)=>!p||!!ready[i]);
+  const fresh=norm(await fbGet(`games/${gameId}`));
+  const {filled,allReady}=getLobbyReadyState(fresh);
+  if(filled<2){alert('Potrzeba co najmniej 2 graczy!');return;}
   if(!allReady){alert('Nie wszyscy gracze są gotowi!');return;}
-  const mode=_gameMode;
-  const idx=GS.players.map((p,i)=>p?i:null).filter(i=>i!==null);
-  const playerCount=GS.players.filter(Boolean).length;
-  let sub,qp;
-  if(mode==='rounds'){
-    const rpp=Math.max(1,parseInt($('rpp').value)||3);
-    for(let r=0;r<rpp;r++) sub=[...(sub||[]),...[...idx]];
-  } else {
-    for(let r=0;r<100;r++) sub=[...(sub||[]),...[...idx]];
-  }
-  const qPool=_selectedCats.length>0
-    ?QS.map((_,i)=>i).filter(i=>(QS[i].cats||[]).some(c=>_selectedCats.includes(c)))
-    :QS.map((_,i)=>i);
-  const qPoolFinal=qPool.length>0?qPool:QS.map((_,i)=>i);
-  if(qPoolFinal.length===0){alert('Brak pytań w bazie! Dodaj pytania aby rozpocząć grę.');return;}
-  qp=shuf([...qPoolFinal]);
-  // Safe fill — avoid infinite loop if pool smaller than sub
-  let safety=0;
-  while(qp.length<sub.length && safety++<200) qp=[...qp,...shuf([...qPoolFinal])];
-  const qSeq=qp.slice(0,sub.length);
-
-  // For player-type questions, bake player names as answers
-  const playerNames=GS.players.map((p,i)=>p?{name:p.name,slot:i}:null).filter(Boolean);
-  const qAnswers={};
-  qSeq.forEach((qIdx,ri)=>{
-    const q=QS[qIdx];
-    if(q&&q.type==='players'){
-      // Exclude the subject from their own question options
-      const subjSlot=sub[ri];
-      const opts=playerNames.map(p=>p.name);
-      if(opts.length>0) qAnswers[ri]=opts;
-    }
-  });
-
-  GS={...GS,phase:'subject',gameMode:mode,subjects:sub,qSeq,qAnswers,rt:sub.length,ri:0,votes:{},bets:{},sa:-1,ready:{},pool:playerCount*10};
-  await writeGS();render();
+  if(!await tryStartIfReady()) alert('Nie udało się rozpocząć gry. Spróbuj ponownie.');
 }
 
 // ── RENDER ──
