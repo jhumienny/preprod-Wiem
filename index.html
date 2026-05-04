@@ -854,7 +854,12 @@ const show=id=>{
     if(id==='s-admin'&&typeof admOpen==='function') admOpen();
     if(id==='s-my-questions'&&typeof myqOpen==='function') myqOpen();
   };
-  if(!prev||prev.id===id){doShow();return;}
+  if(prev&&prev.id===id){
+    if(id==='s-admin'&&typeof admOpen==='function') admOpen();
+    if(id==='s-my-questions'&&typeof myqOpen==='function') myqOpen();
+    return;
+  }
+  if(!prev){doShow();return;}
   prev.style.animation='scrOut .18s ease forwards';
   setTimeout(doShow,180);
 };
@@ -1379,8 +1384,8 @@ async function joinGame(){
     }
     sessionStorage.setItem('ego_name',name);
     hideErr('home-err');
-    startPoll();
     await claimSlot(firstFreeSlot,name);
+    startPoll();
   }catch(e){
     console.error('joinGame error:',e);
     showErr('home-err','❌ Błąd: '+e.message);
