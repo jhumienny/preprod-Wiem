@@ -966,13 +966,16 @@ function renderLobCatSelector(){
   if(!row)return;
   const cats=Object.entries(_qCats||{});
   if(cats.length===0){ row.innerHTML=''; return; }
+  const hasNonDemo=[..._selectedCats].some(c=>c!=='cat_demo');
   row.innerHTML=`
     <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Kategorie pytań</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px">
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none">
       ${cats.map(([id,cat])=>{
         const active=_selectedCats.has(id);
+        const isDemo=id==='cat_demo';
+        const disabled=isDemo&&hasNonDemo;
         const count=Object.values(_qCatMap||{}).filter(arr=>arr&&arr.includes(id)).length;
-        return`<button onclick="toggleLobCat('${id}')" style="padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid ${active?cat.color:cat.color+'55'};background:${active?cat.color+'33':'transparent'};color:${active?cat.color:'var(--muted)'}">${cat.name} <span style="opacity:.6">${count}</span></button>`;
+        return`<button ${disabled?'disabled':''} onclick="toggleLobCat('${id}')" style="flex-shrink:0;padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;border:1.5px solid ${active?cat.color:cat.color+'55'};background:${active?cat.color+'33':'transparent'};color:${active?cat.color:'var(--muted)'};cursor:${disabled?'default':'pointer'};opacity:${disabled?'0.35':'1'}">${cat.name} <span style="opacity:.6">${count}</span></button>`;
       }).join('')}
     </div>`;
 }
@@ -990,11 +993,11 @@ function toggleLobCat(id){
   } else {
     if(_selectedCats.has(id)){
       _selectedCats.delete(id);
-      // If nothing else selected, re-select demo
+      // If nothing else selected, fall back to demo
       if(_selectedCats.size===0) _selectedCats.add('cat_demo');
     } else {
-      // Selecting a non-demo category → deselect demo if it was the only one
-      if(_selectedCats.size===1 && _selectedCats.has('cat_demo')) _selectedCats.delete('cat_demo');
+      // Selecting any non-demo category → always remove demo
+      _selectedCats.delete('cat_demo');
       _selectedCats.add(id);
     }
   }
