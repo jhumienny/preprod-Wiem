@@ -185,6 +185,7 @@ onAuthStateChanged(auth, (user) => {
         <span id="auth-email" style="font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
         <button id="auth-admin-btn" onclick="show('s-admin')" style="display:none;padding:6px 12px;border-radius:8px;border:none;background:#534AB7;color:#fff;font-size:11px;font-weight:700;cursor:pointer">⚙ Panel</button>
         <button id="auth-myq-btn" onclick="show('s-my-questions')" style="display:none;padding:6px 12px;border-radius:8px;border:none;background:var(--text);color:var(--bg);font-size:11px;font-weight:700;cursor:pointer">📝 Pytania</button>
+        <button id="auth-stats-btn" onclick="openStatsModal()" style="display:none;padding:6px 10px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:14px;cursor:pointer" title="Twoje statystyki">📊</button>
         <button onclick="openSettings()" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer" title="Ustawienia imienia">✏️</button>
         <button onclick="authSignOut()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer">Wyloguj</button>
       </div>
@@ -269,16 +270,13 @@ onAuthStateChanged(auth, (user) => {
         <div style="font-size:28px;flex-shrink:0;width:40px;text-align:center">✍️</div>
         <div>
           <div style="font-weight:700;font-size:14px;margin-bottom:3px">Rejestracja jest opcjonalna</div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.5">Do grania konto nie jest potrzebne — bez rejestracji korzystasz z domyślnej puli pytań. <strong style="color:var(--text)">Załóż konto</strong>, jeśli chcesz dodawać własne pytania.</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">📊</span> Zalogowani gracze mają dostęp do <strong style="color:var(--text)">statystyk swoich rozgrywek!</strong></div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.5">Do grania konto nie jest potrzebne — bez rejestracji korzystasz z domyślnej puli pytań. <button onclick="openAuthModal('register')" style="background:none;border:none;padding:0;font-family:inherit;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;text-decoration:underline">Załóż konto</button>, jeśli chcesz dodawać własne pytania i śledzić statystyki swoich rozgrywek.</div>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- Stats panel for logged-in users -->
-  <div id="stats-panel" style="display:none"></div>
 
 </div>
 
@@ -2619,23 +2617,25 @@ const ADMIN_EMAIL = 'jakub@humienny.com';
 let _authMode = 'login';
 
 window._onAuthStateChanged = function(user) {
-  const loggedOut = $('auth-logged-out');
-  const loggedIn  = $('auth-logged-in');
-  const adminBtn  = $('auth-admin-btn');
-  const myqBtn    = $('auth-myq-btn');
-  const emailEl   = $('auth-email');
+  const loggedOut  = $('auth-logged-out');
+  const loggedIn   = $('auth-logged-in');
+  const adminBtn   = $('auth-admin-btn');
+  const myqBtn     = $('auth-myq-btn');
+  const statsBtn   = $('auth-stats-btn');
+  const emailEl    = $('auth-email');
   if (!loggedOut || !loggedIn) return;
   if (user) {
     loggedOut.style.display = 'none';
     loggedIn.style.display  = 'flex';
-    if (emailEl) emailEl.textContent = user.email;
+    if (emailEl)  emailEl.textContent   = user.email;
+    if (statsBtn) statsBtn.style.display = '';
     authCheckRole(user.uid);
-    loadAndShowUserStats();
   } else {
     loggedOut.style.display = 'flex';
     loggedIn.style.display  = 'none';
     if (adminBtn) adminBtn.style.display = 'none';
     if (myqBtn)   myqBtn.style.display   = 'none';
+    if (statsBtn) statsBtn.style.display = 'none';
   }
 };
 
@@ -2704,30 +2704,43 @@ function statCard(icon, label, value, note) {
   </div>`;
 }
 
-async function loadAndShowUserStats() {
+function openStatsModal() {
+  const modal = $('stats-modal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  loadStatsIntoModal();
+}
+
+function closeStatsModal() {
+  const modal = $('stats-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function loadStatsIntoModal() {
   const user = window._currentUser;
-  const el = $('stats-panel');
-  if (!el) return;
-  if (!user) { el.style.display = 'none'; return; }
-  el.style.display = '';
+  const body = $('stats-modal-body');
+  if (!body) return;
+  if (!user) {
+    body.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Zaloguj się, aby zobaczyć statystyki.</div>';
+    return;
+  }
+  body.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Ładowanie…</div>';
   try {
     const token = await user.getIdToken();
     const url = DB_URL + '/users/' + user.uid + '/stats.json?auth=' + token;
     const r = await fetch(url);
     const s = await r.json();
     if (!s || !s.gamesPlayed) {
-      el.innerHTML = `
-        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">📊 Twoje statystyki</div>
-        <div style="opacity:0.4;filter:blur(0.5px);pointer-events:none;display:flex;flex-direction:column;gap:8px">
+      body.innerHTML = `
+        <div style="opacity:0.35;pointer-events:none;display:flex;flex-direction:column;gap:8px">
           ${statCard('🎮','Rozegranych gier','12','przykład')}
           ${statCard('🏆','Rekord żetonów','18 🪙','przykład')}
           ${statCard('✅','Trafne odpowiedzi','67% (45/67)','przykład')}
         </div>
-        <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px">Zagraj swoją pierwszą grę, żeby zobaczyć tu swoje statystyki!</div>`;
+        <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Zagraj swoją pierwszą grę, żeby zobaczyć tu swoje statystyki!</div>`;
     } else {
       const pct = s.totalAnswers > 0 ? Math.round(100*s.correctAnswers/s.totalAnswers) : 0;
-      el.innerHTML = `
-        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">📊 Twoje statystyki</div>
+      body.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:8px">
           ${statCard('🎮','Rozegranych gier',String(s.gamesPlayed||0),'')}
           ${statCard('🏆','Rekord żetonów',(s.maxTokensEver||0)+' 🪙','')}
@@ -2735,9 +2748,12 @@ async function loadAndShowUserStats() {
         </div>`;
     }
   } catch(e) {
-    el.style.display = 'none';
+    body.innerHTML = '<div style="text-align:center;color:var(--c0);font-size:13px;padding:20px 0">Błąd ładowania statystyk.</div>';
   }
 }
+
+// kept for backward compat (called from _onAuthStateChanged)
+function loadAndShowUserStats() {}
 
 function openAuthModal(mode) {
   _authMode = mode || 'login';
@@ -3729,6 +3745,16 @@ async function submitMyQuestion() {
       onkeydown="event.stopPropagation();if(event.key==='Enter')confirmDupName()">
     <div id="dupname-err" style="display:none;color:var(--c0);font-size:12px;text-align:center">To imię też jest zajęte. Wpisz inne.</div>
     <button onclick="confirmDupName()" style="background:var(--text);color:var(--bg);border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer">Potwierdź</button>
+  </div>
+</div>
+
+<div id="stats-modal" style="display:none;position:fixed;inset:0;background:#000b;z-index:9999;align-items:center;justify-content:center" onclick="if(event.target===this)closeStatsModal()">
+  <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:16px;padding:24px;width:min(340px,92vw);display:flex;flex-direction:column;gap:14px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-size:13px;font-weight:700;flex:1">📊 Twoje statystyki</div>
+      <button onclick="closeStatsModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0;line-height:1">×</button>
+    </div>
+    <div id="stats-modal-body"><div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Ładowanie…</div></div>
   </div>
 </div>
 
