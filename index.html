@@ -1478,7 +1478,7 @@ function renderLobby(){
     });
     _maxPlayers=max;
     // Sync game mode
-    const savedMode=GS.gameMode||'rounds';
+    const savedMode=GS.gameMode||'pool';
     if(savedMode!==_gameMode) setGameMode(savedMode);
     renderLobCatSelector();
   }
@@ -2614,7 +2614,7 @@ let _newQType='normal'; // 'normal' | 'players'
 // ══════════════════════════════════════════════
 
 const ADMIN_EMAIL = 'jakub@humienny.com';
-const ADMIN_USERNAME = 'jakub';
+const ADMIN_USERNAME = 'kuba';
 
 let _authMode = 'login';
 
