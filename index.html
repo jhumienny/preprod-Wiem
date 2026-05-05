@@ -1785,7 +1785,7 @@ async function reportError(btn){
   try{
     const qIdx=GS.qSeq?.[GS.ri]??GS.ri;
     const q=CQ();
-    const reportedBy=(GS.players[mySlot]?.name||'Gracz')+(window._currentUser?' ('+window._currentUser.email+')':'');
+    const reportedBy=(GS.players[mySlot]?.name||'Gracz')+(window._currentUser?' ('+(window._currentUser.email||'').replace(/@wiem\.app$/,'')+')':'');
     const data={
       questionIndex:qIdx,
       questionText:q?q.q:'',
@@ -2614,6 +2614,7 @@ let _newQType='normal'; // 'normal' | 'players'
 // ══════════════════════════════════════════════
 
 const ADMIN_EMAIL = 'jakub@humienny.com';
+const ADMIN_USERNAME = 'jakub';
 
 let _authMode = 'login';
 
@@ -2628,7 +2629,7 @@ window._onAuthStateChanged = function(user) {
   if (user) {
     loggedOut.style.display = 'none';
     loggedIn.style.display  = 'flex';
-    if (emailEl)  emailEl.textContent   = user.email;
+    if (emailEl)  emailEl.textContent   = (user.email||'').replace(/@wiem\.app$/,'');
     if (statsBtn) statsBtn.style.display = '';
     authCheckRole(user.uid);
   } else {
@@ -2654,7 +2655,7 @@ async function authCheckRole(uid) {
       await fetch(DB_URL + '/users/' + uid + '.json?auth=' + token, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ email: user.email, role: 'user', createdAt: Date.now() })
+        body: JSON.stringify({ username: (user.email||'').replace(/@wiem\.app$/,''), role: 'user', createdAt: Date.now() })
       });
     }
     const dn = (userData && userData.displayName) || '';
@@ -2799,23 +2800,27 @@ function authShowErr(msg) {
 
 function authFirebaseErrMsg(code) {
   const map = {
-    'auth/invalid-email':          'Nieprawid\u0142owy adres email.',
-    'auth/user-not-found':         'Nie znaleziono konta z tym emailem.',
+    'auth/user-not-found':         'Nie znaleziono konta z takim loginem.',
     'auth/wrong-password':         'B\u0142\u0119dne has\u0142o.',
-    'auth/invalid-credential':     'B\u0142\u0119dne dane logowania.',
-    'auth/email-already-in-use':   'Ten email jest ju\u017c zaj\u0119ty.',
+    'auth/invalid-credential':     'B\u0142\u0119dny login lub has\u0142o.',
+    'auth/email-already-in-use':   'Podany login jest ju\u017c zaj\u0119ty.',
     'auth/weak-password':          'Has\u0142o musi mie\u0107 co najmniej 6 znak\u00f3w.',
     'auth/too-many-requests':      'Za du\u017co pr\u00f3b. Spr\u00f3buj za chwil\u0119.',
     'auth/network-request-failed': 'B\u0142\u0105d sieci. Sprawd\u017a po\u0142\u0105czenie.',
+    'auth/invalid-email':          'Nieprawid\u0142owy login.',
   };
   return map[code] || ('B\u0142\u0105d: ' + code);
 }
 
 async function submitAuth() {
-  const email = ($('auth-inp-email').value || '').trim();
-  const pass  = ($('auth-inp-pass').value  || '');
-  if (!email) { authShowErr('Wpisz adres email.'); return; }
-  if (!pass)  { authShowErr('Wpisz has\u0142o.'); return; }
+  const username = ($('auth-inp-email').value || '').trim().toLowerCase();
+  const pass     = ($('auth-inp-pass').value  || '');
+  if (!username) { authShowErr('Wpisz login.'); return; }
+  if (_authMode === 'register' && !/^[a-z0-9_.-]{3,20}$/.test(username)) {
+    authShowErr('Login: 3\u201320 znak\u00f3w, tylko litery, cyfry, _ . -'); return;
+  }
+  if (!pass) { authShowErr('Wpisz has\u0142o.'); return; }
+  const fakeEmail = username + '@wiem.app';
   const btn = $('auth-submit-btn');
   btn.disabled = true;
   btn.textContent = '\u23f3';
@@ -2825,7 +2830,7 @@ async function submitAuth() {
     const fns  = window._fbAuthFns;
     if (!auth || !fns) throw new Error('auth/not-ready');
     if (_authMode === 'login') {
-      const loginCred = await fns.signInWithEmailAndPassword(auth, email, pass);
+      const loginCred = await fns.signInWithEmailAndPassword(auth, fakeEmail, pass);
       try {
         const loginToken = await loginCred.user.getIdToken();
         const roleR = await fetch(DB_URL + '/users/' + loginCred.user.uid + '/role.json?auth=' + loginToken);
@@ -2834,20 +2839,33 @@ async function submitAuth() {
           await fetch(DB_URL + '/users/' + loginCred.user.uid + '.json?auth=' + loginToken, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ email: email, role: 'user', createdAt: Date.now() })
+            body: JSON.stringify({ username: username, role: 'user', createdAt: Date.now() })
           });
         }
       } catch(e2) {}
     } else {
+      // Check username availability before creating account
+      const unCheck = await fetch(DB_URL + '/usernames/' + username + '.json');
+      const unData  = unCheck.ok ? await unCheck.json() : null;
+      if (unData !== null) {
+        authShowErr('Podany login jest niedost\u0119pny.');
+        return;
+      }
       const displayName = ($('auth-inp-name').value || '').trim();
-      const cred = await fns.createUserWithEmailAndPassword(auth, email, pass);
-      const uid = cred.user.uid;
-      const role = email === ADMIN_EMAIL ? 'admin' : 'user';
+      const cred = await fns.createUserWithEmailAndPassword(auth, fakeEmail, pass);
+      const uid  = cred.user.uid;
+      const role = username === ADMIN_USERNAME ? 'admin' : 'user';
       const regToken = await cred.user.getIdToken();
+      // Reserve username \u2192 uid mapping
+      await fetch(DB_URL + '/usernames/' + username + '.json?auth=' + regToken, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(uid)
+      });
       const regR = await fetch(DB_URL + '/users/' + uid + '.json?auth=' + regToken, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ email: email, role: role, createdAt: Date.now(), displayName: displayName })
+        body: JSON.stringify({ username: username, role: role, createdAt: Date.now(), displayName: displayName || username })
       });
       if (!regR.ok) throw new Error('SET ' + regR.status);
       if (displayName) {
@@ -3702,7 +3720,7 @@ async function submitMyQuestion() {
     const r = await fetch(DB_URL + '/userQuestions/' + user.uid + '.json?auth=' + token, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({q, qs, a, as, status:'pending', authorEmail: user.email, createdAt: Date.now()})
+      body: JSON.stringify({q, qs, a, as, status:'pending', authorEmail: (user.email||'').replace(/@wiem\.app$/,''), createdAt: Date.now()})
     });
     if (!r.ok) throw new Error('POST ' + r.status);
 
@@ -3765,7 +3783,7 @@ async function submitMyQuestion() {
       <div id="auth-modal-title" style="font-size:13px;font-weight:700;flex:1"></div>
       <button onclick="closeAuthModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0;line-height:1">×</button>
     </div>
-    <input id="auth-inp-email" type="email" autocomplete="email" placeholder="Email"
+    <input id="auth-inp-email" type="text" autocomplete="username" placeholder="Login"
       style="background:var(--bg);border:1.5px solid var(--rim);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--text);font-family:inherit;width:100%;box-sizing:border-box"
       onkeydown="event.stopPropagation();if(event.key==='Enter')$('auth-inp-pass').focus()">
     <input id="auth-inp-pass" type="password" autocomplete="current-password" placeholder="Hasło (min. 6 znaków)"
