@@ -1908,6 +1908,7 @@ function setWait(color,name,title,desc,qt){
   $('w-title').textContent=title;
   $('w-desc').textContent=desc;
   $('w-q').textContent=qt;
+  $('w-q').style.display=qt?'':'none';
 }
 
 // ── VOTING (guessers only) ──
