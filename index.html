@@ -399,7 +399,7 @@ onAuthStateChanged(auth, (user) => {
   </div>
   <div class="vstatus" id="v-st"></div>
   <button class="btn btn-lit" id="btn-vote" style="display:none" onclick="confirmVote()">Zatwierdź odpowiedź ✓</button>
-  <button onclick="reportError()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 0;text-align:center;width:100%">⚑ Zgłoś błąd</button>
+  <button onclick="reportError(this)" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 0;text-align:center;width:100%;transition:color .2s">⚑ Zgłoś błąd</button>
   <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
 </div>
 
@@ -428,7 +428,7 @@ onAuthStateChanged(auth, (user) => {
   <div class="ans-list" id="sj-ans"></div>
   <button class="btn btn-dim" id="btn-swap-sj" style="display:none" onclick="swapQuestionSJ()"></button>
   <button class="btn btn-lit" id="btn-sj" style="display:none" onclick="submitSJ()">Zatwierdź i pozwól innym odpowiedzieć →</button>
-  <button onclick="reportError()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 0;text-align:center;width:100%">⚑ Zgłoś błąd</button>
+  <button onclick="reportError(this)" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 0;text-align:center;width:100%;transition:color .2s">⚑ Zgłoś błąd</button>
   <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
 </div>
 
@@ -466,7 +466,7 @@ onAuthStateChanged(auth, (user) => {
         oninput="admRenderQuestions()" onkeydown="event.stopPropagation()">
       <div id="adm-q-count" style="font-size:11px;color:var(--muted);white-space:nowrap"></div>
     </div>
-    <div id="adm-bulk-bar" style="display:none;background:#1e1b4b;border:1.5px solid #534AB7;border-radius:10px;padding:10px 14px;margin-bottom:8px;display:none;align-items:center;gap:10px">
+    <div id="adm-bulk-bar" style="display:none;background:#1e1b4b;border:1.5px solid #534AB7;border-radius:10px;padding:10px 14px;margin-bottom:8px;align-items:center;gap:10px">
       <span id="adm-bulk-count" style="font-size:12px;color:#a5b4fc;flex:1">0 zaznaczonych</span>
       <button onclick="admBulkDelete()" style="padding:6px 14px;border-radius:8px;border:1.5px solid var(--c0)44;background:transparent;color:var(--c0);font-size:12px;font-weight:700;cursor:pointer">🗑 Usuń zaznaczone</button>
       <button onclick="admClearSelection()" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;cursor:pointer">✕</button>
@@ -1781,8 +1781,9 @@ function showSwapToast(){
   t._timer=setTimeout(()=>{t.style.display='none';},3500);
 }
 
-async function reportError(){
+async function reportError(btn){
   if(!GS||!gameId)return;
+  if(btn&&btn._reported)return; // prevent double-click
   try{
     const qIdx=GS.qSeq?.[GS.ri]??GS.ri;
     const q=CQ();
@@ -1797,18 +1798,20 @@ async function reportError(){
       status:'open'
     };
     await fetch(`${DB_URL}/reports.json`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-    // Show toast
-    let t=$('report-toast');
-    if(!t){
-      t=document.createElement('div');
-      t.id='report-toast';
-      t.style.cssText='position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:999;background:#14532d;border:2px solid #16a34a;color:#4ade80;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:600;text-align:center;max-width:300px;box-shadow:0 4px 20px #0006;animation:toastIn .35s cubic-bezier(.34,1.56,.64,1);';
-      document.body.appendChild(t);
+    // Animate button instead of toast
+    if(btn){
+      btn._reported=true;
+      btn.textContent='✓ Zgłoszono!';
+      btn.style.color='#4ade80';
+      btn.style.fontWeight='700';
+      clearTimeout(btn._resetTimer);
+      btn._resetTimer=setTimeout(()=>{
+        btn.textContent='⚑ Zgłoś błąd';
+        btn.style.color='';
+        btn.style.fontWeight='';
+        btn._reported=false;
+      },3000);
     }
-    t.textContent='✓ Zgłoszenie wysłane';
-    t.style.display='block';
-    clearTimeout(t._timer);
-    t._timer=setTimeout(()=>{t.style.display='none';},3000);
   }catch(e){console.error('reportError',e);}
 }
 
@@ -1946,6 +1949,7 @@ function renderVoting(){
   }
   if(mySlot===null||!GS.players[mySlot]){
     setWait('#888','?','Trwa głosowanie…','Czekaj',q.q.replace('[imię]',sp.name));
+    const _wp=$('w-preview'); if(_wp) _wp.innerHTML='';
     show('s-wait'); return;
   }
 
@@ -2163,8 +2167,9 @@ function renderSubj(){
   // Non-subject players see wait screen with question preview
   if(!amSJ()){
     setWait(C(si),sp.name,`${sp.name} wybiera odpowiedź…`,
-      'Twoja kolej zaraz — poczekaj!',
-      q.type==='players'?q.q:q.q.replace('[imię]',sp.name));
+      'Twoja kolej zaraz — poczekaj!', '');
+    // Clear the w-q element – question shown in preview below instead
+    const wq=$('w-q'); if(wq) wq.textContent='';
     // Populate preview with question and disabled answer buttons
     const prev=$('w-preview');
     if(prev){
@@ -2335,7 +2340,7 @@ function renderReveal(){
       ?`<button class="btn btn-lit" onclick="nextRound()">${isLast?'🏆 Wyniki końcowe':'Następna runda →'}</button>`
       :`<div style="text-align:center;padding:14px;font-size:14px;color:var(--muted)">⏳ Czekaj aż host przejdzie dalej…</div>`
     }
-    <button onclick="reportError()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 0;text-align:center;width:100%;margin-top:4px">⚑ Zgłoś błąd</button>`;
+    <button onclick="reportError(this)" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 0;text-align:center;width:100%;margin-top:4px;transition:color .2s">⚑ Zgłoś błąd</button>`;
   show('s-reveal');
 }
 
