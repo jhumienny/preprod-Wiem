@@ -964,7 +964,7 @@ let _selectedCats=new Set(['cat_demo']); // set of selected category ids
 function renderLobCatSelector(){
   const row=$('lob-cat-row');
   if(!row)return;
-  const cats=Object.entries(_qCats||{});
+  const cats=Object.entries(_qCats||{}).sort((a,b)=>a[0]==='cat_demo'?-1:b[0]==='cat_demo'?1:0);
   if(cats.length===0){ row.innerHTML=''; return; }
   const hasNonDemo=[..._selectedCats].some(c=>c!=='cat_demo');
   row.innerHTML=`
