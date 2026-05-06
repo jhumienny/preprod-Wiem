@@ -1328,11 +1328,17 @@ async function joinGame(){
       showErr('home-err','❌ Ta gra już się rozpoczęła. Poczekaj na kolejną rozgrywkę.');
       $('home-err').style.color='var(--c0)';return;
     }
-    gameId=code;GS=norm(gs);
+    const normGs=norm(gs);
+    const firstFree=normGs.players.findIndex(p=>!p);
+    if(firstFree===-1){
+      showErr('home-err','❌ W grze uczestniczy już maksymalna liczba graczy.');
+      $('home-err').style.color='var(--c0)';return;
+    }
+    gameId=code;GS=normGs;
     sessionStorage.setItem('ego_name',name);
     hideErr('home-err');
-    renderSlots(gs,name);show('s-slots');
     startPoll();
+    await claimSlot(firstFree,name);
   }catch(e){
     console.error('joinGame error:',e);
     showErr('home-err','❌ Błąd: '+e.message);
@@ -1402,12 +1408,11 @@ async function claimSlot(slot,name){
     const gs=await fbGet(`games/${gameId}`);
     const fresh=norm(gs);
     if(fresh.players[slot]&&mySlot!==slot){
-      alert('Ten slot jest właśnie zajęty przez kogoś innego!');
-      GS=fresh;renderSlots(fresh,name);return;
+      // Slot was taken by someone else — find next free slot automatically
+      const nextFree=fresh.players.findIndex(p=>!p);
+      if(nextFree===-1){showErr('home-err','❌ W grze uczestniczy już maksymalna liczba graczy.');$('home-err').style.color='var(--c0)';show('s-home');return;}
+      GS=fresh;await claimSlot(nextFree,name);return;
     }
-    const normalName=(name||'Gracz').trim().toLowerCase();
-    const lowerSlotDupe=fresh.players.some((p,i)=>p&&i<slot&&p.name.trim().toLowerCase()===normalName);
-    if(lowerSlotDupe){showDuplicateNameModal(slot);return;}
     // Use PATCH with only the changed player slot — minimal write, atomic
     const patch={};
     patch[`players/${slot}`]={name:name||'Gracz',pts:fresh.players[slot]?.pts??10};
@@ -1726,11 +1731,6 @@ function render(){
     }
   }
 
-  // If on slots screen, keep updating it
-  if($('s-slots').classList.contains('on')){
-    renderSlots(GS,sessionStorage.getItem('ego_name')||'Gracz');
-    return;
-  }
   switch(GS.phase){
     case'lobby':   renderLobby(); show('s-lobby'); break;
     case'voting':  renderVoting(); break;
