@@ -316,18 +316,6 @@ onAuthStateChanged(auth, (user) => {
 
   <!-- Host controls -->
   <div id="lob-host" style="display:none;flex-direction:column;gap:10px;">
-    <div class="rrow-cfg">
-      <label>Liczba graczy</label>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="maxp-btn" data-n="2" onclick="setMaxPlayers(2)">2</button>
-        <button class="maxp-btn" data-n="3" onclick="setMaxPlayers(3)">3</button>
-        <button class="maxp-btn active" data-n="4" onclick="setMaxPlayers(4)">4</button>
-        <button class="maxp-btn" data-n="5" onclick="setMaxPlayers(5)">5</button>
-        <button class="maxp-btn" data-n="6" onclick="setMaxPlayers(6)">6</button>
-        <button class="maxp-btn" data-n="7" onclick="setMaxPlayers(7)">7</button>
-        <button class="maxp-btn" data-n="8" onclick="setMaxPlayers(8)">8</button>
-      </div>
-    </div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <label style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Tryb gry</label>
       <div style="display:flex;gap:8px">
@@ -902,7 +890,7 @@ function norm(gs){
   gs.bets     = gs.bets  || {};
   gs.pool     = gs.pool  != null ? parseInt(gs.pool)||0 : 0;
   gs.ready      = gs.ready || {};
-  gs.maxPlayers = gs.maxPlayers || 4;
+  gs.maxPlayers = 8;
   gs.swapAt     = gs.swapAt || null;
   gs.gameMode   = gs.gameMode || 'pool';
   gs.qAnswers   = gs.qAnswers || {};
@@ -947,7 +935,7 @@ function startCountdown(ms, onTick, onDone){
 function stopCountdown(){
   if(_countdownTimer){clearInterval(_countdownTimer);_countdownTimer=null;}
 }
-let _maxPlayers=4; // host-controlled, 2-8
+let _maxPlayers=8;
 let _gameMode='pool'; // 'rounds' | 'pool'
 let _selectedCats=new Set(['cat_demo']); // set of selected category ids
 let _lobEditingName=false; // inline name edit mode in lobby
@@ -1310,7 +1298,7 @@ async function createGame(){
   $('home-err').style.color='var(--muted)';
   try{
     gameId=rnd4();
-    GS={phase:'lobby',players:[{name,pts:10},null,null,null],subjects:[],qSeq:[],rt:0,ri:0,votes:{},bets:{},sa:-1,ready:{},maxPlayers:4,pool:0,hostSlot:0};
+    GS={phase:'lobby',players:[{name,pts:10},null,null,null,null,null,null,null],subjects:[],qSeq:[],rt:0,ri:0,votes:{},bets:{},sa:-1,ready:{},maxPlayers:8,pool:0,hostSlot:0};
     await fbPut(`games/${gameId}`,GS);
     mySlot=0;isHost=true;
     sessionStorage.setItem('ego_sess',JSON.stringify({gameId,mySlot}));
@@ -1460,17 +1448,12 @@ function renderLobby(){
   $('lob-code').textContent=gameId||'----';
   const ready=GS.ready||{};
   const players=GS.players;
-  const max=GS.maxPlayers||4;
+  const max=8;
   const activePlayers=players.slice(0,max);
   const filled=activePlayers.filter(Boolean).length;
   $('lob-cnt').textContent=`Gracze (${filled}/${max})`;
 
-  // Sync maxp-btn active state for host
   if(isHost){
-    document.querySelectorAll('.maxp-btn[data-n]').forEach(b=>{
-      b.classList.toggle('active', parseInt(b.dataset.n)===max);
-    });
-    _maxPlayers=max;
     // Sync game mode
     const savedMode=GS.gameMode||'pool';
     setGameMode(savedMode);
@@ -1536,9 +1519,7 @@ function renderLobby(){
       btn.disabled=false;
       btn.style.opacity='1';
       // Show how many players will play and allow manual start
-      btn.textContent=filled===activePlayers.filter(Boolean).length && filled===(GS.maxPlayers||4)
-        ? '▶ Rozpocznij grę'
-        : `▶ Rozpocznij z ${filled} graczami`;
+      btn.textContent=`▶ Rozpocznij grę (${filled} graczy)`;
     } else {
       btn.disabled=true;
       btn.style.opacity='0.4';
@@ -1607,7 +1588,7 @@ async function leaveGame(){
         const ordered=[rawHostSlot,...remainingSlots.filter(s=>s!==rawHostSlot)];
         const compactPlayers=ordered.map(s=>({name:GS.players[s].name,pts:10}));
         // Pad to maxPlayers with nulls
-        const max=GS.maxPlayers||4;
+        const max=8;
         while(compactPlayers.length<max)compactPlayers.push(null);
         // Build remap: oldSlot → newSlot
         const slotRemap={};
