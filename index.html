@@ -69,7 +69,9 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .sbi-n{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .sbi-v{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;}
 .plist{display:flex;flex-direction:column;gap:8px;}
-.prow{background:var(--card);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500;}
+.prow{background:var(--card);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500;position:relative;}
+.kick-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);opacity:0;pointer-events:none;transition:opacity .15s;}
+.prow:hover .kick-btn{opacity:1;pointer-events:auto;}
 .prow-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .ptag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap;}
 .tag-host{background:var(--text);color:var(--bg);}
@@ -1484,7 +1486,7 @@ function renderLobby(){
       ? `<span style="min-width:82px;text-align:center;background:#14532d;color:#4ade80;border:1.5px solid #16a34a;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap;display:inline-block">✓ gotowy</span>`
       : `<span style="min-width:82px;text-align:center;background:#2d1a1a;color:#f87171;border:1.5px solid #dc262655;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap;display:inline-block">⏳ czeka</span>`;
     const kickBtn=isHost&&i!==mySlot&&!hostLocked
-      ? `<button onclick="kickPlayer(${i})" title="Usuń gracza" style="flex-shrink:0;width:30px;height:30px;background:#2d1a1a;border:1.5px solid #dc262655;color:#f87171;font-size:15px;font-weight:700;cursor:pointer;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0">✕</button>`
+      ? `<button class="kick-btn" onclick="kickPlayer(${i})" title="Usuń gracza" style="width:30px;height:30px;background:#2d1a1a;border:1.5px solid #dc262655;color:#f87171;font-size:15px;font-weight:700;cursor:pointer;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0">✕</button>`
       : '';
     const nameCell = (i===mySlot && _lobEditingName)
       ? `<input id="lob-name-inp" type="text" value="${p.name}" maxlength="14" autocomplete="off" data-1p-ignore data-lpignore="true"
@@ -1503,8 +1505,8 @@ function renderLobby(){
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         ${i===(GS.hostSlot??0)?'<span class="ptag tag-host">HOST</span>':''}
         ${readyBadge}
-        ${kickBtn}
       </div>
+      ${kickBtn}
     </div>`;
   }).join('')+joinRow;
 
