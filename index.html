@@ -1374,10 +1374,10 @@ function changeSlotName(){
 function renderSlotsGrid(gs,name){
   const grid=$('slot-grid');if(!grid)return;
   grid.innerHTML='';
-  const max=gs.maxPlayers||4;
-  for(let i=0;i<8;i++){
-    if(i>=max) continue;
-    const p=gs.players[i];
+  const firstFree=gs.players.findIndex(p=>!p);
+  // Show only occupied slots + one free slot (to join)
+  const slotsToShow=gs.players.map((p,i)=>({p,i})).filter(({p,i})=>p||i===firstFree);
+  for(const {p,i} of slotsToShow){
     const isMine=mySlot===i;
     const div=document.createElement('div');
     div.className='slot'+(p&&!isMine?' taken':'')+(isMine?' mine':'');
@@ -1460,8 +1460,12 @@ function renderLobby(){
     renderLobCatSelector();
   }
 
+  const firstFreeSlot=activePlayers.findIndex(p=>!p);
+  const joinRow=(mySlot===null && firstFreeSlot!==-1)
+    ? `<div onclick="claimSlot(${firstFreeSlot},($('slots-name-inp')?.value||sessionStorage.getItem('ego_name')||'Gracz').trim())" style="background:var(--card);border:1.5px dashed var(--rim);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--muted);cursor:pointer;text-align:center">+ Dołącz do gry</div>`
+    : '';
   $('lob-list').innerHTML=activePlayers.map((p,i)=>{
-    if(!p)return`<div style="background:var(--card);border:1.5px dashed var(--rim);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--muted)">Slot ${i+1} — wolny</div>`;
+    if(!p)return'';
     const isReady=!!ready[i];
     const readyBadge=isReady
       ? `<span style="background:#14532d;color:#4ade80;border:1.5px solid #16a34a;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap">✓ ${gW(p.name,'gotowy','gotowa')}</span>`
@@ -1486,7 +1490,7 @@ function renderLobby(){
       ${_lobEditingName&&i===mySlot?'':readyBadge}
       ${kickBtn}
     </div>`;
-  }).join('');
+  }).join('')+joinRow;
 
   // Focus inline name input if editing
   if(_lobEditingName){
