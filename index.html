@@ -25,8 +25,8 @@
 html,body{height:100%;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;justify-content:center;min-height:100dvh;}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--rim) 1px,transparent 1px),linear-gradient(90deg,var(--rim) 1px,transparent 1px);background-size:32px 32px;opacity:.18;pointer-events:none;z-index:0;}
-.app{position:relative;z-index:1;width:100%;max-width:440px;min-height:100dvh;display:flex;flex-direction:column;}
-.scr{display:none;flex-direction:column;flex:1;padding:20px 16px max(32px,calc(env(safe-area-inset-bottom) + 24px));gap:16px;animation:pop .28s ease;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.app{position:relative;z-index:1;width:100%;max-width:440px;height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
+.scr{display:none;flex-direction:column;flex:1;min-height:0;padding:20px 16px max(32px,calc(env(safe-area-inset-bottom) + 24px));gap:16px;animation:pop .28s ease;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .scr.on{display:flex;}
 @keyframes pop{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-16px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
