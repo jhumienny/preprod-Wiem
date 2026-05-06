@@ -1941,12 +1941,16 @@ function renderVoting(){
     buildAns('v-ans',getQAnswers(GS.ri),true,GS.sa,null,null);
     $('btn-vote').style.display='none';
     $('v-bet').style.display='none';
+    const pending=GS.players.map((p,i)=>({p,i})).filter(({p,i})=>p&&i!==si&&GS.votes[i]===undefined);
+    const chips=pending.map(({p,i})=>`<span style="padding:6px 16px;border-radius:99px;background:${C(i)}22;color:${C(i)};border:1.5px solid ${C(i)}55;font-size:13px;font-weight:700">${p.name}</span>`).join('');
     $('v-st').innerHTML=`
-      <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:14px 16px;text-align:center;margin-top:4px">
-        <div style="font-size:20px;margin-bottom:6px">🤫</div>
-        <div style="font-weight:600;font-size:14px;margin-bottom:4px">${gW(GS.players[mySlot]?.name||'','Już odpowiedziałeś!','Już odpowiedziałaś!')}</div>
-        <div style="color:var(--muted);font-size:13px">Zagłosowało ${done} z ${guessers.length} graczy</div>
-        ${buildPendingVoters(si)}
+      <div style="text-align:center;padding:28px 20px;background:var(--card);border:1.5px solid var(--rim);border-radius:16px;margin-top:4px">
+        <div style="font-size:44px;margin-bottom:10px">🤫</div>
+        <div style="font-weight:700;font-size:17px;margin-bottom:24px">${gW(GS.players[mySlot]?.name||'','Już odpowiedziałeś!','Już odpowiedziałaś!')}</div>
+        ${pending.length>0?`
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Czekasz na</div>
+          <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px">${chips}</div>
+        `:`<div style="color:var(--c2);font-size:14px;font-weight:700">✓ Wszyscy odpowiedzieli!</div>`}
       </div>`;
     show('s-vote'); return;
   }
