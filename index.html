@@ -1193,10 +1193,7 @@ async function handleGSUpdate(){
           }
         });
         next.pool=Math.max(0,(next.pool||0)+poolDelta);
-        const mode=next.gameMode||'rounds';
-        const anyBroke=next.players.some(p=>p&&p.pts<=0);
-        if(mode==='pool'&&(next.pool<=0||anyBroke)) next.phase='ended';
-        else if(mode==='rounds'&&next.ri+1>=next.rt) next.phase='ended';
+        // Always go to reveal first — nextRound() will handle transition to 'ended'
         GS=next;
         await writeGS();
         render();
@@ -2128,10 +2125,7 @@ async function castVote(ans){
         }
       });
       next.pool=Math.max(0,(next.pool||0)+poolDelta);
-      const mode=next.gameMode||'rounds';
-      const anyBroke=next.players.some(p=>p&&p.pts<=0);
-      if(mode==='pool'&&(next.pool<=0||anyBroke)) next.phase='ended';
-      else if(mode==='rounds'&&next.ri+1>=next.rt) next.phase='ended';
+      // Always go to reveal first — nextRound() will handle transition to 'ended'
       GS=next;
       await writeGS();
     }
