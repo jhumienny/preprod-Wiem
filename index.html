@@ -311,16 +311,6 @@ onAuthStateChanged(auth, (user) => {
   <div class="label" id="lob-cnt">Gracze (0/4)</div>
   <div class="plist" id="lob-list"></div>
 
-  <!-- Name change row -->
-  <div class="field" id="lob-name-row" style="display:none">
-    <label>Twoje imię:</label>
-    <input id="lob-name-inp" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" maxlength="14" autocomplete="off" placeholder="Zmień imię"
-      oninput="this.dataset.touched='1'"
-      onkeydown="event.stopPropagation();if(event.key==='Enter')changeName()"
-      onkeyup="event.stopPropagation()">
-    <button onclick="changeName()" style="background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:6px 12px;font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0">OK</button>
-  </div>
-
   <!-- Ready button (everyone) -->
   <button class="btn" id="btn-ready" style="display:none" onclick="toggleReady()"></button>
 
@@ -960,6 +950,7 @@ function stopCountdown(){
 let _maxPlayers=4; // host-controlled, 2-8
 let _gameMode='pool'; // 'rounds' | 'pool'
 let _selectedCats=new Set(['cat_demo']); // set of selected category ids
+let _lobEditingName=false; // inline name edit mode in lobby
 
 function renderLobCatSelector(){
   const row=$('lob-cat-row');
@@ -1495,26 +1486,28 @@ function renderLobby(){
     const kickBtn=isHost&&i!==mySlot
       ? `<button onclick="kickPlayer(${i})" style="flex-shrink:0;background:#2d1a1a;border:1.5px solid #dc262655;color:#f87171;font-size:12px;font-weight:700;cursor:pointer;padding:5px 12px;border-radius:8px;white-space:nowrap">✕ Usuń</button>`
       : '';
+    const nameCell = (i===mySlot && _lobEditingName)
+      ? `<input id="lob-name-inp" type="text" value="${p.name}" maxlength="14" autocomplete="off" data-1p-ignore data-lpignore="true"
+           style="flex:1;min-width:0;background:var(--bg);border:1.5px solid ${C(i)};border-radius:8px;padding:4px 8px;font-size:14px;font-weight:600;color:var(--text);font-family:inherit"
+           onkeydown="event.stopPropagation();if(event.key==='Enter')changeName();if(event.key==='Escape'){_lobEditingName=false;renderLobby();}"
+           onkeyup="event.stopPropagation()">
+         <button onclick="changeName()" style="flex-shrink:0;background:${C(i)};color:#000;border:none;border-radius:8px;padding:4px 10px;font-weight:700;font-size:13px;cursor:pointer">✓</button>
+         <button onclick="_lobEditingName=false;renderLobby()" style="flex-shrink:0;background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px">✕</button>`
+      : `<span style="font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${p.name}</span>
+         ${i===mySlot?`<button onclick="_lobEditingName=true;renderLobby()" style="flex-shrink:0;background:none;border:none;color:var(--muted);font-size:15px;cursor:pointer;padding:2px 4px" title="Zmień imię">✏️</button>`:''}`;
     return`<div class="prow" style="border:1.5px solid ${isReady?'#16a34a':C(i)+'44'};gap:8px;">
       <div class="prow-dot" style="background:${C(i)};flex-shrink:0"></div>
-      <span style="font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${p.name}</span>
+      ${nameCell}
       ${i===(GS.hostSlot??0)?'<span class="ptag tag-host" style="flex-shrink:0">HOST</span>':''}
-      ${i===mySlot?'<span class="ptag tag-you" style="flex-shrink:0">ty</span>':''}
-      ${readyBadge}
+      ${i===mySlot&&!_lobEditingName?'<span class="ptag tag-you" style="flex-shrink:0">ty</span>':''}
+      ${_lobEditingName&&i===mySlot?'':readyBadge}
       ${kickBtn}
     </div>`;
   }).join('');
 
-  // Name change field
-  if(mySlot!==null){
-    $('lob-name-row').style.display='flex';
-    const curName=players[mySlot]?.name||'';
-    const inp=$('lob-name-inp');
-    if(inp){
-      inp.placeholder=curName;
-      // Only clear the field if user hasn't started typing — ensures placeholder shows current name
-      if(!inp.dataset.touched) inp.value='';
-    }
+  // Focus inline name input if editing
+  if(_lobEditingName){
+    setTimeout(()=>{ const inp=$('lob-name-inp'); if(inp){inp.focus();inp.select();} },50);
   }
 
   // Ready button
@@ -1578,7 +1571,6 @@ async function changeName(){
   const inp=$('lob-name-inp');
   const newName=(inp?.value||'').trim();
   if(!newName||mySlot===null){inp?.focus();return;}
-  // Check duplicate
   const norm2=newName.toLowerCase();
   const dup=GS.players.some((p,i)=>p&&i!==mySlot&&p.name.trim().toLowerCase()===norm2);
   if(dup){alert(`Imię "${newName}" jest już zajęte. Wybierz inne.`);return;}
@@ -1590,8 +1582,7 @@ async function changeName(){
     patch[`ready/${mySlot}`]=false;
     await fbPatch(`games/${gameId}`,patch);
     GS.players[mySlot].name=newName;
-    // Clear input, update placeholder
-    if(inp){ inp.value=''; delete inp.dataset.touched; inp.placeholder=newName; }
+    _lobEditingName=false;
     renderLobby();
   }catch(e){console.error('changeName',e);}
 }
