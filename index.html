@@ -404,7 +404,7 @@ onAuthStateChanged(auth, (user) => {
 <!-- ══ WAIT ══ -->
 <div class="scr" id="s-wait">
   <div class="sbar" id="sb-w"></div>
-  <div class="wmid">
+  <div class="wmid" id="w-mid">
     <div class="wav pulse" id="w-av"></div>
     <div class="wtitle" id="w-title"></div>
     <div class="wdesc" id="w-desc"></div>
@@ -1905,6 +1905,7 @@ function buildAns(cid,answers,locked,chosen,correct,cb){
 }
 
 function setWait(color,name,title,desc,qt){
+  if($('w-mid')) $('w-mid').style.display='';
   const av=$('w-av');
   av.style.cssText=`width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:32px;background:${color}22;color:${color};margin:0 auto;`;
   av.textContent=name.charAt(0).toUpperCase();
@@ -2170,6 +2171,8 @@ function renderSubj(){
   if(!amSJ()){
     setWait(C(si),sp.name,`${sp.name} wybiera odpowiedź…`,
       'Twoja kolej zaraz — poczekaj!', '');
+    // Hide wmid — banner below already shows who's deciding
+    if($('w-mid')) $('w-mid').style.display='none';
     // Clear the w-q element – question shown in preview below instead
     const wq=$('w-q'); if(wq) wq.textContent='';
     // Populate preview with question and disabled answer buttons
