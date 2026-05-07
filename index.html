@@ -522,6 +522,7 @@ onAuthStateChanged(auth, (user) => {
   </div>
   <div class="podium" id="end-pod"></div>
   <div class="rcard" id="end-sc"></div>
+  <div class="rcard" id="end-rounds"></div>
   <div id="end-btns" style="display:flex;flex-direction:column;gap:8px;"></div>
 </div>
 
@@ -1166,7 +1167,7 @@ async function handleGSUpdate(){
           const playerNames=GS.players.map((p,i)=>p?{name:p.name,slot:i}:null).filter(Boolean);
           const qAnswers={};
           qSeq.forEach((qIdx,ri)=>{const qq=QS[qIdx];if(qq&&qq.type==='players'){const opts=playerNames.map(p=>p.name);if(opts.length>0)qAnswers[ri]=opts;}});
-          GS={...GS,phase:'subject',gameMode:mode,subjects:sub,qSeq,qAnswers,rt:sub.length,ri:0,votes:{},bets:{},sa:-1,ready:{},pool:playerCount*10};
+          GS={...GS,phase:'subject',gameMode:mode,subjects:sub,qSeq,qAnswers,rt:sub.length,ri:0,votes:{},bets:{},sa:-1,ready:{},pool:playerCount*10,roundHistory:[]};
           await writeGS();
         }
       } else { if(_allVotedAt) stopCountdown(); _allVotedAt=null; }
@@ -1300,7 +1301,7 @@ async function createGame(){
   $('home-err').style.color='var(--muted)';
   try{
     gameId=rnd4();
-    GS={phase:'lobby',players:[{name,pts:10},null,null,null,null,null,null,null],subjects:[],qSeq:[],rt:0,ri:0,votes:{},bets:{},sa:-1,ready:{},maxPlayers:8,pool:0,hostSlot:0};
+    GS={phase:'lobby',players:[{name,pts:10},null,null,null,null,null,null,null],subjects:[],qSeq:[],rt:0,ri:0,votes:{},bets:{},sa:-1,ready:{},maxPlayers:8,pool:0,hostSlot:0,roundHistory:[]};
     await fbPut(`games/${gameId}`,GS);
     mySlot=0;isHost=true;
     sessionStorage.setItem('ego_sess',JSON.stringify({gameId,mySlot}));
@@ -1620,7 +1621,7 @@ async function leaveGame(){
         ordered.forEach((oldSlot,newSlot)=>{slotRemap[oldSlot]=newSlot;});
         await fbPut(`games/${gameId}`,{
           phase:'lobby',players:compactPlayers,hostSlot:0,slotRemap,
-          subjects:[],qSeq:[],qAnswers:{},rt:0,ri:0,
+          subjects:[],qSeq:[],qAnswers:{},rt:0,ri:0,roundHistory:[],
           votes:{},bets:{},sa:-1,ready:{},maxPlayers:max,pool:0
         });
       }
@@ -1701,7 +1702,7 @@ async function hostStart(){
     }
   });
 
-  GS={...GS,phase:'subject',gameMode:mode,subjects:sub,qSeq,qAnswers,rt:sub.length,ri:0,votes:{},bets:{},sa:-1,ready:{},pool:playerCount*10};
+  GS={...GS,phase:'subject',gameMode:mode,subjects:sub,qSeq,qAnswers,rt:sub.length,ri:0,votes:{},bets:{},sa:-1,ready:{},pool:playerCount*10,roundHistory:[]};
   await writeGS();render();
 }
 
@@ -1814,6 +1815,32 @@ const SP=()=>GS.players[SI()];
 const CQ=()=>QS[GS.qSeq[GS.ri]];
 const amSJ=()=>mySlot===SI();
 const roundLabel=(ri,tot=GS?.rt)=> (GS?.gameMode||'rounds')==='pool' ? `${ri}. runda` : `Runda ${ri} / ${tot}`;
+const esc=s=>String(s??'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+
+function buildRoundHistoryEntry(gs){
+  const ri=gs.ri??0;
+  const si=gs.subjects?.[ri]??0;
+  const sp=gs.players?.[si];
+  const qIdx=gs.qSeq?.[ri];
+  const q=QS[qIdx];
+  const answers=(gs.qAnswers&&gs.qAnswers[ri])||(q?q.a:[]);
+  const correct=gs.sa;
+  return{
+    round:ri+1,
+    subjectSlot:si,
+    subjectName:sp?.name||'',
+    question:q?q.q.replace('[imię]',sp?.name||''):'',
+    correctAnswer:answers[correct]||'',
+    players:(gs.players||[]).map((p,i)=>p?{
+      slot:i,
+      name:p.name,
+      isSubject:i===si,
+      vote:gs.votes?.[i],
+      answer:answers[gs.votes?.[i]]||'',
+      correct:i===si?null:gs.votes?.[i]===correct
+    }:null).filter(Boolean)
+  };
+}
 
 // Dynamically scale question text font size based on character count
 function setQText(elId, text){
@@ -2131,6 +2158,8 @@ async function castVote(ans){
       if(!fresh||fresh.phase!=='voting'){render();return;} // already transitioned
       const next=norm(dc(fresh));
       next.phase='reveal';
+      const historyEntry=buildRoundHistoryEntry(next);
+      next.roundHistory=[...(next.roundHistory||[]),historyEntry];
       let poolDelta=0;
       next.players.forEach((p,i)=>{
         if(!p||i===si)return;
@@ -2389,11 +2418,29 @@ function renderEnd(){
   }).join('');
   $('end-sc').innerHTML='<div class="rctitle">Wyniki końcowe</div>'+
     ps.map(p=>`<div class="rvrow"><div class="rvl"><div class="rvdot" style="background:${C(p.i)}"></div><span>${p.name}</span></div><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:${C(p.i)}">${p.pts} 🪙</div></div>`).join('');
+
+  const rh=GS.roundHistory||[];
+  const roundsEl=$('end-rounds');
+  if(roundsEl){
+    roundsEl.innerHTML='<div class="rctitle">Podsumowanie rund</div>'+(rh.length?rh.map(r=>{
+      const chips=(r.players||[]).map(p=>{
+        if(p.isSubject) return `<span class="vchip" style="background:${C(p.slot)}22;color:${C(p.slot)};border:1px solid ${C(p.slot)}44">${esc(p.name)} · temat</span>`;
+        return `<span class="vchip" style="background:${p.correct?'#14532d':'#450a0a'};color:${p.correct?'#86efac':'#fca5a5'};border:1px solid ${p.correct?'#22c55e55':'#ef444455'}">${p.correct?'✓':'✗'} ${esc(p.name)}</span>`;
+      }).join('');
+      return `<div style="border-top:1px solid var(--rim);padding-top:12px;margin-top:12px">
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">${esc(roundLabel(r.round,GS.rt))} · pytanie o <strong style="color:${C(r.subjectSlot)}">${esc(r.subjectName)}</strong></div>
+        <div style="font-size:13px;line-height:1.45;margin-bottom:8px">${esc(r.question)}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Poprawna: <strong style="color:var(--c2)">${esc(r.correctAnswer)}</strong></div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">${chips}</div>
+      </div>`;
+    }).join(''):'<div style="font-size:13px;color:var(--muted)">Brak zapisanych rund.</div>');
+  }
+
   const eb=$('end-btns');eb.innerHTML='';
   if(isHost){
     const b=document.createElement('button');b.className='btn btn-lit';b.textContent='Zagraj ponownie';
     b.onclick=async()=>{
-      GS={...GS,phase:'lobby',subjects:[],qSeq:[],ri:0,votes:{},bets:{},sa:-1,pool:0};
+      GS={...GS,phase:'lobby',subjects:[],qSeq:[],ri:0,votes:{},bets:{},sa:-1,pool:0,roundHistory:[]};
       GS.players.forEach(p=>{if(p)p.pts=10;});
       await writeGS();render();
     };
