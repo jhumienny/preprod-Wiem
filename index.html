@@ -329,11 +329,11 @@ onAuthStateChanged(auth, (user) => {
         <button id="mode-rounds" class="mode-btn" onclick="setGameMode('rounds')">
           <span style="font-size:18px">🔢</span>
           <span style="font-size:13px;font-weight:700">Na rundy</span>
-          <span style="font-size:10px;opacity:.65">X rund na gracza</span>
+          <span style="font-size:10px;opacity:.65">łączna liczba rund</span>
         </button>
       </div>
       <div id="rpp-row" style="display:none;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:10px 12px">
-        <span style="font-size:13px;color:var(--muted);flex:1">Rund na gracza</span>
+        <span style="font-size:13px;color:var(--muted);flex:1">Liczba rund</span>
         <div style="display:flex;align-items:center;gap:8px">
           <button onclick="adjustRpp(-1)" style="width:28px;height:28px;border-radius:8px;border:1.5px solid var(--rim);background:var(--card);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">−</button>
           <span id="rpp-display" style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;min-width:24px;text-align:center">3</span>
@@ -1151,7 +1151,10 @@ async function handleGSUpdate(){
           const mode=_gameMode;
           const idx=GS.players.map((p,i)=>p?i:null).filter(i=>i!==null);
           let sub=[];
-          if(mode==='rounds'){const rpp=Math.max(1,parseInt($('rpp')?.value)||3);for(let r=0;r<rpp;r++)sub=[...sub,...[...idx]];}
+          if(mode==='rounds'){
+            const rounds=Math.max(1,parseInt($('rpp')?.value)||3);
+            for(let r=0;r<rounds;r++)sub.push(idx[r%idx.length]);
+          }
           else{for(let r=0;r<100;r++)sub=[...sub,...[...idx]];}
           const qPool=_selectedCats.size>0?QS.map((_,i)=>i).filter(i=>[..._selectedCats].some(cat=>(_qCatMap[i]||[]).includes(cat))):QS.map((_,i)=>i);
           const qPoolFinal=qPool.length>0?qPool:QS.map((_,i)=>i);
@@ -1667,10 +1670,10 @@ async function hostStart(){
   const mode=_gameMode;
   const idx=GS.players.map((p,i)=>p?i:null).filter(i=>i!==null);
   const playerCount=GS.players.filter(Boolean).length;
-  let sub,qp;
+  let sub=[],qp;
   if(mode==='rounds'){
-    const rpp=Math.max(1,parseInt($('rpp').value)||3);
-    for(let r=0;r<rpp;r++) sub=[...(sub||[]),...[...idx]];
+    const rounds=Math.max(1,parseInt($('rpp').value)||3);
+    for(let r=0;r<rounds;r++) sub.push(idx[r%idx.length]);
   } else {
     for(let r=0;r<100;r++) sub=[...(sub||[]),...[...idx]];
   }
