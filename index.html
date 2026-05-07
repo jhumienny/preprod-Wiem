@@ -1185,6 +1185,7 @@ async function handleGSUpdate(){
         // GS here is already a fresh re-fetch from SSE handler — use it directly
         const next=norm(dc(GS));
         next.phase='reveal';
+        appendRoundHistory(next);
         let poolDelta=0;
         next.players.forEach((p,i)=>{
           if(!p||i===si)return;
@@ -1842,6 +1843,12 @@ function buildRoundHistoryEntry(gs){
   };
 }
 
+function appendRoundHistory(gs){
+  const entry=buildRoundHistoryEntry(gs);
+  const history=(gs.roundHistory||[]).filter(r=>r.round!==entry.round);
+  gs.roundHistory=[...history,entry].sort((a,b)=>a.round-b.round);
+}
+
 // Dynamically scale question text font size based on character count
 function setQText(elId, text){
   const el=$(elId); if(!el) return;
@@ -2158,8 +2165,7 @@ async function castVote(ans){
       if(!fresh||fresh.phase!=='voting'){render();return;} // already transitioned
       const next=norm(dc(fresh));
       next.phase='reveal';
-      const historyEntry=buildRoundHistoryEntry(next);
-      next.roundHistory=[...(next.roundHistory||[]),historyEntry];
+      appendRoundHistory(next);
       let poolDelta=0;
       next.players.forEach((p,i)=>{
         if(!p||i===si)return;
