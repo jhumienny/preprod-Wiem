@@ -1810,6 +1810,7 @@ const SI=()=>GS.subjects[GS.ri]??0;
 const SP=()=>GS.players[SI()];
 const CQ=()=>QS[GS.qSeq[GS.ri]];
 const amSJ=()=>mySlot===SI();
+const roundLabel=(ri,tot=GS?.rt)=> (GS?.gameMode||'rounds')==='pool' ? `${ri}. runda` : `Runda ${ri} / ${tot}`;
 
 // Dynamically scale question text font size based on character count
 function setQText(elId, text){
@@ -1924,7 +1925,7 @@ function renderVoting(){
     }).length;
     mkSbar('sb-v');
     $('qc-v').style.setProperty('--ac',C(si));
-    $('v-meta').textContent=`Runda ${ri} / ${tot}`;
+    $('v-meta').textContent=roundLabel(ri,tot);
     $('v-about').innerHTML=`Inni zgadują Twoją odpowiedź…`;
     setQText('v-q',q.q.replace('[imię]',sp.name));
     buildAns('v-ans',getQAnswers(GS.ri),true,GS.sa,null,null);
@@ -1953,7 +1954,7 @@ function renderVoting(){
     show('s-wait'); return;
   }
 
-  $('v-meta').textContent=`Runda ${ri} / ${tot}`;
+  $('v-meta').textContent=roundLabel(ri,tot);
   $('v-about').innerHTML=`Pytanie o: <strong style="color:${C(si)}">${sp.name}</strong>`;
   setQText('v-q',q.q.replace('[imię]',sp.name));
 
@@ -2197,7 +2198,7 @@ function renderSubj(){
   }
 
   // Subject screen
-  $('sj-meta').textContent=`Runda ${ri} / ${tot} — To pytanie jest o Tobie!`;
+  $('sj-meta').textContent=`${roundLabel(ri,tot)} — To pytanie jest o Tobie!`;
   $('sj-about').textContent=`Odpowiedz szczerze!`;
   // Build answer buttons — always unlocked so subject can change
   const ac=$('sj-ans'); ac.innerHTML='';
@@ -2281,7 +2282,7 @@ function renderReveal(){
   const rvQText=q.q.replace('[imię]',sp.name);
   const rvQSize=rvQText.length>90?'14px':rvQText.length>65?'15px':'18px';
   bannerHtml+=`<div style="background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:14px 16px;margin-top:12px">
-    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Runda ${ri} / ${tot} · Pytanie o <strong style="color:${C(si)}">${sp.name}</strong></div>
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">${roundLabel(ri,tot)} · Pytanie o <strong style="color:${C(si)}">${sp.name}</strong></div>
     <div style="font-family:'Bebas Neue',sans-serif;font-size:${rvQSize};letter-spacing:.3px;line-height:1.35;word-break:break-word">${rvQText}</div>
   </div>`;
 
@@ -2339,7 +2340,7 @@ function renderReveal(){
   const isLast=mode==='pool'?(poolLeft<=0||anyBroke):(GS.ri+1>=GS.rt);
   const modeInfo=mode==='pool'
     ? `W puli pozostało: <strong style="color:var(--c3)">${poolLeft} 🪙</strong>${anyBroke?' · <span style="color:var(--c0)">Ktoś zbankrutował!</span>':''}`
-    : `Runda <strong>${GS.ri+1}</strong> z <strong>${GS.rt}</strong>`;
+    : `${roundLabel(GS.ri+1,GS.rt)}`;
   $('rv-btn').innerHTML=`
     <div style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:8px">${modeInfo}</div>
     ${isHost
