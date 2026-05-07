@@ -2435,12 +2435,8 @@ function renderEnd(){
       const ok=(r.players||[]).filter(p=>!p.isSubject&&p.correct);
       const bad=(r.players||[]).filter(p=>!p.isSubject&&!p.correct);
       const chip=(p,type)=>`<span class="vchip" style="display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:99px;font-size:11px;font-weight:700;background:${type==='ok'?'#14532d':type==='bad'?'#450a0a':C(p.slot)+'22'};color:${type==='ok'?'#86efac':type==='bad'?'#fca5a5':C(p.slot)};border:1px solid ${type==='ok'?'#22c55e66':type==='bad'?'#ef444466':C(p.slot)+'55'}">${type==='ok'?'✓':type==='bad'?'✗':'●'} ${esc(p.name)}</span>`;
-      const mine=myResult?`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:99px;font-size:11px;font-weight:800;background:${myResult.correct?'#16a34a':'#dc2626'};color:#fff">${myResult.correct?'TY ✓ dobrze':'TY ✗ źle'}</span>`:'';
       return `<div style="border:1.5px solid ${cardColor};background:${cardBg};border-radius:14px;padding:12px;margin-top:10px">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
-          <div style="font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted)">${esc(roundLabel(r.round,GS.rt))} · <strong style="color:${C(r.subjectSlot)}">${esc(r.subjectName)}</strong></div>
-          ${mine}
-        </div>
+        <div style="font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">${esc(roundLabel(r.round,GS.rt))} · <strong style="color:${C(r.subjectSlot)}">${esc(r.subjectName)}</strong></div>
         <div style="font-size:13px;line-height:1.35;margin-bottom:8px">${esc(r.question)}</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:8px">✓ <strong style="color:var(--c2)">${esc(r.correctAnswer)}</strong></div>
         <div style="display:flex;flex-direction:column;gap:6px">
