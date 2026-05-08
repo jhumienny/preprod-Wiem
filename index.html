@@ -140,7 +140,9 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .react-bar{position:sticky;bottom:0;z-index:20;display:flex;justify-content:center;gap:8px;background:linear-gradient(180deg,transparent,var(--bg) 30%);padding:12px 0 2px;margin-top:auto;}
 .react-btn{width:38px;height:38px;border-radius:999px;border:1.5px solid var(--rim);background:var(--card);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease,background .12s ease,border-color .12s ease;}
 .react-btn:active{transform:scale(.92);background:#818cf822;border-color:#818cf855;}
-.react-btn.cool{opacity:.45;pointer-events:none;}
+.react-btn.cooldown{pointer-events:none;}
+.react-btn.cooldown.dim{opacity:.28;transition:none;}
+.react-btn.cooldown.recovering{opacity:1;transition:opacity var(--react-cooldown,3.5s) linear;}
 .react-layer{position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden;}
 .react-bubble{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:linear-gradient(135deg,#7c3aed,#ec4899);border:1.5px solid #f0abfc;border-radius:999px;padding:8px 13px;font-size:14px;font-weight:900;color:#fff;box-shadow:0 12px 34px #7c3aed66,0 0 0 3px #ffffff18;animation:reactFloat 1.8s ease forwards;white-space:nowrap;text-shadow:0 1px 2px #0007;}
 @keyframes reactFloat{0%{opacity:0;transform:translate(-50%,12px) scale(.9)}12%{opacity:1;transform:translate(-50%,0) scale(1)}78%{opacity:1;transform:translate(-50%,-42px) scale(1)}100%{opacity:0;transform:translate(-50%,-62px) scale(.96)}}
@@ -983,6 +985,7 @@ let _countdownTimer=null; // drives timed transitions under SSE
 let _voteRetryTimer=null; // retry fetch if last vote missed by race condition
 let _lastReactionId=null;
 let _lastReactionSentAt=0;
+const REACTION_COOLDOWN_MS=3500;
 const REACTION_EMOJIS=['😂','😮','👀','🔥','💀'];
 
 function startCountdown(ms, onTick, onDone){
@@ -1946,9 +1949,22 @@ function handleIncomingReaction(){
 async function sendReaction(emoji){
   if(!reactionAllowed())return;
   const now=Date.now();
-  if(now-_lastReactionSentAt<1800)return;
+  if(now-_lastReactionSentAt<REACTION_COOLDOWN_MS)return;
   _lastReactionSentAt=now;
-  document.querySelectorAll('.react-btn').forEach(b=>{b.classList.add('cool');setTimeout(()=>b.classList.remove('cool'),900);});
+  document.querySelectorAll('.react-btn').forEach(b=>{
+    b.classList.remove('cooldown','dim','recovering');
+    b.style.setProperty('--react-cooldown',REACTION_COOLDOWN_MS+'ms');
+    b.classList.add('cooldown','dim');
+    void b.offsetWidth;
+    requestAnimationFrame(()=>{
+      b.classList.remove('dim');
+      b.classList.add('recovering');
+    });
+    setTimeout(()=>{
+      b.classList.remove('cooldown','recovering');
+      b.style.removeProperty('--react-cooldown');
+    },REACTION_COOLDOWN_MS);
+  });
   const evt={id:`${mySlot}-${now}-${Math.random().toString(36).slice(2,6)}`,slot:mySlot,name:GS.players[mySlot]?.name||'Gracz',emoji,ri:GS.ri||0,phase:GS.phase,ts:now};
   _lastReactionId=evt.id;
   showReactionBubble(evt);
