@@ -2606,7 +2606,7 @@ function renderReveal(){
   rvAnswers.forEach((a,i)=>{
     const isCorrect=i==correct;
     const isMyVote=!iAmSubject&&i==myVote;
-    const voters=GS.players.filter((p,pi)=>p&&pi!==si&&GS.votes[pi]==i);
+    const voters=GS.players.filter((p,pi)=>p&&pi!==si&&pi!==mySlot&&GS.votes[pi]==i);
     const hasChips=voters.length>0||isMyVote;
 
     const btn=document.createElement('button');
@@ -2626,9 +2626,9 @@ function renderReveal(){
     let chipsHtml='';
     if(hasChips){
       let chips='';
-      if(isMyVote) chips+=`<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:${isCorrect?'#16a34a':'#dc2626'};color:#fff;white-space:nowrap">${isCorrect?'TY ✓':'TY ✗'}</span>`;
+      if(isMyVote) chips+=`<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:${isCorrect?'#16a34a':'#dc2626'};color:#fff;white-space:nowrap">${isCorrect?'✓ Ty':'Ty'}</span>`;
       voters.forEach(v=>{const pi=GS.players.indexOf(v),hit=i==correct;
-        chips+=`<span class="vchip" style="background:${C(pi)}22;color:${C(pi)};border:1px solid ${C(pi)}44">${hit?'✓':'✗'} ${v.name}</span>`;
+        chips+=`<span class="vchip" style="background:${C(pi)}22;color:${C(pi)};border:1px solid ${C(pi)}44">${hit?'✓ ':''}${v.name}</span>`;
       });
       chipsHtml=`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;padding-left:46px">${chips}</div>`;
     }
