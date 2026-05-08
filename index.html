@@ -2066,16 +2066,13 @@ async function reportError(btn){
     // Animate button instead of toast
     if(btn){
       btn._reported=true;
-      btn.textContent='✓ Zgłoszono!';
+      btn.textContent='✓ Zgłoszono';
       btn.style.color='#4ade80';
       btn.style.fontWeight='700';
+      btn.disabled=true;
+      btn.style.cursor='default';
+      btn.style.opacity='0.9';
       clearTimeout(btn._resetTimer);
-      btn._resetTimer=setTimeout(()=>{
-        btn.textContent='⚑ Zgłoś błąd';
-        btn.style.color='';
-        btn.style.fontWeight='';
-        btn._reported=false;
-      },3000);
     }
   }catch(e){console.error('reportError',e);}
 }
