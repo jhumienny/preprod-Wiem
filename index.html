@@ -1725,13 +1725,17 @@ function renderLobby(){
     }
   } else {
     if(startBtn) startBtn.style.display='none';
-    if(startNote) startNote.style.display='none';
+    const readyCount=activePlayers.filter((p,i)=>p&&!!ready[i]).length;
+    if(startNote){
+      startNote.style.display=iAmReady?'flex':'none';
+      startNote.style.order='1';
+      startNote.textContent=allReady?'Gotowe — czekasz na hosta':`Gotowe — ${readyCount}/${filled}`;
+    }
     $('lob-host').style.display='none';
     $('lob-guest').style.display='block';
-    const readyCount=activePlayers.filter((p,i)=>p&&!!ready[i]).length;
     $('lob-guest-conn').innerHTML=allReady
-      ? `<span class="cdot dok"></span>Wszyscy gotowi! Gra startuje za chwilę…`
-      : `<span class="cdot dwait"></span>Gotowych: ${readyCount}/${filled} — czekaj na pozostałych`;
+      ? `<span class="cdot dok"></span>Wszyscy gotowi — host może startować`
+      : `<span class="cdot dwait"></span>${iAmReady?'Czekasz na pozostałych':`Gotowych: ${readyCount}/${filled}`}`;
   }
   updateOnboardingHelp();
   // Note: show('s-lobby') is NOT called here — renderLobby only updates content, screen switching is done explicitly
