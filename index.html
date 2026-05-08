@@ -135,6 +135,9 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .btn:active{transform:scale(.98);}
 .btn-lit{background:var(--text);color:var(--bg);}
 .btn-dim{background:var(--card);color:var(--text);border:1.5px solid var(--rim);}
+.report-btn{background:var(--card);border:1.5px solid var(--rim);color:var(--muted);font-size:12px;line-height:1.4;cursor:pointer;padding:10px 12px;text-align:center;width:100%;margin-top:8px;border-radius:12px;display:block;position:relative;z-index:1;transition:color .2s,border-color .2s,background .2s;}
+.report-btn:active{transform:scale(.98);}
+.report-btn:disabled{cursor:default;transform:none;}
 .brow{display:flex;gap:8px;}
 .brow .btn{flex:1;}
 .react-bar{position:relative;z-index:1;display:flex;justify-content:center;gap:8px;background:transparent;padding:10px 0 8px;margin:8px 0 2px;flex-shrink:0;clear:both;}
@@ -445,7 +448,7 @@ onAuthStateChanged(auth, (user) => {
   </div>
   <div class="vstatus" id="v-st"></div>
   <button class="btn btn-lit" id="btn-vote" style="display:none" onclick="confirmVote()">Zatwierdź odpowiedź ✓</button>
-  <button onclick="reportError(this)" style="background:none;border:none;color:var(--muted);font-size:12px;line-height:1.4;cursor:pointer;padding:10px 0 8px;text-align:center;width:100%;margin-top:8px;display:block;position:relative;z-index:1;transition:color .2s">⚑ Zgłoś błąd</button>
+  <button class="report-btn" onclick="reportError(this)">⚑ Zgłoś błąd</button>
   <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
 </div>
 
@@ -459,7 +462,8 @@ onAuthStateChanged(auth, (user) => {
     <div class="wq" id="w-q"></div>
   </div>
   <div id="w-preview"></div>
-  <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33" onclick="leaveGame()">← Opuść grę</button>
+  <button class="report-btn" onclick="reportError(this)">⚑ Zgłoś błąd</button>
+  <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
 </div>
 
 <!-- ══ SUBJECT ══ -->
@@ -474,7 +478,7 @@ onAuthStateChanged(auth, (user) => {
   <div class="ans-list" id="sj-ans"></div>
   <button class="btn btn-dim" id="btn-swap-sj" style="display:none" onclick="swapQuestionSJ()"></button>
   <button class="btn btn-lit" id="btn-sj" style="display:none" onclick="submitSJ()">Zatwierdź i pozwól innym odpowiedzieć →</button>
-  <button onclick="reportError(this)" style="background:none;border:none;color:var(--muted);font-size:12px;line-height:1.4;cursor:pointer;padding:10px 0 8px;text-align:center;width:100%;margin-top:8px;display:block;position:relative;z-index:1;transition:color .2s">⚑ Zgłoś błąd</button>
+  <button class="report-btn" onclick="reportError(this)">⚑ Zgłoś błąd</button>
   <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
 </div>
 
