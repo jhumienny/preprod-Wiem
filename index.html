@@ -351,6 +351,9 @@ onAuthStateChanged(auth, (user) => {
         <li>Stawiasz 1 albo 2 żetony.</li>
         <li>Trafisz — zyskujesz. Pudło — tracisz.</li>
       </ul>
+      <div class="onb-actions">
+        <button class="onb-mini-btn primary" onclick="event.stopPropagation();dismissOnboardingHelp()">Nie pokazuj więcej</button>
+      </div>
     </div>
   </div>
   <div class="label" id="lob-cnt">Gracze (0/4)</div>
@@ -1015,8 +1018,9 @@ function updateOnboardingHelp(){
     _onboardingOpen=shouldShowOnboardingHints();
     _onboardingInitialized=true;
   }
-  card.style.display='flex';
-  card.classList.toggle('open',_onboardingOpen);
+  const dismissed=!shouldShowOnboardingHints();
+  card.style.display=dismissed?'none':'flex';
+  card.classList.toggle('open',_onboardingOpen&&!dismissed);
   const tog=$('lob-onb-toggle'); if(tog) tog.setAttribute('aria-label',_onboardingOpen?'Zwiń':'Rozwiń');
 }
 function onboardingHint(kind){
