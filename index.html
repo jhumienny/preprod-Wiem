@@ -433,6 +433,7 @@ onAuthStateChanged(auth, (user) => {
     <div class="qabout" id="v-about"></div>
     <div class="qtext" id="v-q"></div>
   </div>
+  <div id="v-hint"></div>
   <div class="ans-list" id="v-ans"></div>
   <div id="v-bet" style="display:none">
     <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Ile żetonów stawiasz?</div>
@@ -2243,6 +2244,7 @@ function renderVoting(){
     buildAns('v-ans',getQAnswers(GS.ri),true,GS.sa,null,null);
     $('btn-vote').style.display='none';
     $('v-bet').style.display='none';
+    const vh=$('v-hint'); if(vh) vh.innerHTML='';
     const pending=GS.players.map((p,i)=>({p,i})).filter(({p,i})=>p&&i!==si&&GS.votes[i]===undefined);
     const chips=pending.map(({p,i})=>`<span style="padding:6px 16px;border-radius:99px;background:${C(i)}22;color:${C(i)};border:1.5px solid ${C(i)}55;font-size:13px;font-weight:700">${p.name}</span>`).join('');
     $('v-st').innerHTML=`
@@ -2300,11 +2302,13 @@ function renderVoting(){
       $('v-bet').style.gap='8px';
       // Don't override _localBet if user already picked — only init on first show
       updateBetUI();
-      $('v-st').innerHTML=onboardingHint('vote');
+      $('v-hint').innerHTML=onboardingHint('vote');
+      $('v-st').innerHTML='';
     } else {
       $('btn-vote').style.display='none';
       $('v-bet').style.display='none';
-      $('v-st').innerHTML=onboardingHint('vote')||'Jak twoim zdaniem odpowie?';
+      $('v-hint').innerHTML=onboardingHint('vote');
+      $('v-st').innerHTML=onboardingHint('vote')?'':'Jak twoim zdaniem odpowie?';
     }
   }
   show('s-vote');
