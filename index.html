@@ -2666,10 +2666,10 @@ function renderReveal(){
   // ── RESULTS TABLE ──
   const subjPts=GS.players.filter((p,i)=>p&&i!==si&&GS.votes[i]==correct).length; // 1 per guesser
   $('rv-res').innerHTML=`<div class="rctitle">Wyniki rundy</div>
-    <div class="rvrow"><div class="rvl"><div class="rvdot" style="background:${C(si)}"></div><strong>${sp.name}</strong><span class="badge b-sub" style="margin-left:8px">Temat</span></div><span class="badge ${subjPts>0?'b-yes':'b-no'}">+${subjPts} 🪙</span></div>`+
+    <div class="rvrow"><div class="rvl"><div class="rvdot" style="background:${C(si)}"></div><strong>${sp.name}</strong></div><span class="badge ${subjPts>0?'b-yes':'b-no'}">+${subjPts} 🪙</span></div>`+
     GS.players.map((p,i)=>{if(!p||i===si)return'';const hit=GS.votes[i]==correct;
       const bet=parseInt((GS.bets||{})[i])||1;
-      return`<div class="rvrow${i===mySlot?' style="background:var(--rim);border-radius:8px;padding:9px 8px;margin:0 -8px"':''}"><div class="rvl"><div class="rvdot" style="background:${C(i)}"></div><span${i===mySlot?' style="font-weight:700"':''}>${p.name}${i===mySlot?' (ty)':''}</span><span style="font-size:11px;color:var(--muted);margin-left:6px">×${bet}</span></div><span class="badge ${hit?'b-yes':'b-no'}">${hit?`+${bet} 🪙`:`-${bet} 🪙`}</span></div>`;
+      return`<div class="rvrow${i===mySlot?' style="background:var(--rim);border-radius:8px;padding:9px 8px;margin:0 -8px"':''}"><div class="rvl"><div class="rvdot" style="background:${C(i)}"></div><span${i===mySlot?' style="font-weight:700"':''}>${p.name}${i===mySlot?' (ty)':''}</span></div><span class="badge ${hit?'b-yes':'b-no'}">${hit?`+${bet} 🪙`:`-${bet} 🪙`}</span></div>`;
     }).join('');
 
   const poolLeft=GS.pool??0;
