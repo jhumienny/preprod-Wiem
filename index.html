@@ -1628,8 +1628,10 @@ function renderLobby(){
     if(startBtn){
       startBtn.style.display=iAmReady?'block':'none';
       startBtn.style.flex='1';
-      startBtn.style.padding='12px 10px';
-      startBtn.style.fontSize='13px';
+      startBtn.style.padding='10px 8px';
+      startBtn.style.fontSize='12px';
+      startBtn.style.lineHeight='1.15';
+      startBtn.style.whiteSpace='normal';
       if(allReady && filled>=2){
         startBtn.disabled=false;
         startBtn.style.opacity='1';
@@ -1637,7 +1639,7 @@ function renderLobby(){
       } else {
         startBtn.disabled=true;
         startBtn.style.opacity='0.55';
-        startBtn.textContent=filled<2?'Minimum 2 osoby':`Gotowych: ${readyCount}/${filled}`;
+        startBtn.textContent=filled<2?'Min. 2 osoby':`Gotowych: ${readyCount}/${filled}`;
       }
     }
   } else {
