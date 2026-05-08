@@ -327,19 +327,19 @@ onAuthStateChanged(auth, (user) => {
       <div class="onb-badge">💡</div>
       <div style="flex:1;min-width:0">
         <div class="onb-title">Pierwszy raz grasz?</div>
-        <div class="onb-sub">Krótka ściąga bez przerywania gry.</div>
+        <div class="onb-sub">W skrócie: odpowiadasz, zgadujesz i zbierasz żetony.</div>
       </div>
       <div id="lob-onb-chevron" style="color:var(--muted);font-size:18px">⌄</div>
     </div>
     <div class="onb-body">
       <ul class="onb-list">
-        <li>Jedna osoba dostaje pytanie o sobie i wybiera odpowiedź.</li>
-        <li>Reszta próbuje zgadnąć, co wybrała.</li>
-        <li>Przed zatwierdzeniem możesz postawić 1 albo 2 żetony.</li>
-        <li>Trafisz — zyskujesz z puli. Nie trafisz — tracisz żetony do puli.</li>
+        <li>Jedna osoba odpowiada na pytanie.</li>
+        <li>Reszta zgaduje jej odpowiedź.</li>
+        <li>Stawiasz 1 albo 2 żetony.</li>
+        <li>Trafisz — zyskujesz. Pudło — tracisz.</li>
       </ul>
       <div class="onb-actions">
-        <button class="onb-mini-btn primary" onclick="event.stopPropagation();dismissOnboardingHelp()">Ok, nie pokazuj podpowiedzi</button>
+        <button class="onb-mini-btn primary" onclick="event.stopPropagation();dismissOnboardingHelp()">Ukryj</button>
         <button class="onb-mini-btn" onclick="event.stopPropagation();toggleOnboardingHelp(false)">Zwiń</button>
       </div>
     </div>
@@ -1010,10 +1010,10 @@ function updateOnboardingHelp(){
 function onboardingHint(kind){
   if(!shouldShowOnboardingHints()||!isFirstRound()) return '';
   const copy={
-    subject:'To pytanie jest o Tobie. Wybierz odpowiedź szczerze — inni zobaczą opcje, ale nie Twój wybór.',
-    waiting:'Zobacz opcje i pomyśl, co ta osoba wybierze. Głosowanie odblokuje się za moment.',
-    vote:'Wybierz odpowiedź, potem zdecyduj czy stawiasz 1 czy 2 żetony. Możesz zmienić wybór przed zatwierdzeniem.',
-    afterVote:'Gotowe — teraz tylko czekasz na pozostałych. Wynik pojawi się automatycznie.'
+    subject:'To pytanie jest o Tobie. Wybierz odpowiedź — reszta będzie zgadywać.',
+    waiting:'Pomyśl, co ta osoba wybierze. Zaraz będziesz zgadywać.',
+    vote:'Wybierz odpowiedź i stawkę. Możesz zmienić wybór przed zatwierdzeniem.',
+    afterVote:'Gotowe — czekasz na resztę.'
   };
   return copy[kind]?`<div class="onb-hint">💡 ${copy[kind]}</div>`:'';
 }
