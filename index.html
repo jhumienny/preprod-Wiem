@@ -985,6 +985,7 @@ let _countdownTimer=null; // drives timed transitions under SSE
 let _voteRetryTimer=null; // retry fetch if last vote missed by race condition
 let _lastReactionId=null;
 let _lastReactionSentAt=0;
+let _reactionCooldownTimer=null;
 const REACTION_COOLDOWN_MS=3500;
 const REACTION_EMOJIS=['😂','😮','👀','🔥','💀'];
 
@@ -1906,6 +1907,34 @@ function mountReactionUI(){
   bar.className='react-bar';
   bar.innerHTML=REACTION_EMOJIS.map(e=>`<button class="react-btn" type="button" onclick="sendReaction('${e}')">${e}</button>`).join('');
   scr.appendChild(bar);
+  applyReactionCooldown();
+}
+
+function clearReactionCooldownUI(){
+  document.querySelectorAll('.react-btn').forEach(b=>{
+    b.classList.remove('cooldown','dim','recovering');
+    b.style.removeProperty('--react-cooldown');
+  });
+}
+
+function applyReactionCooldown(){
+  if(_reactionCooldownTimer){clearTimeout(_reactionCooldownTimer);_reactionCooldownTimer=null;}
+  const remaining=REACTION_COOLDOWN_MS-(Date.now()-_lastReactionSentAt);
+  if(remaining<=0){clearReactionCooldownUI();return;}
+  document.querySelectorAll('.react-btn').forEach(b=>{
+    b.classList.remove('cooldown','dim','recovering');
+    b.style.setProperty('--react-cooldown',remaining+'ms');
+    b.classList.add('cooldown','dim');
+    void b.offsetWidth;
+    requestAnimationFrame(()=>{
+      b.classList.remove('dim');
+      b.classList.add('recovering');
+    });
+  });
+  _reactionCooldownTimer=setTimeout(()=>{
+    clearReactionCooldownUI();
+    _reactionCooldownTimer=null;
+  },remaining);
 }
 
 function showReactionBubble(evt){
@@ -1951,20 +1980,7 @@ async function sendReaction(emoji){
   const now=Date.now();
   if(now-_lastReactionSentAt<REACTION_COOLDOWN_MS)return;
   _lastReactionSentAt=now;
-  document.querySelectorAll('.react-btn').forEach(b=>{
-    b.classList.remove('cooldown','dim','recovering');
-    b.style.setProperty('--react-cooldown',REACTION_COOLDOWN_MS+'ms');
-    b.classList.add('cooldown','dim');
-    void b.offsetWidth;
-    requestAnimationFrame(()=>{
-      b.classList.remove('dim');
-      b.classList.add('recovering');
-    });
-    setTimeout(()=>{
-      b.classList.remove('cooldown','recovering');
-      b.style.removeProperty('--react-cooldown');
-    },REACTION_COOLDOWN_MS);
-  });
+  applyReactionCooldown();
   const evt={id:`${mySlot}-${now}-${Math.random().toString(36).slice(2,6)}`,slot:mySlot,name:GS.players[mySlot]?.name||'Gracz',emoji,ri:GS.ri||0,phase:GS.phase,ts:now};
   _lastReactionId=evt.id;
   showReactionBubble(evt);
