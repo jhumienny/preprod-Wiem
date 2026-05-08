@@ -1667,25 +1667,30 @@ function renderLobby(){
     const kickBtn=isHost&&i!==mySlot&&!hostLocked
       ? `<button class="kick-btn" onclick="kickPlayer(${i})" title="Usuń gracza" style="width:30px;height:30px;background:#2d1a1a;border:1.5px solid #dc262655;color:#f87171;font-size:15px;font-weight:700;cursor:pointer;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0">✕</button>`
       : '';
-    const nameCell = (i===mySlot && _lobEditingName)
-      ? `<input id="lob-name-inp" type="text" value="${p.name}" maxlength="14" autocomplete="off" data-1p-ignore data-lpignore="true"
-           style="flex:1;min-width:0;background:var(--bg);border:1.5px solid ${C(i)};border-radius:8px;padding:4px 8px;font-size:14px;font-weight:600;color:var(--text);font-family:inherit"
-           onkeydown="event.stopPropagation();if(event.key==='Enter')changeName();if(event.key==='Escape'){_lobEditingName=false;renderLobby();}"
-           onkeyup="event.stopPropagation()">
-         <button onclick="changeName()" style="flex-shrink:0;background:${C(i)};color:#000;border:none;border-radius:8px;padding:4px 10px;font-weight:700;font-size:13px;cursor:pointer">✓</button>
-         <button onclick="_lobEditingName=false;renderLobby()" style="flex-shrink:0;background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px">✕</button>`
+    const editingThis=i===mySlot && _lobEditingName;
+    const nameCell = editingThis
+      ? `<div style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:0">
+           <input id="lob-name-inp" type="text" value="${p.name}" maxlength="14" autocomplete="off" data-1p-ignore data-lpignore="true"
+             style="width:100%;box-sizing:border-box;background:var(--bg);border:1.5px solid ${C(i)};border-radius:10px;padding:10px 12px;font-size:16px;font-weight:700;color:var(--text);font-family:inherit;outline:none"
+             onkeydown="event.stopPropagation();if(event.key==='Enter')changeName();if(event.key==='Escape'){_lobEditingName=false;renderLobby();}"
+             onkeyup="event.stopPropagation()">
+           <div style="display:flex;gap:8px">
+             <button onclick="changeName()" style="flex:1;background:${C(i)};color:#000;border:none;border-radius:10px;padding:10px 12px;font-weight:800;font-size:13px;cursor:pointer">Zapisz</button>
+             <button onclick="_lobEditingName=false;renderLobby()" style="flex:1;background:var(--card);border:1.5px solid var(--rim);color:var(--muted);border-radius:10px;padding:10px 12px;font-weight:700;font-size:13px;cursor:pointer">Anuluj</button>
+           </div>
+         </div>`
       : `<span style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
          ${i===mySlot&&!hostLocked?`<button onclick="_lobEditingName=true;renderLobby()" style="flex-shrink:0;background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:0 0 0 4px;line-height:1" title="Zmień imię">✏️</button>`:''}`;
-    return`<div class="prow" style="border:1.5px solid ${isReady?'#16a34a':C(i)+'44'};">
-      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;overflow:hidden">
-        <div class="prow-dot" style="background:${C(i)}"></div>
+    return`<div class="prow" style="border:1.5px solid ${isReady?'#16a34a':C(i)+'44'};${editingThis?'align-items:flex-start;padding:12px;':''}">
+      <div style="display:flex;align-items:${editingThis?'flex-start':'center'};gap:8px;flex:1;min-width:0;overflow:hidden">
+        <div class="prow-dot" style="background:${C(i)};${editingThis?'margin-top:15px;':''}"></div>
         ${nameCell}
       </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+      ${editingThis?'':`<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         ${i===(GS.hostSlot??0)?'<span class="ptag tag-host">HOST</span>':''}
         ${readyBadge}
       </div>
-      ${kickBtn}
+      ${kickBtn}`}
     </div>`;
   }).join('')+joinRow;
 
