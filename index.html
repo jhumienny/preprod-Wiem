@@ -419,7 +419,7 @@ onAuthStateChanged(auth, (user) => {
     <div id="lob-cat-row" style="display:flex;flex-direction:column;gap:6px"></div>
   </div>
   <div id="lob-guest" style="display:none;">
-    <div class="conn" id="lob-guest-conn"><span class="cdot dwait"></span>Czekaj aż host rozpocznie grę…</div>
+    <div class="conn" id="lob-guest-conn">Czekaj aż host rozpocznie grę…</div>
   </div>
   <button class="btn btn-dim" style="color:var(--c0);border-color:var(--c0)44;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
 </div>
@@ -1679,9 +1679,8 @@ function renderLobby(){
          <button onclick="_lobEditingName=false;renderLobby()" style="flex-shrink:0;width:34px;height:34px;background:var(--card);border:1.5px solid var(--rim);color:var(--muted);border-radius:10px;font-weight:900;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0" title="Anuluj">×</button>`
       : `<span style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
          ${i===mySlot&&!hostLocked?`<button onclick="_lobEditingName=true;renderLobby()" style="flex-shrink:0;background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:0 0 0 4px;line-height:1" title="Zmień imię">✏️</button>`:''}`;
-    return`<div class="prow" style="border:1.5px solid ${isReady?'#16a34a':C(i)+'44'};">
+    return`<div class="prow" style="border:1.5px solid ${C(i)}44;">
       <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;overflow:hidden">
-        <div class="prow-dot" style="background:${C(i)}"></div>
         ${nameCell}
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
@@ -1752,8 +1751,8 @@ function renderLobby(){
     $('lob-guest').style.display='block';
     const readyCount=activePlayers.filter((p,i)=>p&&!!ready[i]).length;
     $('lob-guest-conn').innerHTML=allReady
-      ? `<span class="cdot dok"></span>Wszyscy gotowi! Gra startuje za chwilę…`
-      : `<span class="cdot dwait"></span>Gotowych: ${readyCount}/${filled} — czekaj na pozostałych`;
+      ? `Wszyscy gotowi! Gra startuje za chwilę…`
+      : `Gotowych: ${readyCount}/${filled} — czekaj na pozostałych`;
   }
   updateOnboardingHelp();
   // Note: show('s-lobby') is NOT called here — renderLobby only updates content, screen switching is done explicitly
