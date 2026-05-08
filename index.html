@@ -131,7 +131,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .dok{background:var(--c2);}
 .dwait{background:var(--c3);animation:blink .9s infinite;}
 .derr{background:var(--c0);}
-.btn{border-radius:12px;padding:15px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .15s;text-align:center;width:100%;display:block;}
+.btn{box-sizing:border-box;border-radius:12px;padding:15px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:2px solid transparent;transition:all .15s;text-align:center;width:100%;display:block;}
 .btn:active{transform:scale(.98);}
 .btn-lit{background:var(--text);color:var(--bg);}
 .btn-dim{background:var(--card);color:var(--text);border:1.5px solid var(--rim);}
@@ -1713,7 +1713,7 @@ function renderLobby(){
         : 'background:#14532d;color:#4ade80;border:2px solid #16a34a;border-radius:12px;padding:15px;font-size:15px;font-weight:800;font-family:\'DM Sans\',sans-serif;cursor:pointer;width:100%;flex:1;white-space:nowrap;min-height:50px;transform:none;order:1;';
     } else {
       readyBtn.textContent=gW(myName,'Jestem gotowy ✓','Jestem gotowa ✓');
-      readyBtn.style.cssText='background:var(--text);color:var(--bg);border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;font-family:\'DM Sans\',sans-serif;cursor:pointer;width:100%;flex:1;min-height:50px;transform:none;order:1;';
+      readyBtn.style.cssText='background:var(--text);color:var(--bg);border:2px solid transparent;border-radius:12px;padding:15px;font-size:15px;font-weight:700;font-family:\'DM Sans\',sans-serif;cursor:pointer;width:100%;flex:1;min-height:50px;transform:none;order:1;';
     }
   }
 
