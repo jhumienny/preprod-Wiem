@@ -136,6 +136,18 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .mode-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 8px;border-radius:12px;border:1.5px solid var(--rim);background:var(--card);color:var(--muted);cursor:pointer;transition:all .15s;}
 .mode-btn:active{transform:scale(.97);}
 .mode-btn-active{border-color:#7F77DD;background:#1e1b4b;color:var(--text);}
+.onb-card{background:linear-gradient(135deg,#1e1b4b55,#161621);border:1.5px solid #818cf855;border-radius:var(--rad);padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 30px #0002;}
+.onb-head{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+.onb-badge{width:34px;height:34px;border-radius:11px;background:#818cf822;color:#a5b4fc;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.onb-title{font-weight:800;font-size:14px;color:var(--text);}
+.onb-sub{font-size:12px;color:var(--muted);line-height:1.45;margin-top:2px;}
+.onb-body{display:none;border-top:1px solid #818cf833;padding-top:10px;font-size:13px;color:var(--muted);line-height:1.55;}
+.onb-card.open .onb-body{display:block;}
+.onb-list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;}
+.onb-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.onb-mini-btn{border:1.5px solid var(--rim);background:transparent;color:var(--muted);border-radius:9px;padding:7px 10px;font-size:12px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;}
+.onb-mini-btn.primary{background:var(--text);border-color:var(--text);color:var(--bg);}
+.onb-hint{background:#1e3a5f22;border:1.5px solid #60a5fa55;color:#bfdbfe;border-radius:12px;padding:9px 12px;font-size:12px;line-height:1.45;font-weight:600;}
 .adm-tab{flex:1;min-width:0;padding:8px 6px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;background:var(--card);color:var(--muted);border:1.5px solid var(--rim);text-align:center;line-height:1.3;}
 .adm-tab-active{background:#1e1b4b;border-color:#534AB7;color:#a5b4fc;}
 .adm-card{background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;}
@@ -309,6 +321,28 @@ onAuthStateChanged(auth, (user) => {
     <div class="codelbl">Kod gry — wyślij znajomym</div>
     <div class="codelink" id="lob-code" onclick="copyCode()">----</div>
     <div class="codesub">Kliknij aby skopiować · Każdy wpisuje kod w aplikacji</div>
+  </div>
+  <div class="onb-card" id="lob-onboarding">
+    <div class="onb-head" onclick="toggleOnboardingHelp()">
+      <div class="onb-badge">💡</div>
+      <div style="flex:1;min-width:0">
+        <div class="onb-title">Pierwszy raz grasz?</div>
+        <div class="onb-sub">Krótka ściąga bez przerywania gry.</div>
+      </div>
+      <div id="lob-onb-chevron" style="color:var(--muted);font-size:18px">⌄</div>
+    </div>
+    <div class="onb-body">
+      <ul class="onb-list">
+        <li>Jedna osoba dostaje pytanie o sobie i wybiera odpowiedź.</li>
+        <li>Reszta próbuje zgadnąć, co wybrała.</li>
+        <li>Przed zatwierdzeniem możesz postawić 1 albo 2 żetony.</li>
+        <li>Trafisz — zyskujesz z puli. Nie trafisz — tracisz żetony do puli.</li>
+      </ul>
+      <div class="onb-actions">
+        <button class="onb-mini-btn primary" onclick="event.stopPropagation();dismissOnboardingHelp()">Ok, nie pokazuj podpowiedzi</button>
+        <button class="onb-mini-btn" onclick="event.stopPropagation();toggleOnboardingHelp(false)">Zwiń</button>
+      </div>
+    </div>
   </div>
   <div class="label" id="lob-cnt">Gracze (0/4)</div>
   <div class="plist" id="lob-list"></div>
@@ -943,6 +977,47 @@ let _gameMode='pool'; // 'rounds' | 'pool'
 let _selectedCats=new Set(['cat_demo']); // set of selected category ids
 let _lobEditingName=false; // inline name edit mode in lobby
 
+const ONB_SEEN_KEY='wiem_onboarding_help_seen_v1';
+let _onboardingOpen=false;
+let _onboardingInitialized=false;
+
+function isFirstRound(){ return GS && (GS.ri||0)===0; }
+function shouldShowOnboardingHints(){
+  try{return !localStorage.getItem(ONB_SEEN_KEY);}catch(e){return true;}
+}
+function markOnboardingSeen(){
+  try{localStorage.setItem(ONB_SEEN_KEY,'1');}catch(e){}
+}
+function toggleOnboardingHelp(force){
+  _onboardingOpen=typeof force==='boolean'?force:!_onboardingOpen;
+  updateOnboardingHelp();
+}
+function dismissOnboardingHelp(){
+  markOnboardingSeen();
+  _onboardingOpen=false;
+  updateOnboardingHelp();
+}
+function updateOnboardingHelp(){
+  const card=$('lob-onboarding'); if(!card)return;
+  if(!_onboardingInitialized){
+    _onboardingOpen=shouldShowOnboardingHints();
+    _onboardingInitialized=true;
+  }
+  card.style.display='flex';
+  card.classList.toggle('open',_onboardingOpen);
+  const chev=$('lob-onb-chevron'); if(chev) chev.textContent=_onboardingOpen?'⌃':'⌄';
+}
+function onboardingHint(kind){
+  if(!shouldShowOnboardingHints()||!isFirstRound()) return '';
+  const copy={
+    subject:'To pytanie jest o Tobie. Wybierz odpowiedź szczerze — inni zobaczą opcje, ale nie Twój wybór.',
+    waiting:'Zobacz opcje i pomyśl, co ta osoba wybierze. Głosowanie odblokuje się za moment.',
+    vote:'Wybierz odpowiedź, potem zdecyduj czy stawiasz 1 czy 2 żetony. Możesz zmienić wybór przed zatwierdzeniem.',
+    afterVote:'Gotowe — teraz tylko czekasz na pozostałych. Wynik pojawi się automatycznie.'
+  };
+  return copy[kind]?`<div class="onb-hint">💡 ${copy[kind]}</div>`:'';
+}
+
 function renderLobCatSelector(){
   const row=$('lob-cat-row');
   if(!row)return;
@@ -1560,6 +1635,7 @@ function renderLobby(){
       ? `<span class="cdot dok"></span>Wszyscy gotowi! Gra startuje za chwilę…`
       : `<span class="cdot dwait"></span>Gotowych: ${readyCount}/${filled} — czekaj na pozostałych`;
   }
+  updateOnboardingHelp();
   // Note: show('s-lobby') is NOT called here — renderLobby only updates content, screen switching is done explicitly
 }
 
@@ -2025,11 +2101,11 @@ function renderVoting(){
       $('v-bet').style.gap='8px';
       // Don't override _localBet if user already picked — only init on first show
       updateBetUI();
-      $('v-st').textContent='';
+      $('v-st').innerHTML=onboardingHint('vote');
     } else {
       $('btn-vote').style.display='none';
       $('v-bet').style.display='none';
-      $('v-st').textContent='Jak twoim zdaniem odpowie?';
+      $('v-st').innerHTML=onboardingHint('vote')||'Jak twoim zdaniem odpowie?';
     }
   }
   show('s-vote');
@@ -2123,7 +2199,9 @@ function confirmVote(){
   $('v-bet').style.display='none';
   buildAns('v-ans',getQAnswers(GS.ri),true,_confirmedVote,null,null);
   const myName=GS&&mySlot!==null?GS.players[mySlot]?.name||'':'';
-  $('v-st').innerHTML=`<span style="color:var(--c2)">✓ ${gW(myName,'Zatwierdziłeś','Zatwierdziłaś')}! Czekaj na pozostałych…</span>`;
+  const afterVoteHint=onboardingHint('afterVote');
+  markOnboardingSeen();
+  $('v-st').innerHTML=`<span style="color:var(--c2)">✓ ${gW(myName,'Zatwierdziłeś','Zatwierdziłaś')}! Czekaj na pozostałych…</span>${afterVoteHint}`;
   castVote(_confirmedVote);
 }
 
@@ -2224,6 +2302,7 @@ function renderSubj(){
         <div style="margin-bottom:10px;padding:10px 14px;border:2px solid #3b82f6;border-radius:12px;background:#1e3a5f22;font-size:12px;color:#60a5fa;font-weight:600;text-align:center">
           👀 Zastanów się – wybierzesz gdy <strong style="color:#93c5fd">${sp.name}</strong> się zdecyduje
         </div>
+        ${onboardingHint('waiting')}
         <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(14px,4.5vw,20px);letter-spacing:.5px;line-height:1.35;margin:8px 0;word-break:break-word">${qText}</div>
         <div style="display:flex;flex-direction:column;gap:8px">
           ${answers.map((a,i)=>`<div style="background:var(--card);border:2px solid var(--rim);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;opacity:0.5;pointer-events:none">
@@ -2243,6 +2322,12 @@ function renderSubj(){
   const isPlayerType=q.type==='players';
   const answers=getQAnswers(GS.ri);
   setQText('sj-q',q.qs);
+  const sjHint=onboardingHint('subject');
+  if(sjHint){
+    const hint=document.createElement('div');
+    hint.innerHTML=sjHint;
+    ac.appendChild(hint.firstElementChild);
+  }
   answers.forEach((a,i)=>{
     const btn=document.createElement('button');
     btn.className='abtn';
