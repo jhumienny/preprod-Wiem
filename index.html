@@ -148,6 +148,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .onb-mini-btn{border:1.5px solid var(--rim);background:transparent;color:var(--muted);border-radius:9px;padding:7px 10px;font-size:12px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;}
 .onb-mini-btn.primary{background:var(--text);border-color:var(--text);color:var(--bg);}
 .onb-hint{background:#1e3a5f22;border:1.5px solid #60a5fa55;color:#bfdbfe;border-radius:12px;padding:9px 12px;font-size:12px;line-height:1.45;font-weight:600;}
+.cat-scroll{display:flex;gap:6px;overflow-x:auto;padding:0 18px 4px 0;margin-right:-18px;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%);}
+.cat-scroll::-webkit-scrollbar{display:none;}
 .adm-tab{flex:1;min-width:0;padding:8px 6px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;background:var(--card);color:var(--muted);border:1.5px solid var(--rim);text-align:center;line-height:1.3;}
 .adm-tab-active{background:#1e1b4b;border-color:#534AB7;color:#a5b4fc;}
 .adm-card{background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;}
@@ -1026,7 +1028,7 @@ function renderLobCatSelector(){
   const hasNonDemo=[..._selectedCats].some(c=>c!=='cat_demo');
   row.innerHTML=`
     <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Kategorie pytań</div>
-    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none">
+    <div class="cat-scroll">
       ${cats.map(([id,cat])=>{
         const active=_selectedCats.has(id);
         const isDemo=id==='cat_demo';
@@ -1625,7 +1627,7 @@ function renderLobby(){
     } else {
       btn.disabled=true;
       btn.style.opacity='0.4';
-      btn.textContent=`Gotowych: ${readyCount}/${filled} — czekaj…`;
+      btn.textContent=filled<2?'Do gry potrzebna jest jeszcze jedna osoba':`Gotowych: ${readyCount}/${filled} — czekaj…`;
     }
   } else {
     $('lob-host').style.display='none';
