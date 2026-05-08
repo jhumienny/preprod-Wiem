@@ -737,6 +737,23 @@ function isFeminine(name){
 // Returns gendered form: genderWord(name, 'Trafiłeś/aś') → 'Trafiłaś' or 'Trafiłeś'
 // Usage: gW(name, masc, fem)
 function gW(name,masc,fem){return isFeminine(name)?fem:masc;}
+function nameAfterDo(name){
+  const raw=(name||'').trim();
+  if(!raw)return 'gracza';
+  const lower=raw.toLowerCase();
+  const known={
+    kuba:'Kuby',ola:'Oli',alicja:'Alicji',kasia:'Kasi',basia:'Basi',zosia:'Zosi',ania:'Ani',julia:'Julii',maja:'Mai',jakub:'Jakuba',jan:'Jana',paweł:'Pawła',michał:'Michała',maciej:'Macieja',tomasz:'Tomasza',marcin:'Marcina',piotr:'Piotra',kacper:'Kacpra'
+  };
+  if(known[lower])return known[lower];
+  if(isFeminine(raw)){
+    if(lower.endsWith('ia'))return raw.slice(0,-1)+'i';
+    if(lower.endsWith('la'))return raw.slice(0,-1)+'i';
+    return raw.slice(0,-1)+'y';
+  }
+  if(lower.endsWith('a'))return raw.slice(0,-1)+'y';
+  if(lower.endsWith('ek'))return raw.slice(0,-2)+'ka';
+  return raw+'a';
+}
 
 // Transforms question from 3rd person to 2nd person for subject screen
 function qForSubject(q){
@@ -2498,7 +2515,7 @@ function renderSubj(){
       const qText=q.type==='players'?q.q:q.q.replace('[imię]',sp.name);
       prev.innerHTML=`
         <div style="margin:14px 0 12px;padding:14px 14px 12px;background:var(--card);border:1.5px solid var(--rim);border-radius:16px">
-          <div style="font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Pytanie</div>
+          <div style="font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Pytanie do ${nameAfterDo(sp.name)}</div>
           <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(24px,7.2vw,34px);letter-spacing:.5px;line-height:1.12;word-break:break-word;color:var(--text)">${qText}</div>
         </div>
         ${onboardingHint('waiting')}
