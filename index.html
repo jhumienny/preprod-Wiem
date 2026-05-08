@@ -2139,7 +2139,7 @@ function buildPendingVoters(si){
   }
   const chips=pending.map(({p,i})=>`<span style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:99px;background:${C(i)}22;color:${C(i)};border:1px solid ${C(i)}55;white-space:nowrap">${p.name}</span>`).join('');
   return`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--rim)">
-    <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;text-align:center">Czeka na</div>
+    <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;text-align:center;line-height:1.35;padding-top:1px">Czeka na</div>
     <div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center">${chips}</div>
   </div>`;
 }
@@ -2247,7 +2247,7 @@ function renderVoting(){
         </div>
         ${pending.length>0?`
           <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px">
-            <span style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Czekasz na</span>
+            <span style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);line-height:1.35;padding-top:1px;display:inline-flex;align-items:center">Czekasz na</span>
             ${chips}
           </div>
         `:''}
