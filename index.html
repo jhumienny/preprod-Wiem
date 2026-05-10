@@ -311,7 +311,7 @@ onAuthStateChanged(auth, (user) => {
         <div style="font-size:28px;flex-shrink:0;width:40px;text-align:center">📚</div>
         <div>
           <div style="font-weight:700;font-size:14px;margin-bottom:3px">Duża baza pytań</div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.5">Aktualnie w grze jest <strong id="home-q-count" style="color:var(--text)">—</strong> pytań oraz <strong id="home-user-q-count" style="color:var(--text)">20</strong> pytań dodanych przez użytkowników.</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.5">Aktualnie w grze jest <strong id="home-q-count" style="color:var(--text)">—</strong> pytań oraz <strong id="home-user-q-count" style="color:var(--text)">41</strong> pytań dodanych przez użytkowników.</div>
         </div>
       </div>
 
@@ -707,6 +707,29 @@ const QS=[
   {q:"Jak [imię] zachowuje się w escape roomie?",qs:"Jak zachowujesz się w escape roomie?",a:["Przejmuje dowodzenie","Chaos, ale z energią","Stoi z boku i nagle znajduje kluczową wskazówkę"],as:["Przejmuję dowodzenie","Chaos, ale z energią","Stoję z boku i nagle znajduję kluczową wskazówkę"],cat:"zyciowka"},
   {q:"Co [imię] robi, gdy ktoś mówi „nie obraź się, ale…”?",qs:"Co robisz, gdy ktoś mówi „nie obraź się, ale…”?",a:["Już jest obrażony/a","Słucha z ciekawością","Odpowiada „za późno”"],as:["Już jestem obrażony/a","Słucham z ciekawością","Odpowiadam „za późno”"],cat:"zyciowka"},
   {q:"Jak [imię] reaguje, gdy planowany wieczór zmienia się w imprezę?",qs:"Jak reagujesz, gdy planowany wieczór zmienia się w imprezę?",a:["Wchodzi w to","Próbuje wrócić do planu","Narzeka, ale bawi się najlepiej"],as:["Wchodzę w to","Próbuję wrócić do planu","Narzekam, ale bawię się najlepiej"],cat:"impreza"},
+
+  // Nowe pytania — maj 2026
+  {q:"Co [imię] robi, gdy telefon ma 1% baterii?",qs:"Co robisz, gdy telefon ma 1% baterii?",a:["Panikuje i szuka ładowarki","Włącza tryb przetrwania","Udaje, że wszystko pod kontrolą"],as:["Panikuję i szukam ładowarki","Włączam tryb przetrwania","Udaję, że wszystko pod kontrolą"],cat:"zyciowka"},
+  {q:"Jak [imię] reaguje na wiadomość głosową dłuższą niż minuta?",qs:"Jak reagujesz na wiadomość głosową dłuższą niż minuta?",a:["Słucha od razu","Odkłada na „później”","Prosi o wersję tekstową"],as:["Słucham od razu","Odkładam na „później”","Proszę o wersję tekstową"],cat:"zyciowka"},
+  {q:"Co [imię] robi, gdy dostawa jedzenia przyjdzie pomylona?",qs:"Co robisz, gdy dostawa jedzenia przyjdzie pomylona?",a:["Zjada, bo głód wygrał","Pisze reklamację","Próbuje przekonać siebie, że właśnie tego chciał/a"],as:["Zjadam, bo głód wygrał","Piszę reklamację","Próbuję przekonać siebie, że właśnie tego chciałem/am"],cat:"zyciowka"},
+  {q:"Jak [imię] zachowuje się w windzie z obcą osobą?",qs:"Jak zachowujesz się w windzie z obcą osobą?",a:["Patrzy w telefon","Uśmiecha się niezręcznie","Próbuje small talku"],as:["Patrzę w telefon","Uśmiecham się niezręcznie","Próbuję small talku"],cat:"zyciowka"},
+  {q:"Co [imię] robi, gdy nie może znaleźć rzeczy, którą miał/a przed chwilą w ręce?",qs:"Co robisz, gdy nie możesz znaleźć rzeczy, którą miałeś/aś przed chwilą w ręce?",a:["Oskarża wszechświat","Sprawdza te same miejsca pięć razy","Prosi kogoś o pomoc po 10 sekundach"],as:["Oskarżam wszechświat","Sprawdzam te same miejsca pięć razy","Proszę kogoś o pomoc po 10 sekundach"],cat:"zyciowka"},
+  {q:"Jak [imię] reaguje, gdy ktoś dzwoni bez zapowiedzi?",qs:"Jak reagujesz, gdy ktoś dzwoni bez zapowiedzi?",a:["Odbiera normalnie","Patrzy na ekran jak na zagrożenie","Oddzwania po mentalnym przygotowaniu"],as:["Odbieram normalnie","Patrzę na ekran jak na zagrożenie","Oddzwaniam po mentalnym przygotowaniu"],cat:"zyciowka"},
+  {q:"Co [imię] robi, gdy ma za dużo nieprzeczytanych powiadomień?",qs:"Co robisz, gdy masz za dużo nieprzeczytanych powiadomień?",a:["Czyści wszystko od razu","Ignoruje, aż zniknie poczucie winy","Otwiera tylko najważniejsze"],as:["Czyszczę wszystko od razu","Ignoruję, aż zniknie poczucie winy","Otwieram tylko najważniejsze"],cat:"zyciowka"},
+  {q:"Jak [imię] wybiera restaurację z grupą?",qs:"Jak wybierasz restaurację z grupą?",a:["Ma konkretną propozycję","Mówi „mi wszystko jedno”, ale jednak nie wszystko","Czeka, aż ktoś zdecyduje"],as:["Mam konkretną propozycję","Mówię „mi wszystko jedno”, ale jednak nie wszystko","Czekam, aż ktoś zdecyduje"],cat:"zyciowka"},
+  {q:"Co [imię] robi, gdy ktoś przejmuje głośnik na imprezie?",qs:"Co robisz, gdy ktoś przejmuje głośnik na imprezie?",a:["Oddaje kontrolę bez walki","Walczy o playlistę","Ocenia wybory muzyczne w ciszy"],as:["Oddaję kontrolę bez walki","Walczę o playlistę","Oceniam wybory muzyczne w ciszy"],cat:"impreza"},
+  {q:"Jak [imię] reaguje na hasło „after”?",qs:"Jak reagujesz na hasło „after”?",a:["Od razu wchodzi w temat","Mówi nie, ale daje się namówić","Znika zanim ktoś zapyta drugi raz"],as:["Od razu wchodzę w temat","Mówię nie, ale daję się namówić","Znikam zanim ktoś zapyta drugi raz"],cat:"impreza"},
+  {q:"Co [imię] robi, gdy ktoś nagrywa filmik na imprezie?",qs:"Co robisz, gdy ktoś nagrywa filmik na imprezie?",a:["Pozytywnie pozuje","Ucieka z kadru","Pyta, czy to na pewno nie pójdzie do neta"],as:["Pozytywnie pozuję","Uciekam z kadru","Pytam, czy to na pewno nie pójdzie do neta"],cat:"impreza"},
+  {q:"Jak [imię] zachowuje się podczas gry imprezowej?",qs:"Jak zachowujesz się podczas gry imprezowej?",a:["Gra na pełnej powadze","Robi chaos dla zabawy","Udaje, że nie zależy mu/jej na wygranej"],as:["Gram na pełnej powadze","Robię chaos dla zabawy","Udaję, że nie zależy mi na wygranej"],cat:"impreza"},
+  {q:"Co [imię] robi, gdy gospodarz prosi o pomoc w kuchni?",qs:"Co robisz, gdy gospodarz prosi o pomoc w kuchni?",a:["Pomaga od razu","Pyta „co konkretnie?”","Znika między ludźmi"],as:["Pomagam od razu","Pytam „co konkretnie?”","Znikam między ludźmi"],cat:"impreza"},
+  {q:"Co [imię] zrobiłby/aby, gdyby dostał/a ryzykowną, ale świetną szansę zawodową?",qs:"Co zrobiłbyś/abyś, gdybyś dostał/a ryzykowną, ale świetną szansę zawodową?",a:["Bierze od razu","Analizuje wszystkie scenariusze","Pyta bliskich o opinię"],as:["Biorę od razu","Analizuję wszystkie scenariusze","Pytam bliskich o opinię"],cat:"ambicje"},
+  {q:"Co najbardziej motywuje [imię]?",qs:"Co najbardziej cię motywuje?",a:["Pieniądze","Uznanie","Spokój i niezależność"],as:["Pieniądze","Uznanie","Spokój i niezależność"],cat:"ambicje"},
+  {q:"Jak [imię] zachowuje się, gdy ma być liderem?",qs:"Jak zachowujesz się, gdy masz być liderem?",a:["Bierze odpowiedzialność","Woli działać z tyłu","Stresuje się, ale dowozi"],as:["Biorę odpowiedzialność","Wolę działać z tyłu","Stresuję się, ale dowożę"],cat:"ambicje"},
+  {q:"Co [imię] chciałby/chciałaby kiedyś usłyszeć o sobie?",qs:"Co chciałbyś/chciałabyś kiedyś usłyszeć o sobie?",a:["„Można na nim/niej polegać”","„Miał/a odwagę żyć po swojemu”","„Zostawił/a coś po sobie”"],as:["„Można na mnie polegać”","„Miałem/am odwagę żyć po swojemu”","„Zostawiłem/am coś po sobie”"],cat:"ambicje"},
+  {q:"Kto z graczy najdłużej udawałby, że wszystko rozumie?",qs:"Kto z graczy najdłużej udawałby, że wszystko rozumie?",a:[],type:"players"},
+  {q:"Kto z graczy najlepiej poradziłby sobie w reality show?",qs:"Kto z graczy najlepiej poradziłby sobie w reality show?",a:[],type:"players"},
+  {q:"Kto z graczy byłby adminem grupy i nadużywał władzy?",qs:"Kto z graczy byłby adminem grupy i nadużywał władzy?",a:[],type:"players"},
+  {q:"Kto z graczy pierwszy wymyśliłby kompletnie absurdalny plan, który jakimś cudem działa?",qs:"Kto z graczy pierwszy wymyśliłby kompletnie absurdalny plan, który jakimś cudem działa?",a:[],type:"players"},
 
 ];
 /* ═══════════════════════════════════════════════════════════════ */
@@ -2884,7 +2907,7 @@ let _bulkSelected=new Set(); // indices selected for bulk category assign
   }
 })();
 
-const USER_QUESTION_DISPLAY_COUNT=20;
+const USER_QUESTION_DISPLAY_COUNT=41;
 function publicQuestionCount(){
   const ids=new Set();
   QS.forEach((q,i)=>{
