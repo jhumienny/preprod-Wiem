@@ -540,8 +540,13 @@ onAuthStateChanged(auth, (user) => {
 
   <!-- Tab: Reports -->
   <div id="adm-pane-reports" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button id="reports-sub-btn-open" onclick="admReportsSubTab('open')" style="padding:6px 14px;border-radius:8px;border:none;background:var(--text);color:var(--bg);font-size:12px;font-weight:700;cursor:pointer">Otwarte</button>
+      <button id="reports-sub-btn-history" onclick="admReportsSubTab('history')" style="padding:6px 14px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer">Historia</button>
+    </div>
     <div id="adm-reports-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:32px 0;display:none">Brak zgłoszeń ✅</div>
     <div id="adm-reports-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div id="adm-reports-history-list" style="display:none;flex-direction:column;gap:10px"></div>
   </div>
 
   <!-- Tab: Users -->
@@ -3360,7 +3365,7 @@ function admSetTab(tab) {
   });
   if (tab === 'questions') admRenderQuestions();
   if (tab === 'pending')   admLoadPending();
-  if (tab === 'reports')   admLoadReports();
+  if (tab === 'reports')   admReportsSubTab('open');
   if (tab === 'users')     admLoadUsers();
 }
 
@@ -3822,6 +3827,65 @@ async function admLoadPendingCount() {
 }
 
 // ── TAB: REPORTS ──
+function reportIsOpen(r) {
+  if (!r) return false;
+  return r.status ? r.status === 'open' : !r.resolved;
+}
+
+function reportStatusLabel(status) {
+  if (status === 'rejected') return {txt:'✗ Odrzucone', style:'background:#ef444422;color:#f87171;border:1px solid #ef444444'};
+  if (status === 'resolved') return {txt:'✓ Zamknięte', style:'background:#16a34a22;color:#4ade80;border:1px solid #16a34a44'};
+  return {txt:'Otwarte', style:'background:#ef444422;color:#f87171;border:1px solid #ef444444'};
+}
+
+function admReportsSubTab(tab) {
+  const openList = $('adm-reports-list');
+  const historyList = $('adm-reports-history-list');
+  const empty = $('adm-reports-empty');
+  const btnO = $('reports-sub-btn-open');
+  const btnH = $('reports-sub-btn-history');
+  if (tab === 'history') {
+    if (openList) openList.style.display = 'none';
+    if (empty) empty.style.display = 'none';
+    if (historyList) historyList.style.display = 'flex';
+    if (btnO) { btnO.style.background = 'transparent'; btnO.style.color = 'var(--muted)'; btnO.style.border = '1.5px solid var(--rim)'; }
+    if (btnH) { btnH.style.background = 'var(--text)'; btnH.style.color = 'var(--bg)'; btnH.style.border = 'none'; }
+    admLoadReportsHistory();
+  } else {
+    if (historyList) historyList.style.display = 'none';
+    if (openList) openList.style.display = 'flex';
+    if (btnH) { btnH.style.background = 'transparent'; btnH.style.color = 'var(--muted)'; btnH.style.border = '1.5px solid var(--rim)'; }
+    if (btnO) { btnO.style.background = 'var(--text)'; btnO.style.color = 'var(--bg)'; btnO.style.border = 'none'; }
+    admLoadReports();
+  }
+}
+
+function admBuildReportCard(rid, r, history) {
+  const dateStr = r.reportedAt ? new Date(r.reportedAt).toLocaleString('pl') : (r.reportedAt||'—');
+  const qText = r.questionText || r.qText || '(brak treści)';
+  const answers = r.answers || [];
+  const st = reportStatusLabel(r.status || (r.resolved ? 'resolved' : 'open'));
+  const resolvedAt = r.resolvedAt ? new Date(r.resolvedAt).toLocaleString('pl') : '';
+  const ansHtml = answers.length > 0
+    ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0">' + answers.map((a,i) => '<span style="font-size:11px;background:var(--bg);border-radius:6px;padding:3px 8px;color:var(--muted)">' + (i+1) + '. ' + escHtml(a) + '</span>').join('') + '</div>'
+    : '';
+  return '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
+      '<span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">' + dateStr + '</span>' +
+      '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;' + st.style + '">' + st.txt + '</span>' +
+    '</div>' +
+    '<div class="adm-card-q">' + escHtml(qText) + '</div>' +
+    ansHtml +
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:6px">Zgłosił/a: ' + escHtml(r.reportedBy || r.reportedByName || '—') + (r.gameId ? ' · Gra: ' + escHtml(r.gameId) : '') + '</div>' +
+    (history && resolvedAt ? '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Rozpatrzono: ' + resolvedAt + '</div>' : '') +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      '<button onclick="admEditReportQ(\'' + rid + '\')" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer">✏️ Edytuj</button>' +
+      (history
+        ? '<button onclick="admReopenReport(\'' + rid + '\')" style="flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer">↩ Przywróć jako otwarte</button>'
+        : '<button onclick="admResolveReport(\'' + rid + '\')" style="flex:1;padding:9px;border-radius:8px;border:none;background:#16a34a;color:#fff;font-size:12px;font-weight:700;cursor:pointer">✓ Zamknij</button>' +
+          '<button onclick="admRejectReport(\'' + rid + '\')" style="padding:9px 14px;border-radius:8px;border:1.5px solid var(--c0)44;background:transparent;color:var(--c0);font-size:12px;font-weight:700;cursor:pointer">✗ Odrzuć</button>') +
+    '</div>';
+}
+
 async function admLoadReports() {
   const list = $('adm-reports-list');
   const empty = $('adm-reports-empty');
@@ -3831,12 +3895,8 @@ async function admLoadReports() {
   try {
     const data = await admFetch('reports');
     const items = [];
-    if (data) Object.entries(data).forEach(([rid, r]) => {
-      if (!r) return;
-      // Support both old format (r.resolved field) and new format (r.status field)
-      const isOpen = r.status ? r.status === 'open' : !r.resolved;
-      if (isOpen) items.push({rid, r});
-    });
+    if (data) Object.entries(data).forEach(([rid, r]) => { if (reportIsOpen(r)) items.push({rid, r}); });
+    items.sort((a,b) => new Date(b.r.reportedAt||0) - new Date(a.r.reportedAt||0));
 
     list.innerHTML = '';
     if (items.length === 0) { if (empty) empty.style.display = ''; return; }
@@ -3846,25 +3906,7 @@ async function admLoadReports() {
       const card = document.createElement('div');
       card.className = 'adm-card';
       card.id = 'rep-' + rid;
-      const dateStr = r.reportedAt ? new Date(r.reportedAt).toLocaleString('pl') : (r.reportedAt||'—');
-      const qText = r.questionText || r.qText || '(brak treści)';
-      const answers = r.answers || [];
-      const ansHtml = answers.length > 0
-        ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0">' + answers.map((a,i) => '<span style="font-size:11px;background:var(--bg);border-radius:6px;padding:3px 8px;color:var(--muted)">' + (i+1) + '. ' + escHtml(a) + '</span>').join('') + '</div>'
-        : '';
-      card.innerHTML =
-        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
-          '<span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">' + dateStr + '</span>' +
-          '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:#ef444422;color:#f87171;border:1px solid #ef444444">Otwarte</span>' +
-        '</div>' +
-        '<div class="adm-card-q">' + escHtml(qText) + '</div>' +
-        ansHtml +
-        '<div style="font-size:12px;color:var(--muted);margin-bottom:6px">Zgłosił/a: ' + escHtml(r.reportedBy || r.reportedByName || '—') + (r.gameId ? ' · Gra: ' + escHtml(r.gameId) : '') + '</div>' +
-        '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-          '<button onclick="admEditReportQ(\'' + rid + '\')" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer">✏️ Edytuj</button>' +
-          '<button onclick="admResolveReport(\'' + rid + '\')" style="flex:1;padding:9px;border-radius:8px;border:none;background:#16a34a;color:#fff;font-size:12px;font-weight:700;cursor:pointer">✓ Zamknij</button>' +
-          '<button onclick="admRejectReport(\'' + rid + '\')" style="padding:9px 14px;border-radius:8px;border:1.5px solid var(--c0)44;background:transparent;color:var(--c0);font-size:12px;font-weight:700;cursor:pointer">✗ Odrzuć</button>' +
-        '</div>';
+      card.innerHTML = admBuildReportCard(rid, r, false);
       list.appendChild(card);
     });
     admLoadReportsCount();
@@ -3873,9 +3915,35 @@ async function admLoadReports() {
   }
 }
 
+async function admLoadReportsHistory() {
+  const list = $('adm-reports-history-list');
+  if (!list) return;
+  list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Ładowanie…</div>';
+  try {
+    const data = await admFetch('reports');
+    const items = [];
+    if (data) Object.entries(data).forEach(([rid, r]) => { if (r && !reportIsOpen(r)) items.push({rid, r}); });
+    items.sort((a,b) => (b.r.resolvedAt||0) - (a.r.resolvedAt||0) || (new Date(b.r.reportedAt||0) - new Date(a.r.reportedAt||0)));
+    list.innerHTML = '';
+    if (items.length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:32px 0">Brak historii</div>';
+      return;
+    }
+    items.forEach(({rid, r}) => {
+      const card = document.createElement('div');
+      card.className = 'adm-card';
+      card.id = 'rep-hist-' + rid;
+      card.innerHTML = admBuildReportCard(rid, r, true);
+      list.appendChild(card);
+    });
+  } catch(e) {
+    list.innerHTML = '<div style="color:var(--c0);font-size:13px;text-align:center;padding:16px">Błąd: ' + e.message + '</div>';
+  }
+}
+
 function admEditReportQ(rid) {
   // Find related question in QS by matching questionText and open inline edit
-  const card = $('rep-' + rid);
+  const card = $('rep-' + rid) || $('rep-hist-' + rid);
   if (!card) return;
   const qTextEl = card.querySelector('.adm-card-q');
   const qText = qTextEl ? qTextEl.textContent : '';
@@ -3892,7 +3960,7 @@ function admEditReportQ(rid) {
 
 async function admResolveReport(rid) {
   try {
-    await admWrite('reports/' + rid + '/status', 'resolved', 'PUT');
+    await admWrite('reports/' + rid, {status:'resolved', resolvedAt:Date.now()}, 'PATCH');
     const card = $('rep-' + rid);
     if (card) card.remove();
     admLoadReportsCount();
@@ -3901,8 +3969,17 @@ async function admResolveReport(rid) {
 
 async function admRejectReport(rid) {
   try {
-    await admWrite('reports/' + rid + '/status', 'rejected', 'PUT');
+    await admWrite('reports/' + rid, {status:'rejected', resolvedAt:Date.now()}, 'PATCH');
     const card = $('rep-' + rid);
+    if (card) card.remove();
+    admLoadReportsCount();
+  } catch(e) { alert('Błąd: ' + e.message); }
+}
+
+async function admReopenReport(rid) {
+  try {
+    await admWrite('reports/' + rid, {status:'open', resolvedAt:null}, 'PATCH');
+    const card = $('rep-hist-' + rid);
     if (card) card.remove();
     admLoadReportsCount();
   } catch(e) { alert('Błąd: ' + e.message); }
@@ -3912,11 +3989,7 @@ async function admLoadReportsCount() {
   try {
     const data = await admFetch('reports');
     let n = 0;
-    if (data) Object.values(data).forEach(r => {
-      if (!r) return;
-      const isOpen = r.status ? r.status === 'open' : !r.resolved;
-      if (isOpen) n++;
-    });
+    if (data) Object.values(data).forEach(r => { if (reportIsOpen(r)) n++; });
     const el = $('adm-reports-count');
     if (el) { el.textContent = n; el.style.display = n > 0 ? 'inline' : 'none'; }
   } catch(e) {}
