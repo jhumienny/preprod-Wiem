@@ -140,7 +140,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .report-btn:disabled{cursor:default;transform:none;}
 .brow{display:flex;gap:8px;}
 .brow .btn{flex:1;}
-.react-bar{position:relative;z-index:1;display:flex;justify-content:center;gap:8px;background:transparent;padding:10px 0 8px;margin:8px 0 2px;flex-shrink:0;clear:both;}
+.react-bar{position:relative;z-index:1;display:flex;justify-content:center;gap:8px;background:transparent;padding:10px 0 8px;margin:16px 0 8px;flex-shrink:0;clear:both;}
 .react-btn{width:38px;height:38px;border-radius:999px;border:1.5px solid var(--rim);background:var(--card);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease,background .12s ease,border-color .12s ease;}
 .react-btn:active{transform:scale(.92);background:#818cf822;border-color:#818cf855;}
 .react-btn.cooldown{pointer-events:none;}
@@ -2029,9 +2029,13 @@ function showReactionBubble(evt){
   const name=evt.slot===mySlot?'Ty':(evt.name||'Gracz');
   b.textContent=`${name} ${evt.emoji}`;
   const x=(typeof evt.xPct==='number'?evt.xPct:.5)*window.innerWidth;
-  const y=(typeof evt.yPct==='number'?evt.yPct:.78)*window.innerHeight;
+  const rawY=(typeof evt.yPct==='number'?evt.yPct:.78)*window.innerHeight;
+  // Reactions are fired from the bottom emoji bar; start their pill lower so
+  // the upward float stays around the bar instead of covering wait/status cards.
+  const y=evt.fromReactBar?rawY+78:rawY;
+  const maxY=evt.fromReactBar?window.innerHeight-34:window.innerHeight-90;
   b.style.left=Math.max(24,Math.min(window.innerWidth-24,x))+'px';
-  b.style.top=Math.max(60,Math.min(window.innerHeight-90,y))+'px';
+  b.style.top=Math.max(60,Math.min(maxY,y))+'px';
   layer.appendChild(b);
   setTimeout(()=>b.remove(),1900);
 }
@@ -2053,7 +2057,7 @@ async function sendReaction(emoji,btn){
   const rect=btn?.getBoundingClientRect?.();
   const xPct=rect?((rect.left+rect.width/2)/window.innerWidth):.5;
   const yPct=rect?((rect.top+rect.height/2)/window.innerHeight):.78;
-  const evt={id:`${mySlot}-${now}-${Math.random().toString(36).slice(2,6)}`,slot:mySlot,name:GS.players[mySlot]?.name||'Gracz',emoji,ri:GS.ri||0,phase:GS.phase,ts:now,xPct,yPct};
+  const evt={id:`${mySlot}-${now}-${Math.random().toString(36).slice(2,6)}`,slot:mySlot,name:GS.players[mySlot]?.name||'Gracz',emoji,ri:GS.ri||0,phase:GS.phase,ts:now,xPct,yPct,fromReactBar:true};
   _lastReactionId=evt.id;
   showReactionBubble(evt);
   try{await fbPatch(`games/${gameId}`,{reaction:evt});}catch(e){console.error('reaction',e);}
