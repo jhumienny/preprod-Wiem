@@ -2909,12 +2909,7 @@ let _bulkSelected=new Set(); // indices selected for bulk category assign
 
 const USER_QUESTION_DISPLAY_COUNT=41;
 function publicQuestionCount(){
-  const ids=new Set();
-  QS.forEach((q,i)=>{
-    const cats=(_qCatMap[i]||[]).filter(c=>c!=='cat_demo');
-    if(cats.length>0) ids.add(i);
-  });
-  return Math.max(0,ids.size-USER_QUESTION_DISPLAY_COUNT);
+  return Math.max(0,QS.length-USER_QUESTION_DISPLAY_COUNT);
 }
 function updateHomeQuestionCount(){
   const el=$('home-q-count');
