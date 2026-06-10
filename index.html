@@ -12,19 +12,21 @@
 :root{
   --bg:#0e0e12;--card:#18181f;--rim:#26262f;--text:#f0eef8;--muted:#6a6a80;
   --c0:#ff4d4d;--c1:#4d8dff;--c2:#3dd68c;--c3:#ffb830;--rad:16px;
+  --self-bg:#3730a322;--self-rim:#a78bfa55;--self-text:#a78bfa;
 }
 [data-theme="light"]{
-  --bg:#f0eff8;--card:#ffffff;--rim:#dddbe8;--text:#12111a;--muted:#7a7890;
+  --bg:#f0eff8;--card:#ffffff;--rim:#d7d3e2;--text:#12111a;--muted:#5f5b73;
+  --self-bg:#f1efff;--self-rim:#8b5cf655;--self-text:#5b21b6;
 }
 @media(prefers-color-scheme:light){
   :root:not([data-theme="dark"]){
-    --bg:#f0eff8;--card:#ffffff;--rim:#dddbe8;--text:#12111a;--muted:#7a7890;
+    --bg:#f0eff8;--card:#ffffff;--rim:#d7d3e2;--text:#12111a;--muted:#5f5b73;
+    --self-bg:#f1efff;--self-rim:#8b5cf655;--self-text:#5b21b6;
   }
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;justify-content:center;min-height:100dvh;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--rim) 1px,transparent 1px),linear-gradient(90deg,var(--rim) 1px,transparent 1px);background-size:32px 32px;opacity:.18;pointer-events:none;z-index:0;}
 .app{position:relative;z-index:1;width:100%;max-width:440px;height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
 .scr{display:none;flex-direction:column;flex:1;min-height:0;padding:20px 16px max(32px,calc(env(safe-area-inset-bottom) + 24px));gap:16px;animation:pop .28s ease;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .scr.on{display:flex;}
@@ -38,6 +40,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .field label{font-size:13px;color:var(--muted);white-space:nowrap;}
 .field input{flex:1;background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text);}
 .field input::placeholder{color:var(--muted);}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:1;}
 
 /* setup screen */
 .setup-card{background:var(--card);border:1.5px solid var(--rim);border-radius:var(--rad);padding:20px;}
@@ -69,9 +72,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .copy-note.show{opacity:1;transform:translateY(0);}
 .codebox.copied .codesub{display:none;}
 .lob-actions{display:flex;gap:8px;align-items:stretch;min-height:50px;}
-.lob-actions .btn{min-width:0;min-height:50px;transform:none!important;transition:none!important;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-.lob-actions .btn:active{transform:none!important;}
-.lob-start-note{flex:1;min-height:50px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:10px 12px;font-size:12px;font-weight:800;color:var(--muted);line-height:1.25;transition:none!important;}
+.lob-actions .btn{min-width:0;min-height:50px;transform:none!important;}
+.lob-start-note{flex:1;min-height:50px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:10px 12px;font-size:12px;font-weight:800;color:var(--muted);line-height:1.25;}
 .sbar{display:flex;gap:4px;background:var(--card);border-radius:10px;padding:8px 10px;}
 .sbi{flex:1;text-align:center;}
 .sbi-n{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -125,35 +127,18 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .podium{display:flex;align-items:flex-end;justify-content:center;gap:6px;}
 .podcol{flex:1;text-align:center;}
 .podbar{border-radius:8px 8px 0 0;margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:22px;}
-.vstatus{text-align:center;font-size:13px;color:var(--muted);min-height:20px;position:relative;z-index:0;}
-#s-vote .react-bar{margin:14px 0 12px;}
-#s-vote .vstatus{margin-bottom:16px;}
-#s-vote .report-btn{margin-top:0;}
+.vstatus{text-align:center;font-size:13px;color:var(--muted);min-height:20px;}
 .conn{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);}
 .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 .dok{background:var(--c2);}
 .dwait{background:var(--c3);animation:blink .9s infinite;}
 .derr{background:var(--c0);}
-.btn{box-sizing:border-box;border-radius:12px;padding:15px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:2px solid transparent;transition:all .15s;text-align:center;width:100%;display:block;}
+.btn{border-radius:12px;padding:15px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .15s;text-align:center;width:100%;display:block;}
 .btn:active{transform:scale(.98);}
 .btn-lit{background:var(--text);color:var(--bg);}
 .btn-dim{background:var(--card);color:var(--text);border:1.5px solid var(--rim);}
-.report-btn{background:var(--card);border:1.5px solid var(--rim);color:var(--muted);font-size:12px;line-height:1.4;cursor:pointer;padding:10px 12px;text-align:center;width:100%;margin-top:8px;border-radius:12px;display:block;position:relative;z-index:1;transition:color .2s,border-color .2s,background .2s;}
-.report-btn:active{transform:scale(.98);}
-.report-btn:disabled{cursor:default;transform:none;}
 .brow{display:flex;gap:8px;}
 .brow .btn{flex:1;}
-.react-bar{position:relative;z-index:1;display:flex;justify-content:center;gap:8px;background:transparent;padding:6px 0 4px;margin:8px 0 10px;flex-shrink:0;clear:both;}
-.react-btn{width:38px;height:38px;border-radius:999px;border:1.5px solid var(--rim);background:var(--card);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease,background .12s ease,border-color .12s ease;}
-.react-btn:active{transform:scale(.92);background:#818cf822;border-color:#818cf855;}
-.react-btn.cooldown{pointer-events:none;}
-.react-btn.cooldown.dim{opacity:.28;transition:none;}
-.react-btn.cooldown.recovering{opacity:1;transition:opacity var(--react-cooldown,3.5s) linear;}
-.react-layer{position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden;}
-.react-bubble{position:absolute;left:50%;top:70%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#7c3aed,#ec4899);border:1.5px solid #f0abfc;border-radius:999px;padding:8px 13px;font-size:14px;font-weight:900;color:#fff;box-shadow:0 12px 34px #7c3aed66,0 0 0 3px #ffffff18;animation:reactFloat 1.8s ease forwards;white-space:nowrap;text-shadow:0 1px 2px #0007;}
-.react-bubble.from-bar{animation:reactFloatFromBar 1.55s ease forwards;}
-@keyframes reactFloat{0%{opacity:0;transform:translate(-50%,4px) scale(.9)}12%{opacity:1;transform:translate(-50%,-8px) scale(1)}78%{opacity:1;transform:translate(-50%,-54px) scale(1)}100%{opacity:0;transform:translate(-50%,-76px) scale(.96)}}
-@keyframes reactFloatFromBar{0%{opacity:0;transform:translate(-50%,4px) scale(.9)}12%{opacity:1;transform:translate(-50%,-8px) scale(1)}72%{opacity:1;transform:translate(-50%,14px) scale(1)}100%{opacity:0;transform:translate(-50%,32px) scale(.96)}}
 .err-msg{color:var(--c0);font-size:13px;text-align:center;display:none;padding:4px 0;}
 .maxp-btn{width:36px;height:36px;border-radius:8px;border:1.5px solid var(--rim);background:var(--card);color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:18px;cursor:pointer;transition:all .15s;}
 .maxp-btn:active{transform:scale(.95);}
@@ -172,9 +157,12 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .onb-body{display:none;border-top:1px solid #818cf833;padding-top:10px;font-size:13px;color:var(--muted);line-height:1.55;}
 .onb-card.open .onb-body{display:block;}
 .onb-list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;}
-.onb-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.onb-actions{display:flex;justify-content:flex-start;margin-top:10px;}
 .onb-mini-btn{border:1.5px solid var(--rim);background:transparent;color:var(--muted);border-radius:9px;padding:7px 10px;font-size:12px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;}
 .onb-mini-btn.primary{background:var(--text);border-color:var(--text);color:var(--bg);}
+.onb-dismiss{border:none;background:transparent;color:#c7d2fe;margin-left:-6px;padding:5px 7px;border-radius:7px;font-size:12px;font-weight:800;font-family:'DM Sans',sans-serif;cursor:pointer;text-decoration:none;transition:background .15s ease,color .15s ease,transform .15s ease;}
+.onb-dismiss:hover,.onb-dismiss:focus-visible{background:#818cf81f;color:#ffffff;outline:none;}
+.onb-dismiss:active{transform:scale(.97);}
 .onb-hint{background:#1e3a5f22;border:1.5px solid #60a5fa55;color:#bfdbfe;border-radius:12px;padding:9px 12px;font-size:12px;line-height:1.45;font-weight:600;}
 .cat-scroll{display:flex;gap:6px;overflow-x:auto;padding:0 18px 4px 18px;margin:0 -18px;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 28px,#000 calc(100% - 34px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 28px,#000 calc(100% - 34px),transparent 100%);}
 .cat-scroll::-webkit-scrollbar{display:none;}
@@ -185,6 +173,30 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .adm-card-meta{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
 .theme-btn{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:10px;border:1.5px solid var(--rim);background:var(--card);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:all .15s;}
 .theme-btn:active{transform:scale(.95);}
+.lobby-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;}
+.leave-icon-btn{width:40px;height:40px;flex:0 0 40px;border-radius:12px;border:1.5px solid var(--c0);background:#2d1a1a;color:var(--c0);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s ease,background .15s ease,border-color .15s ease;}
+.leave-icon-btn:active{transform:scale(.95);}
+.leave-icon-btn svg{width:22px;height:22px;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+[data-theme="light"] .mode-btn-active{border-color:#7c3aed;background:#ece9ff;color:#312e81;}
+[data-theme="light"] .mode-btn span[style*="opacity"]{opacity:.82!important;}
+[data-theme="light"] .adm-tab-active{background:#ece9ff;border-color:#7c3aed;color:#312e81;}
+[data-theme="light"] .onb-card{background:linear-gradient(135deg,#f4f1ff,#ffffff);border-color:#c4b5fd;box-shadow:0 10px 26px #4c1d9514;}
+[data-theme="light"] .onb-toggle{border-color:#c4b5fd;background:#ede9fe;color:#5b21b6;}
+[data-theme="light"] .onb-card.open .onb-toggle{border-color:var(--self-text);background:#ede9fe;color:#5b21b6;}
+[data-theme="light"] .onb-badge{background:#ede9fe;color:#5b21b6;}
+[data-theme="light"] .onb-title{color:#312e81;}
+[data-theme="light"] .onb-sub,
+[data-theme="light"] .onb-body{color:#514a68;}
+[data-theme="light"] .onb-body{border-top-color:#ddd6fe;}
+[data-theme="light"] .onb-hint{background:#eff6ff;border-color:#93c5fd;color:#1d4ed8;}
+[data-theme="light"] .onb-mini-btn{color:#514a68;}
+[data-theme="light"] .onb-mini-btn.primary{background:#12111a;border-color:#12111a;color:#ffffff;}
+[data-theme="light"] .onb-dismiss{color:#5b21b6;}
+[data-theme="light"] .onb-dismiss:hover,
+[data-theme="light"] .onb-dismiss:focus-visible{background:#ede9fe;color:#3b0764;}
+[data-theme="light"] .codebox.copied{background:#dcfce7;border-color:#16a34a;box-shadow:0 0 0 3px #16a34a22;}
+[data-theme="light"] .copy-note{color:#15803d;}
+[data-theme="light"] .leave-icon-btn{background:#fee2e2;}
 </style>
 
 <!-- Firebase Auth SDK -->
@@ -311,16 +323,6 @@ onAuthStateChanged(auth, (user) => {
       <div style="height:1px;background:var(--rim)"></div>
 
       <div style="display:flex;gap:14px;align-items:flex-start">
-        <div style="font-size:28px;flex-shrink:0;width:40px;text-align:center">📚</div>
-        <div>
-          <div style="font-weight:700;font-size:14px;margin-bottom:3px">Duża baza pytań</div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.5">Aktualnie w grze jest <strong id="home-q-count" style="color:var(--text)">—</strong> pytań.</div>
-        </div>
-      </div>
-
-      <div style="height:1px;background:var(--rim)"></div>
-
-      <div style="display:flex;gap:14px;align-items:flex-start">
         <div style="font-size:28px;flex-shrink:0;width:40px;text-align:center">✍️</div>
         <div>
           <div style="font-weight:700;font-size:14px;margin-bottom:3px">Rejestracja jest opcjonalna</div>
@@ -354,8 +356,15 @@ onAuthStateChanged(auth, (user) => {
 
 <!-- ══ LOBBY ══ -->
 <div class="scr" id="s-lobby">
-  <div style="padding-top:12px">
+  <div class="lobby-head">
     <div class="logo" style="font-size:42px">Wiem<em>!</em></div>
+    <button class="leave-icon-btn" onclick="leaveGame()" title="Opuść grę" aria-label="Opuść grę">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M13 4h-6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6"/>
+        <path d="M16 8l4 4-4 4"/>
+        <path d="M9 12h11"/>
+      </svg>
+    </button>
   </div>
   <div class="codebox" onclick="copyCode()">
     <div class="codelbl">Kod gry</div>
@@ -377,10 +386,10 @@ onAuthStateChanged(auth, (user) => {
         <li>Jedna osoba odpowiada na pytanie.</li>
         <li>Reszta zgaduje jej odpowiedź.</li>
         <li>Stawiasz 1 albo 2 żetony.</li>
-        <li>Trafisz — zyskujesz. Pudło — tracisz postawione żetony.</li>
+        <li>Trafisz — zyskujesz. Pudło — tracisz.</li>
       </ul>
       <div class="onb-actions">
-        <button class="onb-mini-btn primary" onclick="event.stopPropagation();dismissOnboardingHelp()">Nie pokazuj więcej</button>
+        <button class="onb-dismiss" onclick="event.stopPropagation();dismissOnboardingHelp()">Nie pokazuj więcej</button>
       </div>
     </div>
   </div>
@@ -424,9 +433,9 @@ onAuthStateChanged(auth, (user) => {
     <div id="lob-cat-row" style="display:flex;flex-direction:column;gap:6px"></div>
   </div>
   <div id="lob-guest" style="display:none;">
-    <div class="conn" id="lob-guest-conn">Czekaj aż host rozpocznie grę…</div>
+    <div class="conn" id="lob-guest-conn"><span class="cdot dwait"></span>Czekaj aż host rozpocznie grę…</div>
   </div>
-  <button class="btn btn-dim" style="color:var(--c0);border-color:var(--c0)44;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
+  <div class="conn"><span class="cdot dok"></span><span id="sync-st">Połączono</span></div>
 </div>
 
 <!-- ══ VOTE ══ -->
@@ -438,7 +447,6 @@ onAuthStateChanged(auth, (user) => {
     <div class="qabout" id="v-about"></div>
     <div class="qtext" id="v-q"></div>
   </div>
-  <div id="v-hint"></div>
   <div class="ans-list" id="v-ans"></div>
   <div id="v-bet" style="display:none">
     <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Ile żetonów stawiasz?</div>
@@ -454,7 +462,7 @@ onAuthStateChanged(auth, (user) => {
   </div>
   <div class="vstatus" id="v-st"></div>
   <button class="btn btn-lit" id="btn-vote" style="display:none" onclick="confirmVote()">Zatwierdź odpowiedź ✓</button>
-  <button class="report-btn" onclick="reportError(this)">⚑ Zgłoś błąd</button>
+  <button onclick="reportError(this)" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 0;text-align:center;width:100%;transition:color .2s">⚑ Zgłoś błąd</button>
   <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
 </div>
 
@@ -468,8 +476,7 @@ onAuthStateChanged(auth, (user) => {
     <div class="wq" id="w-q"></div>
   </div>
   <div id="w-preview"></div>
-  <button class="report-btn" onclick="reportError(this)">⚑ Zgłoś błąd</button>
-  <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
+  <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33" onclick="leaveGame()">← Opuść grę</button>
 </div>
 
 <!-- ══ SUBJECT ══ -->
@@ -484,7 +491,7 @@ onAuthStateChanged(auth, (user) => {
   <div class="ans-list" id="sj-ans"></div>
   <button class="btn btn-dim" id="btn-swap-sj" style="display:none" onclick="swapQuestionSJ()"></button>
   <button class="btn btn-lit" id="btn-sj" style="display:none" onclick="submitSJ()">Zatwierdź i pozwól innym odpowiedzieć →</button>
-  <button class="report-btn" onclick="reportError(this)">⚑ Zgłoś błąd</button>
+  <button onclick="reportError(this)" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 0;text-align:center;width:100%;transition:color .2s">⚑ Zgłoś błąd</button>
   <button class="btn btn-dim" style="font-size:12px;padding:10px;color:var(--c0);border-color:var(--c0)33;margin-top:4px" onclick="leaveGame()">← Opuść grę</button>
 </div>
 
@@ -543,13 +550,8 @@ onAuthStateChanged(auth, (user) => {
 
   <!-- Tab: Reports -->
   <div id="adm-pane-reports" style="display:none">
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <button id="reports-sub-btn-open" onclick="admReportsSubTab('open')" style="padding:6px 14px;border-radius:8px;border:none;background:var(--text);color:var(--bg);font-size:12px;font-weight:700;cursor:pointer">Otwarte</button>
-      <button id="reports-sub-btn-history" onclick="admReportsSubTab('history')" style="padding:6px 14px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer">Historia</button>
-    </div>
     <div id="adm-reports-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:32px 0;display:none">Brak zgłoszeń ✅</div>
     <div id="adm-reports-list" style="display:flex;flex-direction:column;gap:10px"></div>
-    <div id="adm-reports-history-list" style="display:none;flex-direction:column;gap:10px"></div>
   </div>
 
   <!-- Tab: Users -->
@@ -571,21 +573,21 @@ onAuthStateChanged(auth, (user) => {
     <div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px"><span>Dla innych — pamiętaj, żeby zawrzeć [imię] w pytaniu</span><span>Dla Ciebie</span></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
       <textarea id="myq-q" placeholder="Co [imię] robi gdy…" rows="3" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()"></textarea>
-      <textarea id="myq-qs" placeholder="Co robisz gdy…" rows="3" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:13px;color:#a78bfa;font-family:inherit;resize:vertical;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()"></textarea>
+      <textarea id="myq-qs" placeholder="Co robisz gdy…" rows="3" style="background:var(--self-bg);border:1.5px solid var(--self-rim);border-radius:8px;padding:8px;font-size:13px;color:var(--self-text);font-family:inherit;resize:vertical;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()"></textarea>
     </div>
     <div class="label">Odpowiedzi (3)</div>
     <div style="display:flex;flex-direction:column;gap:6px">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
         <input id="myq-a0" type="text" placeholder="Odpowiedź 1 — dla innych" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:12px;color:var(--text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
-        <input id="myq-as0" type="text" placeholder="Odpowiedź 1 — dla Ciebie" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:12px;color:#a78bfa;font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
+        <input id="myq-as0" type="text" placeholder="Odpowiedź 1 — dla Ciebie" style="background:var(--self-bg);border:1.5px solid var(--self-rim);border-radius:8px;padding:8px;font-size:12px;color:var(--self-text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
         <input id="myq-a1" type="text" placeholder="Odpowiedź 2 — dla innych" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:12px;color:var(--text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
-        <input id="myq-as1" type="text" placeholder="Odpowiedź 2 — dla Ciebie" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:12px;color:#a78bfa;font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
+        <input id="myq-as1" type="text" placeholder="Odpowiedź 2 — dla Ciebie" style="background:var(--self-bg);border:1.5px solid var(--self-rim);border-radius:8px;padding:8px;font-size:12px;color:var(--self-text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
         <input id="myq-a2" type="text" placeholder="Odpowiedź 3 — dla innych" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:12px;color:var(--text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
-        <input id="myq-as2" type="text" placeholder="Odpowiedź 3 — dla Ciebie" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:12px;color:#a78bfa;font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
+        <input id="myq-as2" type="text" placeholder="Odpowiedź 3 — dla Ciebie" style="background:var(--self-bg);border:1.5px solid var(--self-rim);border-radius:8px;padding:8px;font-size:12px;color:var(--self-text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">
       </div>
     </div>
     <div id="myq-err" style="display:none;color:var(--c0);font-size:12px"></div>
@@ -689,56 +691,6 @@ const QS=[
   {q:"Jak [imię] radzi sobie z porażką?",qs:"Jak radzisz sobie z porażką?",a:["Analizuje co poszło nie tak i próbuje ponownie","Odcina się i potrzebuje czasu","Żartuje żeby nie płakać"],as:["Analizuję co poszło nie tak i próbuję ponownie","Odcinam się i potrzebuję czasu","Żartuję żeby nie płakać"],cat:"ambicje"},
   {q:"Czego [imię] nigdy nie zrobiłby/aby dla pieniędzy?",qs:"Czego nigdy nie zrobiłbyś/abyś dla pieniędzy?",a:["Zdradzić kogoś bliskiego","Zrezygnować z wartości","Pracy którą gardzi"],as:["Zdradzić kogoś bliskiego","Zrezygnować z wartości","Pracy którą gardzę"],cat:"ambicje"},
   {q:"Jaki jest największy strach [imię]?",qs:"Jaki jest twój największy strach?",a:["Samotność na starość","Marnowanie życia na coś bez sensu","Utrata kogoś ważnego"],as:["Samotność na starość","Marnowanie życia na coś bez sensu","Utrata kogoś ważnego"],cat:"ambicje"},
-  // Nowe pytania — Życiówka / Impreza
-  {q:"Co [imię] robi, gdy ktoś proponuje spontaniczny wyjazd za godzinę?",qs:"Co robisz, gdy ktoś proponuje spontaniczny wyjazd za godzinę?",a:["Pakuje się w 10 minut","Panikuje, ale jedzie","Odmawia, bo potrzebuje planu"],as:["Pakuję się w 10 minut","Panikuję, ale jadę","Odmawiam, bo potrzebuję planu"],cat:"zyciowka"},
-  {q:"Jak [imię] reaguje, gdy kelner pomyli jego/jej zamówienie?",qs:"Jak reagujesz, gdy kelner pomyli twoje zamówienie?",a:["Grzecznie zgłasza problem","Zjada, bo nie chce robić zamieszania","Robi z tego sprawę honoru"],as:["Grzecznie zgłaszam problem","Zjadam, bo nie chcę robić zamieszania","Robię z tego sprawę honoru"],cat:"zyciowka"},
-  {q:"Jak [imię] zachowuje się, gdy ktoś opowiada nudną historię?",qs:"Jak zachowujesz się, gdy ktoś opowiada nudną historię?",a:["Udaje pełne zainteresowanie","Odpływa wzrokiem","Przerywa i zmienia temat"],as:["Udaję pełne zainteresowanie","Odpływam wzrokiem","Przerywam i zmieniam temat"],cat:"zyciowka"},
-  {q:"Co [imię] robi, gdy musi wybrać film na wieczór?",qs:"Co robisz, gdy musisz wybrać film na wieczór?",a:["Przegląda opcje przez godzinę","Bierze pierwszy sensowny","Oddaje wybór komuś innemu"],as:["Przeglądam opcje przez godzinę","Biorę pierwszy sensowny","Oddaję wybór komuś innemu"],cat:"zyciowka"},
-  {q:"Jak [imię] reaguje, gdy ktoś mówi „musimy pogadać”?",qs:"Jak reagujesz, gdy ktoś mówi „musimy pogadać”?",a:["Od razu zakłada najgorsze","Pyta „o czym?” w sekundę","Udaje spokój, ale w środku panika"],as:["Od razu zakładam najgorsze","Pytam „o czym?” w sekundę","Udaję spokój, ale w środku panika"],cat:"zyciowka"},
-  {q:"Co [imię] robi, gdy jest głodny/a i zły/a?",qs:"Co robisz, gdy jesteś głodny/a i zły/a?",a:["Milczy groźnie","Kłóci się o byle co","Natychmiast zamawia jedzenie"],as:["Milczę groźnie","Kłócę się o byle co","Natychmiast zamawiam jedzenie"],cat:"zyciowka"},
-  {q:"Jak [imię] zachowuje się na karaoke?",qs:"Jak zachowujesz się na karaoke?",a:["Śpiewa jak gwiazda wieczoru","Daje się namówić po czasie","Nie ma opcji, żeby wyszedł/wyszła"],as:["Śpiewam jak gwiazda wieczoru","Daję się namówić po czasie","Nie ma opcji, żebym wyszedł/wyszła"],cat:"impreza"},
-  {q:"Co [imię] zrobi, gdy ktoś lajkuje jego/jej stare zdjęcie?",qs:"Co zrobisz, gdy ktoś lajkuje twoje stare zdjęcie?",a:["Sprawdza kto i dlaczego","Udaje, że nie zauważył/a","Od razu analizuje intencje"],as:["Sprawdzam kto i dlaczego","Udaję, że nie zauważyłem/am","Od razu analizuję intencje"],cat:"zyciowka"},
-  {q:"Jak [imię] reaguje, gdy plan nagle się zmienia?",qs:"Jak reagujesz, gdy plan nagle się zmienia?",a:["Luz, improwizacja","Denerwuje się, ale dostosowuje","Potrzebuje 15 minut na przetworzenie"],as:["Luz, improwizacja","Denerwuję się, ale dostosowuję","Potrzebuję 15 minut na przetworzenie"],cat:"zyciowka"},
-  {q:"Jak [imię] zachowuje się, gdy ma wolny dzień?",qs:"Jak zachowujesz się, gdy masz wolny dzień?",a:["Odpoczywa bez wyrzutów","Robi milion zaległych rzeczy","Planuje odpoczynek i nic z tego nie wychodzi"],as:["Odpoczywam bez wyrzutów","Robię milion zaległych rzeczy","Planuję odpoczynek i nic z tego nie wychodzi"],cat:"zyciowka"},
-  {q:"Co [imię] robi, gdy ktoś źle wymawia jego/jej imię?",qs:"Co robisz, gdy ktoś źle wymawia twoje imię?",a:["Poprawia od razu","Odpuści, niech żyje w błędzie","Śmieje się i robi z tego żart"],as:["Poprawiam od razu","Odpuściłbym/abym, niech żyje w błędzie","Śmieję się i robię z tego żart"],cat:"zyciowka"},
-  {q:"Jak [imię] reaguje, gdy widzi promocję „-70%”?",qs:"Jak reagujesz, gdy widzisz promocję „-70%”?",a:["Kupuje, bo okazja","Sprawdza, czy naprawdę się opłaca","Kupuje rzeczy, których nie potrzebuje"],as:["Kupuję, bo okazja","Sprawdzam, czy naprawdę się opłaca","Kupuję rzeczy, których nie potrzebuję"],cat:"zyciowka"},
-  {q:"Co [imię] robi, gdy znajomy prosi o szczerą opinię?",qs:"Co robisz, gdy znajomy prosi o szczerą opinię?",a:["Mówi delikatnie","Mówi brutalnie szczerze","Owija tak długo, że nikt nie wie o co chodzi"],as:["Mówię delikatnie","Mówię brutalnie szczerze","Owijam tak długo, że nikt nie wie o co chodzi"],cat:"zyciowka"},
-  {q:"Jak [imię] zachowuje się, gdy ktoś robi zdjęcie grupowe?",qs:"Jak zachowujesz się, gdy ktoś robi zdjęcie grupowe?",a:["Ustawia wszystkich","Chowa się z tyłu","Robi 20 wersji, bo „jeszcze jedno”"],as:["Ustawiam wszystkich","Chowam się z tyłu","Robię 20 wersji, bo „jeszcze jedno”"],cat:"zyciowka"},
-  {q:"Co [imię] zrobi, gdy obudzi się 10 minut przed wyjściem?",qs:"Co zrobisz, gdy obudzisz się 10 minut przed wyjściem?",a:["Ogarnia się w turbo trybie","Odwołuje wszystko","Wychodzi jak stoi"],as:["Ogarniam się w turbo trybie","Odwołuję wszystko","Wychodzę jak stoję"],cat:"zyciowka"},
-  {q:"Jak [imię] reaguje, gdy ktoś ma lepszy wynik w grze?",qs:"Jak reagujesz, gdy ktoś ma lepszy wynik w grze?",a:["Gratuluje szczerze","Udaje luz, ale boli","Chce rewanżu natychmiast"],as:["Gratuluję szczerze","Udaję luz, ale boli","Chcę rewanżu natychmiast"],cat:"zyciowka"},
-  {q:"Jak [imię] zachowuje się, gdy trzeba coś zorganizować?",qs:"Jak zachowujesz się, gdy trzeba coś zorganizować?",a:["Przejmuje dowodzenie","Pomaga, ale nie chce prowadzić","Znika, zanim ktoś da mu/jej zadanie"],as:["Przejmuję dowodzenie","Pomagam, ale nie chcę prowadzić","Znikam, zanim ktoś da mi zadanie"],cat:"zyciowka"},
-  {q:"Co [imię] robi, gdy nie zna odpowiedzi na pytanie?",qs:"Co robisz, gdy nie znasz odpowiedzi na pytanie?",a:["Strzela z pewnością siebie","Przyznaje, że nie wie","Próbuje logicznie obejść temat"],as:["Strzelam z pewnością siebie","Przyznaję, że nie wiem","Próbuję logicznie obejść temat"],cat:"zyciowka"},
-  {q:"Jak [imię] zachowuje się, gdy pada hasło „idziemy tańczyć”?",qs:"Jak zachowujesz się, gdy pada hasło „idziemy tańczyć”?",a:["Pierwszy/a na parkiecie","Potrzebuje zachęty","Pilnuje stolika jak świętości"],as:["Pierwszy/a na parkiecie","Potrzebuję zachęty","Pilnuję stolika jak świętości"],cat:"impreza"},
-  {q:"Co [imię] robi, gdy widzi psa na ulicy?",qs:"Co robisz, gdy widzisz psa na ulicy?",a:["Od razu się rozczula","Zachowuje dystans","Pyta właściciela, czy można pogłaskać"],as:["Od razu się rozczulam","Zachowuję dystans","Pytam właściciela, czy można pogłaskać"],cat:"zyciowka"},
-  {q:"Jak [imię] reaguje, gdy ktoś chce pożyczyć pieniądze?",qs:"Jak reagujesz, gdy ktoś chce pożyczyć pieniądze?",a:["Pożycza bez problemu","Pyta konkretnie na co i kiedy odda","Udaje, że nie ma"],as:["Pożyczam bez problemu","Pytam konkretnie na co i kiedy odda","Udaję, że nie mam"],cat:"zyciowka"},
-  {q:"Co [imię] robi, gdy skończy serial, który kochał/a?",qs:"Co robisz, gdy skończysz serial, który kochałeś/aś?",a:["Szuka podobnego od razu","Ma pustkę emocjonalną","Zaczyna oglądać od początku"],as:["Szukam podobnego od razu","Mam pustkę emocjonalną","Zaczynam oglądać od początku"],cat:"zyciowka"},
-  {q:"Jak [imię] zachowuje się w escape roomie?",qs:"Jak zachowujesz się w escape roomie?",a:["Przejmuje dowodzenie","Chaos, ale z energią","Stoi z boku i nagle znajduje kluczową wskazówkę"],as:["Przejmuję dowodzenie","Chaos, ale z energią","Stoję z boku i nagle znajduję kluczową wskazówkę"],cat:"zyciowka"},
-  {q:"Co [imię] robi, gdy ktoś mówi „nie obraź się, ale…”?",qs:"Co robisz, gdy ktoś mówi „nie obraź się, ale…”?",a:["Już jest obrażony/a","Słucha z ciekawością","Odpowiada „za późno”"],as:["Już jestem obrażony/a","Słucham z ciekawością","Odpowiadam „za późno”"],cat:"zyciowka"},
-  {q:"Jak [imię] reaguje, gdy planowany wieczór zmienia się w imprezę?",qs:"Jak reagujesz, gdy planowany wieczór zmienia się w imprezę?",a:["Wchodzi w to","Próbuje wrócić do planu","Narzeka, ale bawi się najlepiej"],as:["Wchodzę w to","Próbuję wrócić do planu","Narzekam, ale bawię się najlepiej"],cat:"impreza"},
-
-  // Nowe pytania — maj 2026
-  {q:"Co [imię] robi, gdy telefon ma 1% baterii?",qs:"Co robisz, gdy telefon ma 1% baterii?",a:["Panikuje i szuka ładowarki","Włącza tryb przetrwania","Udaje, że wszystko pod kontrolą"],as:["Panikuję i szukam ładowarki","Włączam tryb przetrwania","Udaję, że wszystko pod kontrolą"],cat:"zyciowka"},
-  {q:"Jak [imię] reaguje na wiadomość głosową dłuższą niż minuta?",qs:"Jak reagujesz na wiadomość głosową dłuższą niż minuta?",a:["Słucha od razu","Odkłada na „później”","Prosi o wersję tekstową"],as:["Słucham od razu","Odkładam na „później”","Proszę o wersję tekstową"],cat:"zyciowka"},
-  {q:"Co [imię] robi, gdy dostawa jedzenia przyjdzie pomylona?",qs:"Co robisz, gdy dostawa jedzenia przyjdzie pomylona?",a:["Zjada, bo głód wygrał","Pisze reklamację","Próbuje przekonać siebie, że właśnie tego chciał/a"],as:["Zjadam, bo głód wygrał","Piszę reklamację","Próbuję przekonać siebie, że właśnie tego chciałem/am"],cat:"zyciowka"},
-  {q:"Jak [imię] zachowuje się w windzie z obcą osobą?",qs:"Jak zachowujesz się w windzie z obcą osobą?",a:["Patrzy w telefon","Uśmiecha się niezręcznie","Próbuje small talku"],as:["Patrzę w telefon","Uśmiecham się niezręcznie","Próbuję small talku"],cat:"zyciowka"},
-  {q:"Co [imię] robi, gdy nie może znaleźć rzeczy, którą miał/a przed chwilą w ręce?",qs:"Co robisz, gdy nie możesz znaleźć rzeczy, którą miałeś/aś przed chwilą w ręce?",a:["Oskarża wszechświat","Sprawdza te same miejsca pięć razy","Prosi kogoś o pomoc po 10 sekundach"],as:["Oskarżam wszechświat","Sprawdzam te same miejsca pięć razy","Proszę kogoś o pomoc po 10 sekundach"],cat:"zyciowka"},
-  {q:"Jak [imię] reaguje, gdy ktoś dzwoni bez zapowiedzi?",qs:"Jak reagujesz, gdy ktoś dzwoni bez zapowiedzi?",a:["Odbiera normalnie","Patrzy na ekran jak na zagrożenie","Oddzwania po mentalnym przygotowaniu"],as:["Odbieram normalnie","Patrzę na ekran jak na zagrożenie","Oddzwaniam po mentalnym przygotowaniu"],cat:"zyciowka"},
-  {q:"Co [imię] robi, gdy ma za dużo nieprzeczytanych powiadomień?",qs:"Co robisz, gdy masz za dużo nieprzeczytanych powiadomień?",a:["Czyści wszystko od razu","Ignoruje, aż zniknie poczucie winy","Otwiera tylko najważniejsze"],as:["Czyszczę wszystko od razu","Ignoruję, aż zniknie poczucie winy","Otwieram tylko najważniejsze"],cat:"zyciowka"},
-  {q:"Jak [imię] wybiera restaurację z grupą?",qs:"Jak wybierasz restaurację z grupą?",a:["Ma konkretną propozycję","Mówi „mi wszystko jedno”, ale jednak nie wszystko","Czeka, aż ktoś zdecyduje"],as:["Mam konkretną propozycję","Mówię „mi wszystko jedno”, ale jednak nie wszystko","Czekam, aż ktoś zdecyduje"],cat:"zyciowka"},
-  {q:"Co [imię] robi, gdy ktoś przejmuje głośnik na imprezie?",qs:"Co robisz, gdy ktoś przejmuje głośnik na imprezie?",a:["Oddaje kontrolę bez walki","Walczy o playlistę","Ocenia wybory muzyczne w ciszy"],as:["Oddaję kontrolę bez walki","Walczę o playlistę","Oceniam wybory muzyczne w ciszy"],cat:"impreza"},
-  {q:"Jak [imię] reaguje na propozycję afterparty, czyli imprezy po imprezie?",qs:"Jak reagujesz na propozycję afterparty, czyli imprezy po imprezie?",a:["Od razu wchodzi w temat","Mówi nie, ale daje się namówić","Znika zanim ktoś zapyta drugi raz"],as:["Od razu wchodzę w temat","Mówię nie, ale daję się namówić","Znikam zanim ktoś zapyta drugi raz"],cat:"impreza"},
-  {q:"Co [imię] robi, gdy ktoś nagrywa filmik na imprezie?",qs:"Co robisz, gdy ktoś nagrywa filmik na imprezie?",a:["Pozytywnie pozuje","Ucieka z kadru","Pyta, czy to na pewno nie pójdzie do neta"],as:["Pozytywnie pozuję","Uciekam z kadru","Pytam, czy to na pewno nie pójdzie do neta"],cat:"impreza"},
-  {q:"Jak [imię] zachowuje się podczas gry imprezowej?",qs:"Jak zachowujesz się podczas gry imprezowej?",a:["Gra na pełnej powadze","Robi chaos dla zabawy","Udaje, że nie zależy mu/jej na wygranej"],as:["Gram na pełnej powadze","Robię chaos dla zabawy","Udaję, że nie zależy mi na wygranej"],cat:"impreza"},
-  {q:"Co [imię] robi, gdy gospodarz prosi o pomoc w kuchni?",qs:"Co robisz, gdy gospodarz prosi o pomoc w kuchni?",a:["Pomaga od razu","Pyta „co konkretnie?”","Znika między ludźmi"],as:["Pomagam od razu","Pytam „co konkretnie?”","Znikam między ludźmi"],cat:"impreza"},
-  {q:"Co [imię] zrobiłby/aby, gdyby dostał/a ryzykowną, ale świetną szansę zawodową?",qs:"Co zrobiłbyś/abyś, gdybyś dostał/a ryzykowną, ale świetną szansę zawodową?",a:["Bierze od razu","Analizuje wszystkie scenariusze","Pyta bliskich o opinię"],as:["Biorę od razu","Analizuję wszystkie scenariusze","Pytam bliskich o opinię"],cat:"ambicje"},
-  {q:"Co najbardziej motywuje [imię]?",qs:"Co najbardziej cię motywuje?",a:["Pieniądze","Uznanie","Spokój i niezależność"],as:["Pieniądze","Uznanie","Spokój i niezależność"],cat:"ambicje"},
-  {q:"Jak [imię] zachowuje się, gdy ma być liderem?",qs:"Jak zachowujesz się, gdy masz być liderem?",a:["Bierze odpowiedzialność","Woli działać z tyłu","Stresuje się, ale dowozi"],as:["Biorę odpowiedzialność","Wolę działać z tyłu","Stresuję się, ale dowożę"],cat:"ambicje"},
-  {q:"Co [imię] chciałby/chciałaby kiedyś usłyszeć o sobie?",qs:"Co chciałbyś/chciałabyś kiedyś usłyszeć o sobie?",a:["„Można na nim/niej polegać”","„Miał/a odwagę żyć po swojemu”","„Zostawił/a coś po sobie”"],as:["„Można na mnie polegać”","„Miałem/am odwagę żyć po swojemu”","„Zostawiłem/am coś po sobie”"],cat:"ambicje"},
-  {q:"Kto z graczy najdłużej udawałby, że wszystko rozumie?",qs:"Kto z graczy najdłużej udawałby, że wszystko rozumie?",a:[],type:"players"},
-  {q:"Kto z graczy najlepiej poradziłby sobie w reality show?",qs:"Kto z graczy najlepiej poradziłby sobie w reality show?",a:[],type:"players"},
-  {q:"Kto z graczy byłby adminem grupy i nadużywał władzy?",qs:"Kto z graczy byłby adminem grupy i nadużywał władzy?",a:[],type:"players"},
-  {q:"Kto z graczy pierwszy wymyśliłby kompletnie absurdalny plan, który jakimś cudem działa?",qs:"Kto z graczy pierwszy wymyśliłby kompletnie absurdalny plan, który jakimś cudem działa?",a:[],type:"players"},
-
 ];
 /* ═══════════════════════════════════════════════════════════════ */
 
@@ -770,23 +722,6 @@ function isFeminine(name){
 // Returns gendered form: genderWord(name, 'Trafiłeś/aś') → 'Trafiłaś' or 'Trafiłeś'
 // Usage: gW(name, masc, fem)
 function gW(name,masc,fem){return isFeminine(name)?fem:masc;}
-function nameAfterDo(name){
-  const raw=(name||'').trim();
-  if(!raw)return 'gracza';
-  const lower=raw.toLowerCase();
-  const known={
-    kuba:'Kuby',ola:'Oli',alicja:'Alicji',kasia:'Kasi',basia:'Basi',zosia:'Zosi',ania:'Ani',julia:'Julii',maja:'Mai',jakub:'Jakuba',jan:'Jana',paweł:'Pawła',michał:'Michała',maciej:'Macieja',tomasz:'Tomasza',marcin:'Marcina',piotr:'Piotra',kacper:'Kacpra'
-  };
-  if(known[lower])return known[lower];
-  if(isFeminine(raw)){
-    if(lower.endsWith('ia'))return raw.slice(0,-1)+'i';
-    if(lower.endsWith('la'))return raw.slice(0,-1)+'i';
-    return raw.slice(0,-1)+'y';
-  }
-  if(lower.endsWith('a'))return raw.slice(0,-1)+'y';
-  if(lower.endsWith('ek'))return raw.slice(0,-2)+'ka';
-  return raw+'a';
-}
 
 // Transforms question from 3rd person to 2nd person for subject screen
 function qForSubject(q){
@@ -1075,11 +1010,6 @@ let _lastRi=null; // track round index to reset local state on round change
 let _allVotedAt=null; // timestamp when all votes first detected
 let _countdownTimer=null; // drives timed transitions under SSE
 let _voteRetryTimer=null; // retry fetch if last vote missed by race condition
-let _lastReactionId=null;
-let _lastReactionSentAt=0;
-let _reactionCooldownTimer=null;
-const REACTION_COOLDOWN_MS=3500;
-const REACTION_EMOJIS=['😂','😮','👀','🔥','💀'];
 
 function startCountdown(ms, onTick, onDone){
   if(_countdownTimer) clearInterval(_countdownTimer);
@@ -1483,7 +1413,7 @@ function homeUpdateBtn() {
   if (!btn) return;
   if (code.length > 0) {
     btn.textContent = '→ Dołącz do gry';
-    btn.className = 'btn btn-lit';
+    btn.className = 'btn btn-dim';
     btn.onclick = joinGame;
   } else {
     btn.textContent = '🎮 Utwórz nową grę';
@@ -1700,27 +1630,25 @@ function renderLobby(){
     const kickBtn=isHost&&i!==mySlot&&!hostLocked
       ? `<button class="kick-btn" onclick="kickPlayer(${i})" title="Usuń gracza" style="width:30px;height:30px;background:#2d1a1a;border:1.5px solid #dc262655;color:#f87171;font-size:15px;font-weight:700;cursor:pointer;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0">✕</button>`
       : '';
-    const editingThis=i===mySlot && _lobEditingName;
-    const nameCell = editingThis
+    const nameCell = (i===mySlot && _lobEditingName)
       ? `<input id="lob-name-inp" type="text" value="${p.name}" maxlength="14" autocomplete="off" data-1p-ignore data-lpignore="true"
-           style="flex:1;min-width:0;background:#111116;border:1.5px solid var(--rim);border-radius:10px;padding:8px 10px;font-size:14px;font-weight:700;color:var(--text);font-family:inherit;outline:none;box-shadow:none"
-           onfocus="this.style.borderColor='${C(i)}66'"
-           onblur="this.style.borderColor='var(--rim)'"
+           style="flex:1;min-width:0;background:var(--bg);border:1.5px solid ${C(i)};border-radius:8px;padding:4px 8px;font-size:14px;font-weight:600;color:var(--text);font-family:inherit"
            onkeydown="event.stopPropagation();if(event.key==='Enter')changeName();if(event.key==='Escape'){_lobEditingName=false;renderLobby();}"
            onkeyup="event.stopPropagation()">
-         <button onclick="changeName()" style="flex-shrink:0;width:34px;height:34px;background:${C(i)};color:#000;border:none;border-radius:10px;font-weight:900;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0" title="Zapisz">✓</button>
-         <button onclick="_lobEditingName=false;renderLobby()" style="flex-shrink:0;width:34px;height:34px;background:var(--card);border:1.5px solid var(--rim);color:var(--muted);border-radius:10px;font-weight:900;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0" title="Anuluj">×</button>`
+         <button onclick="changeName()" style="flex-shrink:0;background:${C(i)};color:#000;border:none;border-radius:8px;padding:4px 10px;font-weight:700;font-size:13px;cursor:pointer">✓</button>
+         <button onclick="_lobEditingName=false;renderLobby()" style="flex-shrink:0;background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px">✕</button>`
       : `<span style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
          ${i===mySlot&&!hostLocked?`<button onclick="_lobEditingName=true;renderLobby()" style="flex-shrink:0;background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:0 0 0 4px;line-height:1" title="Zmień imię">✏️</button>`:''}`;
-    return`<div class="prow" style="border:1.5px solid ${C(i)}44;">
+    return`<div class="prow" style="border:1.5px solid ${isReady?'#16a34a':C(i)+'44'};">
       <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;overflow:hidden">
+        <div class="prow-dot" style="background:${C(i)}"></div>
         ${nameCell}
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        ${!editingThis&&i===(GS.hostSlot??0)?'<span class="ptag tag-host">HOST</span>':''}
-        ${!editingThis?readyBadge:''}
+        ${i===(GS.hostSlot??0)?'<span class="ptag tag-host">HOST</span>':''}
+        ${readyBadge}
       </div>
-      ${editingThis?'':kickBtn}
+      ${kickBtn}
     </div>`;
   }).join('')+joinRow;
 
@@ -1741,12 +1669,10 @@ function renderLobby(){
     readyBtn.style.display=mySlot!==null?'block':'none';
     if(iAmReady){
       readyBtn.textContent='Cofnij';
-      readyBtn.style.cssText=isHost
-        ? 'background:#14532d;color:#4ade80;border:2px solid #16a34a;border-radius:12px;padding:12px 14px;font-size:13px;font-weight:800;font-family:\'DM Sans\',sans-serif;cursor:pointer;flex:0 0 86px;white-space:nowrap;min-height:50px;transform:none;order:2;'
-        : 'background:#14532d;color:#4ade80;border:2px solid #16a34a;border-radius:12px;padding:15px;font-size:15px;font-weight:800;font-family:\'DM Sans\',sans-serif;cursor:pointer;width:100%;flex:1;white-space:nowrap;min-height:50px;transform:none;order:1;';
+      readyBtn.style.cssText='background:#14532d;color:#4ade80;border:2px solid #16a34a;border-radius:12px;padding:12px 14px;font-size:13px;font-weight:800;font-family:\'DM Sans\',sans-serif;cursor:pointer;flex:0 0 86px;white-space:nowrap;min-height:50px;transform:none;';
     } else {
       readyBtn.textContent=gW(myName,'Jestem gotowy ✓','Jestem gotowa ✓');
-      readyBtn.style.cssText='background:var(--text);color:var(--bg);border:2px solid transparent;border-radius:12px;padding:15px;font-size:15px;font-weight:700;font-family:\'DM Sans\',sans-serif;cursor:pointer;width:100%;flex:1;min-height:50px;transform:none;order:1;';
+      readyBtn.style.cssText='background:var(--text);color:var(--bg);border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;font-family:\'DM Sans\',sans-serif;cursor:pointer;width:100%;flex:1;min-height:50px;transform:none;';
     }
   }
 
@@ -1760,7 +1686,6 @@ function renderLobby(){
       const canStart=allReady&&filled>=2;
       startBtn.style.display=iAmReady&&canStart?'block':'none';
       startBtn.style.flex='1';
-      startBtn.style.order='1';
       startBtn.style.padding='12px 10px';
       startBtn.style.fontSize='13px';
       startBtn.style.minHeight='50px';
@@ -1774,7 +1699,6 @@ function renderLobby(){
     if(startNote){
       const canStart=allReady&&filled>=2;
       startNote.style.display=iAmReady&&!canStart?'flex':'none';
-      startNote.style.order='1';
       startNote.textContent=filled<2?'Minimum 2 osoby':`Gotowych: ${readyCount}/${filled}`;
     }
   } else {
@@ -1784,15 +1708,14 @@ function renderLobby(){
     $('lob-guest').style.display='block';
     const readyCount=activePlayers.filter((p,i)=>p&&!!ready[i]).length;
     $('lob-guest-conn').innerHTML=allReady
-      ? `Wszyscy gotowi! Gra startuje za chwilę…`
-      : `Gotowych: ${readyCount}/${filled} — czekaj na pozostałych`;
+      ? `<span class="cdot dok"></span>Wszyscy gotowi! Gra startuje za chwilę…`
+      : `<span class="cdot dwait"></span>Gotowych: ${readyCount}/${filled} — czekaj na pozostałych`;
   }
   updateOnboardingHelp();
   // Note: show('s-lobby') is NOT called here — renderLobby only updates content, screen switching is done explicitly
 }
 
 async function toggleReady(){
-  document.activeElement?.blur?.();
   if(mySlot===null)return;
   try{
     const gs=await fbGet(`games/${gameId}`);
@@ -1985,116 +1908,6 @@ function render(){
     case'reveal':  renderReveal(); break;
     case'ended':   renderEnd();    break;
   }
-  mountReactionUI();
-  handleIncomingReaction();
-}
-
-
-function reactionAllowed(){
-  return GS&&gameId&&mySlot!==null&&GS.players?.[mySlot]&&['subject','voting','reveal'].includes(GS.phase);
-}
-
-function mountReactionUI(){
-  document.querySelectorAll('.react-bar').forEach(el=>el.remove());
-  if(!reactionAllowed())return;
-  const scr=document.querySelector('.scr.on');
-  if(!scr||!['s-subj','s-vote','s-wait','s-reveal'].includes(scr.id))return;
-  const bar=document.createElement('div');
-  bar.className='react-bar';
-  bar.innerHTML=REACTION_EMOJIS.map(e=>`<button class="react-btn" type="button" onclick="sendReaction('${e}',this)">${e}</button>`).join('');
-  let anchor=null;
-  if(scr.id==='s-reveal') anchor=$('rv-btn');
-  else if(scr.id==='s-vote') anchor=$('v-st');
-  else anchor=Array.from(scr.querySelectorAll('button')).find(b=>(b.getAttribute('onclick')||'').includes('reportError')||(b.getAttribute('onclick')||'').includes('leaveGame'));
-  if(anchor) scr.insertBefore(bar, anchor);
-  else scr.appendChild(bar);
-  applyReactionCooldown();
-}
-
-function clearReactionCooldownUI(){
-  document.querySelectorAll('.react-btn').forEach(b=>{
-    b.classList.remove('cooldown','dim','recovering');
-    b.style.removeProperty('--react-cooldown');
-  });
-}
-
-function applyReactionCooldown(){
-  if(_reactionCooldownTimer){clearTimeout(_reactionCooldownTimer);_reactionCooldownTimer=null;}
-  const remaining=REACTION_COOLDOWN_MS-(Date.now()-_lastReactionSentAt);
-  if(remaining<=0){clearReactionCooldownUI();return;}
-  document.querySelectorAll('.react-btn').forEach(b=>{
-    b.classList.remove('cooldown','dim','recovering');
-    b.style.setProperty('--react-cooldown',remaining+'ms');
-    b.classList.add('cooldown','dim');
-    void b.offsetWidth;
-    requestAnimationFrame(()=>{
-      b.classList.remove('dim');
-      b.classList.add('recovering');
-    });
-  });
-  _reactionCooldownTimer=setTimeout(()=>{
-    clearReactionCooldownUI();
-    _reactionCooldownTimer=null;
-  },remaining);
-}
-
-function showReactionBubble(evt){
-  if(!evt||!evt.emoji)return;
-  let layer=$('react-layer');
-  if(!layer){
-    layer=document.createElement('div');
-    layer.id='react-layer';
-    layer.className='react-layer';
-    document.body.appendChild(layer);
-  }
-  const b=document.createElement('div');
-  b.className='react-bubble';
-  const palettes={
-    '😂':['#f97316','#facc15','#fed7aa'],
-    '😮':['#2563eb','#06b6d4','#bfdbfe'],
-    '👀':['#7c3aed','#ec4899','#f0abfc'],
-    '🔥':['#dc2626','#f97316','#fecaca'],
-    '💀':['#334155','#8b5cf6','#c4b5fd']
-  };
-  const pal=palettes[evt.emoji]||['#7c3aed','#ec4899','#f0abfc'];
-  b.style.background=`linear-gradient(135deg,${pal[0]},${pal[1]})`;
-  b.style.borderColor=pal[2];
-  b.style.boxShadow=`0 12px 34px ${pal[0]}66,0 0 0 3px #ffffff18`;
-  const name=evt.slot===mySlot?'Ty':(evt.name||'Gracz');
-  b.textContent=`${name} ${evt.emoji}`;
-  const x=(typeof evt.xPct==='number'?evt.xPct:.5)*window.innerWidth;
-  const rawY=(typeof evt.yPct==='number'?evt.yPct:.78)*window.innerHeight;
-  // Bar reactions should originate from the tapped emoji, then drift downward
-  // so they don't cover the wait/status text above the bar.
-  if(evt.fromReactBar)b.classList.add('from-bar');
-  const maxY=evt.fromReactBar?window.innerHeight-48:window.innerHeight-90;
-  b.style.left=Math.max(24,Math.min(window.innerWidth-24,x))+'px';
-  b.style.top=Math.max(60,Math.min(maxY,rawY))+'px';
-  layer.appendChild(b);
-  setTimeout(()=>b.remove(),1900);
-}
-
-function handleIncomingReaction(){
-  const evt=GS?.reaction;
-  if(!evt||!evt.id||evt.id===_lastReactionId)return;
-  if(!['subject','voting','reveal'].includes(GS.phase))return;
-  _lastReactionId=evt.id;
-  showReactionBubble(evt);
-}
-
-async function sendReaction(emoji,btn){
-  if(!reactionAllowed())return;
-  const now=Date.now();
-  if(now-_lastReactionSentAt<REACTION_COOLDOWN_MS)return;
-  _lastReactionSentAt=now;
-  applyReactionCooldown();
-  const rect=btn?.getBoundingClientRect?.();
-  const xPct=rect?((rect.left+rect.width/2)/window.innerWidth):.5;
-  const yPct=rect?((rect.top+rect.height/2)/window.innerHeight):.78;
-  const evt={id:`${mySlot}-${now}-${Math.random().toString(36).slice(2,6)}`,slot:mySlot,name:GS.players[mySlot]?.name||'Gracz',emoji,ri:GS.ri||0,phase:GS.phase,ts:now,xPct,yPct,fromReactBar:true};
-  _lastReactionId=evt.id;
-  showReactionBubble(evt);
-  try{await fbPatch(`games/${gameId}`,{reaction:evt});}catch(e){console.error('reaction',e);}
 }
 
 function showSwapToast(){
@@ -2135,13 +1948,16 @@ async function reportError(btn){
     // Animate button instead of toast
     if(btn){
       btn._reported=true;
-      btn.textContent='✓ Zgłoszono';
+      btn.textContent='✓ Zgłoszono!';
       btn.style.color='#4ade80';
       btn.style.fontWeight='700';
-      btn.disabled=true;
-      btn.style.cursor='default';
-      btn.style.opacity='0.9';
       clearTimeout(btn._resetTimer);
+      btn._resetTimer=setTimeout(()=>{
+        btn.textContent='⚑ Zgłoś błąd';
+        btn.style.color='';
+        btn.style.fontWeight='';
+        btn._reported=false;
+      },3000);
     }
   }catch(e){console.error('reportError',e);}
 }
@@ -2205,7 +2021,7 @@ function buildPendingVoters(si){
   }
   const chips=pending.map(({p,i})=>`<span style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:99px;background:${C(i)}22;color:${C(i)};border:1px solid ${C(i)}55;white-space:nowrap">${p.name}</span>`).join('');
   return`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--rim)">
-    <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;text-align:center;line-height:1.35;padding-top:1px">Czeka na</div>
+    <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;text-align:center">Czeka na</div>
     <div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center">${chips}</div>
   </div>`;
 }
@@ -2303,7 +2119,6 @@ function renderVoting(){
     buildAns('v-ans',getQAnswers(GS.ri),true,GS.sa,null,null);
     $('btn-vote').style.display='none';
     $('v-bet').style.display='none';
-    const vh=$('v-hint'); if(vh) vh.innerHTML='';
     const pending=GS.players.map((p,i)=>({p,i})).filter(({p,i})=>p&&i!==si&&GS.votes[i]===undefined);
     const chips=pending.map(({p,i})=>`<span style="padding:6px 16px;border-radius:99px;background:${C(i)}22;color:${C(i)};border:1.5px solid ${C(i)}55;font-size:13px;font-weight:700">${p.name}</span>`).join('');
     $('v-st').innerHTML=`
@@ -2314,7 +2129,7 @@ function renderVoting(){
         </div>
         ${pending.length>0?`
           <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px">
-            <span style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);line-height:1.35;padding-top:1px;display:inline-flex;align-items:center">Czekasz na</span>
+            <span style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Czekasz na</span>
             ${chips}
           </div>
         `:''}
@@ -2361,13 +2176,11 @@ function renderVoting(){
       $('v-bet').style.gap='8px';
       // Don't override _localBet if user already picked — only init on first show
       updateBetUI();
-      $('v-hint').innerHTML=onboardingHint('vote');
-      $('v-st').innerHTML='';
+      $('v-st').innerHTML=onboardingHint('vote');
     } else {
       $('btn-vote').style.display='none';
       $('v-bet').style.display='none';
-      $('v-hint').innerHTML=onboardingHint('vote');
-      $('v-st').innerHTML=onboardingHint('vote')?'':'Jak twoim zdaniem odpowie?';
+      $('v-st').innerHTML=onboardingHint('vote')||'Jak twoim zdaniem odpowie?';
     }
   }
   show('s-vote');
@@ -2554,15 +2367,22 @@ function renderSubj(){
       const answers=getQAnswers(GS.ri);
       const qText=q.type==='players'?q.q:q.q.replace('[imię]',sp.name);
       prev.innerHTML=`
-        <div style="margin:14px 0 12px;padding:14px 14px 12px;background:var(--card);border:1.5px solid var(--rim);border-radius:16px">
-          <div style="font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Pytanie do ${nameAfterDo(sp.name)}</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(24px,7.2vw,34px);letter-spacing:.5px;line-height:1.12;word-break:break-word;color:var(--text)">${qText}</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:10px 12px;background:${C(si)}11;border:1.5px solid ${C(si)}44;border-radius:12px">
+          <div style="width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;background:${C(si)}33;color:${C(si)}">${sp.name.charAt(0).toUpperCase()}</div>
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.5px;color:${C(si)}">${sp.name}</div>
+            <div style="font-size:12px;color:var(--muted)">wybiera teraz odpowiedź…</div>
+          </div>
         </div>
-        <div class="onb-hint" style="margin-bottom:10px">💡 Pomyśl, którą odpowiedź wybierze ${sp.name}. Zagłosujesz, gdy się zdecyduje.</div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
-          ${answers.map((a,i)=>`<div style="background:var(--card);border:1.5px solid var(--rim);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;opacity:0.45;pointer-events:none">
-            <div style="width:30px;height:30px;border-radius:8px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;flex-shrink:0">${i+1}</div>
-            <span style="font-size:13px">${a}</span>
+        <div style="margin-bottom:10px;padding:10px 14px;border:2px solid #3b82f6;border-radius:12px;background:#1e3a5f22;font-size:12px;color:#60a5fa;font-weight:600;text-align:center">
+          👀 Zastanów się – wybierzesz gdy <strong style="color:#93c5fd">${sp.name}</strong> się zdecyduje
+        </div>
+        ${onboardingHint('waiting')}
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(14px,4.5vw,20px);letter-spacing:.5px;line-height:1.35;margin:8px 0;word-break:break-word">${qText}</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${answers.map((a,i)=>`<div style="background:var(--card);border:2px solid var(--rim);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;opacity:0.5;pointer-events:none">
+            <div style="width:32px;height:32px;border-radius:8px;background:var(--rim);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;flex-shrink:0">${i+1}</div>
+            <span style="font-size:14px">${a}</span>
           </div>`).join('')}
         </div>`;
     }
@@ -2672,7 +2492,7 @@ function renderReveal(){
   rvAnswers.forEach((a,i)=>{
     const isCorrect=i==correct;
     const isMyVote=!iAmSubject&&i==myVote;
-    const voters=GS.players.filter((p,pi)=>p&&pi!==si&&pi!==mySlot&&GS.votes[pi]==i);
+    const voters=GS.players.filter((p,pi)=>p&&pi!==si&&GS.votes[pi]==i);
     const hasChips=voters.length>0||isMyVote;
 
     const btn=document.createElement('button');
@@ -2692,9 +2512,9 @@ function renderReveal(){
     let chipsHtml='';
     if(hasChips){
       let chips='';
-      if(isMyVote) chips+=`<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:${isCorrect?'#16a34a':'#dc2626'};color:#fff;white-space:nowrap">${isCorrect?'✓ Ty':'Ty'}</span>`;
+      if(isMyVote) chips+=`<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:${isCorrect?'#16a34a':'#dc2626'};color:#fff;white-space:nowrap">${isCorrect?'TY ✓':'TY ✗'}</span>`;
       voters.forEach(v=>{const pi=GS.players.indexOf(v),hit=i==correct;
-        chips+=`<span class="vchip" style="background:${C(pi)}22;color:${C(pi)};border:1px solid ${C(pi)}44">${hit?'✓ ':''}${v.name}</span>`;
+        chips+=`<span class="vchip" style="background:${C(pi)}22;color:${C(pi)};border:1px solid ${C(pi)}44">${hit?'✓':'✗'} ${v.name}</span>`;
       });
       chipsHtml=`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;padding-left:46px">${chips}</div>`;
     }
@@ -2706,10 +2526,10 @@ function renderReveal(){
   // ── RESULTS TABLE ──
   const subjPts=GS.players.filter((p,i)=>p&&i!==si&&GS.votes[i]==correct).length; // 1 per guesser
   $('rv-res').innerHTML=`<div class="rctitle">Wyniki rundy</div>
-    <div class="rvrow"><div class="rvl"><div class="rvdot" style="background:${C(si)}"></div><strong>${sp.name}</strong></div><span class="badge ${subjPts>0?'b-yes':'b-no'}">+${subjPts} 🪙</span></div>`+
+    <div class="rvrow"><div class="rvl"><div class="rvdot" style="background:${C(si)}"></div><strong>${sp.name}</strong><span class="badge b-sub" style="margin-left:8px">Temat</span></div><span class="badge ${subjPts>0?'b-yes':'b-no'}">+${subjPts} 🪙</span></div>`+
     GS.players.map((p,i)=>{if(!p||i===si)return'';const hit=GS.votes[i]==correct;
       const bet=parseInt((GS.bets||{})[i])||1;
-      return`<div class="rvrow${i===mySlot?' style="background:var(--rim);border-radius:8px;padding:9px 8px;margin:0 -8px"':''}"><div class="rvl"><div class="rvdot" style="background:${C(i)}"></div><span${i===mySlot?' style="font-weight:700"':''}>${p.name}${i===mySlot?' (ty)':''}</span></div><span class="badge ${hit?'b-yes':'b-no'}">${hit?`+${bet} 🪙`:`-${bet} 🪙`}</span></div>`;
+      return`<div class="rvrow${i===mySlot?' style="background:var(--rim);border-radius:8px;padding:9px 8px;margin:0 -8px"':''}"><div class="rvl"><div class="rvdot" style="background:${C(i)}"></div><span${i===mySlot?' style="font-weight:700"':''}>${p.name}${i===mySlot?' (ty)':''}</span><span style="font-size:11px;color:var(--muted);margin-left:6px">×${bet}</span></div><span class="badge ${hit?'b-yes':'b-no'}">${hit?`+${bet} 🪙`:`-${bet} 🪙`}</span></div>`;
     }).join('');
 
   const poolLeft=GS.pool??0;
@@ -2724,7 +2544,8 @@ function renderReveal(){
     ${isHost
       ?`<button class="btn btn-lit" onclick="nextRound()">${isLast?'🏆 Wyniki końcowe':'Następna runda →'}</button>`
       :`<div style="text-align:center;padding:14px;font-size:14px;color:var(--muted)">⏳ Czekaj aż host przejdzie dalej…</div>`
-    }`;
+    }
+    <button onclick="reportError(this)" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 0;text-align:center;width:100%;margin-top:4px;transition:color .2s">⚑ Zgłoś błąd</button>`;
   show('s-reveal');
 }
 
@@ -2915,15 +2736,6 @@ let _bulkSelected=new Set(); // indices selected for bulk category assign
     try{ localStorage.setItem('wiem_catmap',JSON.stringify(_qCatMap)); }catch(e){}
   }
 })();
-
-function publicQuestionCount(){
-  return QS.length;
-}
-function updateHomeQuestionCount(){
-  const el=$('home-q-count');
-  if(el) el.textContent=publicQuestionCount();
-}
-updateHomeQuestionCount();
 
 const CAT_COLORS=['#7c3aed','#0891b2','#059669','#d97706','#dc2626','#db2777','#4338ca','#0284c7'];
 
@@ -3369,7 +3181,7 @@ function admSetTab(tab) {
   });
   if (tab === 'questions') admRenderQuestions();
   if (tab === 'pending')   admLoadPending();
-  if (tab === 'reports')   admReportsSubTab('open');
+  if (tab === 'reports')   admLoadReports();
   if (tab === 'users')     admLoadUsers();
 }
 
@@ -3466,13 +3278,13 @@ function admBuildQCard(q, i, editing) {
     const aRows = (q.a||[]).map((a, ai) =>
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">' +
         '<input data-ai="' + ai + '" class="adm-a-inp" value="' + escHtml(a) + '" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--text);font-family:inherit" onkeydown="event.stopPropagation()">' +
-        '<input data-ai="' + ai + '" class="adm-as-inp" value="' + escHtml((q.as||[])[ai]||'') + '" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:12px;color:#a78bfa;font-family:inherit" onkeydown="event.stopPropagation()">' +
+        '<input data-ai="' + ai + '" class="adm-as-inp" value="' + escHtml((q.as||[])[ai]||'') + '" style="background:var(--self-bg);border:1.5px solid var(--self-rim);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--self-text);font-family:inherit" onkeydown="event.stopPropagation()">' +
       '</div>'
     ).join('');
     return '<div class="adm-card-meta">#' + (i+1) + ' — edycja</div>' +
-      '<div style="font-size:9px;color:#a78bfa;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Dla innych</span><span>Dla Ciebie</span></div>' +
+      '<div style="font-size:9px;color:var(--self-text);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Dla innych</span><span>Dla Ciebie</span></div>' +
       '<textarea id="adm-q-inp-' + i + '" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;min-height:52px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.q) + '</textarea>' +
-      '<textarea id="adm-qs-inp-' + i + '" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:13px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
+      '<textarea id="adm-qs-inp-' + i + '" style="width:100%;background:var(--self-bg);border:1.5px solid var(--self-rim);border-radius:8px;padding:8px;font-size:13px;color:var(--self-text);font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
       '<div id="adm-a-rows-' + i + '">' + aRows + '</div>' +
       '<div style="display:flex;gap:8px">' +
         '<button onclick="admSaveQ(' + i + ')" style="flex:1;background:var(--text);color:var(--bg);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">Zapisz ✓</button>' +
@@ -3623,7 +3435,7 @@ function histBuildExpanded(hid, q) {
   const ans = [0,1,2].map(i =>
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">' +
       '<span style="font-size:12px;background:var(--bg);border-radius:6px;padding:4px 8px;color:var(--muted)">' + escHtml((q.a||[])[i]||'—') + '</span>' +
-      '<span style="font-size:12px;background:#3730a322;border-radius:6px;padding:4px 8px;color:#a78bfa">' + escHtml((q.as||[])[i]||'—') + '</span>' +
+      '<span style="font-size:12px;background:var(--self-bg);border-radius:6px;padding:4px 8px;color:var(--self-text)">' + escHtml((q.as||[])[i]||'—') + '</span>' +
     '</div>'
   ).join('');
   return (
@@ -3641,13 +3453,13 @@ function histBuildEditForm(hid, q) {
   const aRows = [0,1,2].map(i =>
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">' +
       '<input class="hist-a-inp" value="' + escHtml((q.a||[])[i]||'') + '" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--text);font-family:inherit" onkeydown="event.stopPropagation()">' +
-      '<input class="hist-as-inp" value="' + escHtml((q.as||[])[i]||'') + '" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:12px;color:#a78bfa;font-family:inherit" onkeydown="event.stopPropagation()">' +
+      '<input class="hist-as-inp" value="' + escHtml((q.as||[])[i]||'') + '" style="background:var(--self-bg);border:1.5px solid var(--self-rim);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--self-text);font-family:inherit" onkeydown="event.stopPropagation()">' +
     '</div>'
   ).join('');
   return (
     '<div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Pytanie dla graczy</span><span>Pytanie dla Ciebie</span></div>' +
     '<textarea id="hist-q-inp-' + hid + '" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;min-height:52px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.q||'') + '</textarea>' +
-    '<textarea id="hist-qs-inp-' + hid + '" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:13px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box;margin-top:6px" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
+    '<textarea id="hist-qs-inp-' + hid + '" style="width:100%;background:var(--self-bg);border:1.5px solid var(--self-rim);border-radius:8px;padding:8px;font-size:13px;color:var(--self-text);font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box;margin-top:6px" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
     '<div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 2px"><span>Odpowiedź dla innych</span><span>Odpowiedź dla Ciebie</span></div>' +
     '<div id="hist-a-rows-' + hid + '">' + aRows + '</div>' +
     '<div style="display:flex;gap:8px;margin-top:8px">' +
@@ -3747,13 +3559,13 @@ function admBuildPendCard(qid, q, editing) {
     const aRows = [0,1,2].map(i =>
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">' +
         '<input class="pend-a-inp" data-i="' + i + '" value="' + escHtml((q.a||[])[i]||'') + '" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">' +
-        '<input class="pend-as-inp" data-i="' + i + '" value="' + escHtml((q.as||[])[i]||'') + '" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:12px;color:#a78bfa;font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">' +
+        '<input class="pend-as-inp" data-i="' + i + '" value="' + escHtml((q.as||[])[i]||'') + '" style="background:var(--self-bg);border:1.5px solid var(--self-rim);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--self-text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">' +
       '</div>'
     ).join('');
     return meta +
-      '<div style="font-size:9px;color:#a78bfa;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Dla innych</span><span>Dla Ciebie</span></div>' +
+      '<div style="font-size:9px;color:var(--self-text);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Dla innych</span><span>Dla Ciebie</span></div>' +
       '<textarea id="pend-q-' + qid + '" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;min-height:52px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.q) + '</textarea>' +
-      '<textarea id="pend-qs-' + qid + '" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:13px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
+      '<textarea id="pend-qs-' + qid + '" style="width:100%;background:var(--self-bg);border:1.5px solid var(--self-rim);border-radius:8px;padding:8px;font-size:13px;color:var(--self-text);font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
       '<div id="pend-arows-' + qid + '">' + aRows + '</div>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
         '<button onclick="admActPending(\'' + qid + '\',\'approve\')" style="flex:1;min-width:110px;padding:9px;border-radius:8px;border:none;background:#16a34a;color:#fff;font-size:12px;font-weight:700;cursor:pointer">✓ Zatwierdź</button>' +
@@ -3831,65 +3643,6 @@ async function admLoadPendingCount() {
 }
 
 // ── TAB: REPORTS ──
-function reportIsOpen(r) {
-  if (!r) return false;
-  return r.status ? r.status === 'open' : !r.resolved;
-}
-
-function reportStatusLabel(status) {
-  if (status === 'rejected') return {txt:'✗ Odrzucone', style:'background:#ef444422;color:#f87171;border:1px solid #ef444444'};
-  if (status === 'resolved') return {txt:'✓ Zamknięte', style:'background:#16a34a22;color:#4ade80;border:1px solid #16a34a44'};
-  return {txt:'Otwarte', style:'background:#ef444422;color:#f87171;border:1px solid #ef444444'};
-}
-
-function admReportsSubTab(tab) {
-  const openList = $('adm-reports-list');
-  const historyList = $('adm-reports-history-list');
-  const empty = $('adm-reports-empty');
-  const btnO = $('reports-sub-btn-open');
-  const btnH = $('reports-sub-btn-history');
-  if (tab === 'history') {
-    if (openList) openList.style.display = 'none';
-    if (empty) empty.style.display = 'none';
-    if (historyList) historyList.style.display = 'flex';
-    if (btnO) { btnO.style.background = 'transparent'; btnO.style.color = 'var(--muted)'; btnO.style.border = '1.5px solid var(--rim)'; }
-    if (btnH) { btnH.style.background = 'var(--text)'; btnH.style.color = 'var(--bg)'; btnH.style.border = 'none'; }
-    admLoadReportsHistory();
-  } else {
-    if (historyList) historyList.style.display = 'none';
-    if (openList) openList.style.display = 'flex';
-    if (btnH) { btnH.style.background = 'transparent'; btnH.style.color = 'var(--muted)'; btnH.style.border = '1.5px solid var(--rim)'; }
-    if (btnO) { btnO.style.background = 'var(--text)'; btnO.style.color = 'var(--bg)'; btnO.style.border = 'none'; }
-    admLoadReports();
-  }
-}
-
-function admBuildReportCard(rid, r, history) {
-  const dateStr = r.reportedAt ? new Date(r.reportedAt).toLocaleString('pl') : (r.reportedAt||'—');
-  const qText = r.questionText || r.qText || '(brak treści)';
-  const answers = r.answers || [];
-  const st = reportStatusLabel(r.status || (r.resolved ? 'resolved' : 'open'));
-  const resolvedAt = r.resolvedAt ? new Date(r.resolvedAt).toLocaleString('pl') : '';
-  const ansHtml = answers.length > 0
-    ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0">' + answers.map((a,i) => '<span style="font-size:11px;background:var(--bg);border-radius:6px;padding:3px 8px;color:var(--muted)">' + (i+1) + '. ' + escHtml(a) + '</span>').join('') + '</div>'
-    : '';
-  return '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
-      '<span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">' + dateStr + '</span>' +
-      '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;' + st.style + '">' + st.txt + '</span>' +
-    '</div>' +
-    '<div class="adm-card-q">' + escHtml(qText) + '</div>' +
-    ansHtml +
-    '<div style="font-size:12px;color:var(--muted);margin-bottom:6px">Zgłosił/a: ' + escHtml(r.reportedBy || r.reportedByName || '—') + (r.gameId ? ' · Gra: ' + escHtml(r.gameId) : '') + '</div>' +
-    (history && resolvedAt ? '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Rozpatrzono: ' + resolvedAt + '</div>' : '') +
-    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-      '<button onclick="admEditReportQ(\'' + rid + '\')" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer">✏️ Edytuj</button>' +
-      (history
-        ? '<button onclick="admReopenReport(\'' + rid + '\')" style="flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer">↩ Przywróć jako otwarte</button>'
-        : '<button onclick="admResolveReport(\'' + rid + '\')" style="flex:1;padding:9px;border-radius:8px;border:none;background:#16a34a;color:#fff;font-size:12px;font-weight:700;cursor:pointer">✓ Zamknij</button>' +
-          '<button onclick="admRejectReport(\'' + rid + '\')" style="padding:9px 14px;border-radius:8px;border:1.5px solid var(--c0)44;background:transparent;color:var(--c0);font-size:12px;font-weight:700;cursor:pointer">✗ Odrzuć</button>') +
-    '</div>';
-}
-
 async function admLoadReports() {
   const list = $('adm-reports-list');
   const empty = $('adm-reports-empty');
@@ -3899,8 +3652,12 @@ async function admLoadReports() {
   try {
     const data = await admFetch('reports');
     const items = [];
-    if (data) Object.entries(data).forEach(([rid, r]) => { if (reportIsOpen(r)) items.push({rid, r}); });
-    items.sort((a,b) => new Date(b.r.reportedAt||0) - new Date(a.r.reportedAt||0));
+    if (data) Object.entries(data).forEach(([rid, r]) => {
+      if (!r) return;
+      // Support both old format (r.resolved field) and new format (r.status field)
+      const isOpen = r.status ? r.status === 'open' : !r.resolved;
+      if (isOpen) items.push({rid, r});
+    });
 
     list.innerHTML = '';
     if (items.length === 0) { if (empty) empty.style.display = ''; return; }
@@ -3910,7 +3667,25 @@ async function admLoadReports() {
       const card = document.createElement('div');
       card.className = 'adm-card';
       card.id = 'rep-' + rid;
-      card.innerHTML = admBuildReportCard(rid, r, false);
+      const dateStr = r.reportedAt ? new Date(r.reportedAt).toLocaleString('pl') : (r.reportedAt||'—');
+      const qText = r.questionText || r.qText || '(brak treści)';
+      const answers = r.answers || [];
+      const ansHtml = answers.length > 0
+        ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0">' + answers.map((a,i) => '<span style="font-size:11px;background:var(--bg);border-radius:6px;padding:3px 8px;color:var(--muted)">' + (i+1) + '. ' + escHtml(a) + '</span>').join('') + '</div>'
+        : '';
+      card.innerHTML =
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
+          '<span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">' + dateStr + '</span>' +
+          '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:#ef444422;color:#f87171;border:1px solid #ef444444">Otwarte</span>' +
+        '</div>' +
+        '<div class="adm-card-q">' + escHtml(qText) + '</div>' +
+        ansHtml +
+        '<div style="font-size:12px;color:var(--muted);margin-bottom:6px">Zgłosił/a: ' + escHtml(r.reportedBy || r.reportedByName || '—') + (r.gameId ? ' · Gra: ' + escHtml(r.gameId) : '') + '</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+          '<button onclick="admEditReportQ(\'' + rid + '\')" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer">✏️ Edytuj</button>' +
+          '<button onclick="admResolveReport(\'' + rid + '\')" style="flex:1;padding:9px;border-radius:8px;border:none;background:#16a34a;color:#fff;font-size:12px;font-weight:700;cursor:pointer">✓ Zamknij</button>' +
+          '<button onclick="admRejectReport(\'' + rid + '\')" style="padding:9px 14px;border-radius:8px;border:1.5px solid var(--c0)44;background:transparent;color:var(--c0);font-size:12px;font-weight:700;cursor:pointer">✗ Odrzuć</button>' +
+        '</div>';
       list.appendChild(card);
     });
     admLoadReportsCount();
@@ -3919,35 +3694,9 @@ async function admLoadReports() {
   }
 }
 
-async function admLoadReportsHistory() {
-  const list = $('adm-reports-history-list');
-  if (!list) return;
-  list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Ładowanie…</div>';
-  try {
-    const data = await admFetch('reports');
-    const items = [];
-    if (data) Object.entries(data).forEach(([rid, r]) => { if (r && !reportIsOpen(r)) items.push({rid, r}); });
-    items.sort((a,b) => (b.r.resolvedAt||0) - (a.r.resolvedAt||0) || (new Date(b.r.reportedAt||0) - new Date(a.r.reportedAt||0)));
-    list.innerHTML = '';
-    if (items.length === 0) {
-      list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:32px 0">Brak historii</div>';
-      return;
-    }
-    items.forEach(({rid, r}) => {
-      const card = document.createElement('div');
-      card.className = 'adm-card';
-      card.id = 'rep-hist-' + rid;
-      card.innerHTML = admBuildReportCard(rid, r, true);
-      list.appendChild(card);
-    });
-  } catch(e) {
-    list.innerHTML = '<div style="color:var(--c0);font-size:13px;text-align:center;padding:16px">Błąd: ' + e.message + '</div>';
-  }
-}
-
 function admEditReportQ(rid) {
   // Find related question in QS by matching questionText and open inline edit
-  const card = $('rep-' + rid) || $('rep-hist-' + rid);
+  const card = $('rep-' + rid);
   if (!card) return;
   const qTextEl = card.querySelector('.adm-card-q');
   const qText = qTextEl ? qTextEl.textContent : '';
@@ -3964,7 +3713,7 @@ function admEditReportQ(rid) {
 
 async function admResolveReport(rid) {
   try {
-    await admWrite('reports/' + rid, {status:'resolved', resolvedAt:Date.now()}, 'PATCH');
+    await admWrite('reports/' + rid + '/status', 'resolved', 'PUT');
     const card = $('rep-' + rid);
     if (card) card.remove();
     admLoadReportsCount();
@@ -3973,17 +3722,8 @@ async function admResolveReport(rid) {
 
 async function admRejectReport(rid) {
   try {
-    await admWrite('reports/' + rid, {status:'rejected', resolvedAt:Date.now()}, 'PATCH');
+    await admWrite('reports/' + rid + '/status', 'rejected', 'PUT');
     const card = $('rep-' + rid);
-    if (card) card.remove();
-    admLoadReportsCount();
-  } catch(e) { alert('Błąd: ' + e.message); }
-}
-
-async function admReopenReport(rid) {
-  try {
-    await admWrite('reports/' + rid, {status:'open', resolvedAt:null}, 'PATCH');
-    const card = $('rep-hist-' + rid);
     if (card) card.remove();
     admLoadReportsCount();
   } catch(e) { alert('Błąd: ' + e.message); }
@@ -3993,7 +3733,11 @@ async function admLoadReportsCount() {
   try {
     const data = await admFetch('reports');
     let n = 0;
-    if (data) Object.values(data).forEach(r => { if (reportIsOpen(r)) n++; });
+    if (data) Object.values(data).forEach(r => {
+      if (!r) return;
+      const isOpen = r.status ? r.status === 'open' : !r.resolved;
+      if (isOpen) n++;
+    });
     const el = $('adm-reports-count');
     if (el) { el.textContent = n; el.style.display = n > 0 ? 'inline' : 'none'; }
   } catch(e) {}
@@ -4024,7 +3768,7 @@ async function admLoadUsers() {
       card.innerHTML =
         '<div style="display:flex;align-items:center;gap:10px">' +
           '<div style="flex:1">' +
-            '<div style="font-size:13px;font-weight:600;color:var(--text)">' + escHtml(u.email||uid) + (isSelf ? ' <span style="font-size:10px;color:#a78bfa">(ty)</span>' : '') + '</div>' +
+            '<div style="font-size:13px;font-weight:600;color:var(--text)">' + escHtml(u.email||uid) + (isSelf ? ' <span style="font-size:10px;color:var(--self-text)">(ty)</span>' : '') + '</div>' +
             '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + roleLabel + ' · ' + new Date(u.createdAt||0).toLocaleDateString('pl') + '</div>' +
           '</div>' +
           (!isSelf && curIsAdmin && !isAdmin ? '<button onclick="admToggleRole(\'' + uid + '\',\'' + (isMod?'user':'moderator') + '\')" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer">' + (isMod ? '→ User' : '→ Mod') + '</button>' : '') +
@@ -4128,13 +3872,13 @@ function myqEditCard(qid) {
   const aRows = [0,1,2].map(i =>
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">' +
       '<input class="myq-edit-a" value="' + escHtml((q.a||[])[i]||'') + '" placeholder="Odpowiedź ' + (i+1) + ' — dla innych" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">' +
-      '<input class="myq-edit-as" value="' + escHtml((q.as||[])[i]||'') + '" placeholder="Odpowiedź ' + (i+1) + ' — dla Ciebie" style="background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:6px 8px;font-size:12px;color:#a78bfa;font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">' +
+      '<input class="myq-edit-as" value="' + escHtml((q.as||[])[i]||'') + '" placeholder="Odpowiedź ' + (i+1) + ' — dla Ciebie" style="background:var(--self-bg);border:1.5px solid var(--self-rim);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--self-text);font-family:inherit;box-sizing:border-box;width:100%" onkeydown="event.stopPropagation()">' +
     '</div>'
   ).join('');
   card.innerHTML =
     '<div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px"><span>Dla innych — pamiętaj o [imię]</span><span>Dla Ciebie</span></div>' +
     '<textarea id="myq-edit-q-' + qid + '" style="width:100%;background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;min-height:52px;box-sizing:border-box" onkeydown="event.stopPropagation()">' + escHtml(q.q||'') + '</textarea>' +
-    '<textarea id="myq-edit-qs-' + qid + '" style="width:100%;background:#3730a322;border:1.5px solid #a78bfa55;border-radius:8px;padding:8px;font-size:13px;color:#a78bfa;font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box;margin-top:6px" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
+    '<textarea id="myq-edit-qs-' + qid + '" style="width:100%;background:var(--self-bg);border:1.5px solid var(--self-rim);border-radius:8px;padding:8px;font-size:13px;color:var(--self-text);font-family:inherit;resize:vertical;min-height:48px;box-sizing:border-box;margin-top:6px" onkeydown="event.stopPropagation()">' + escHtml(q.qs||'') + '</textarea>' +
     '<div style="font-size:9px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 2px"><span>Odpowiedź dla innych</span><span>Odpowiedź dla Ciebie</span></div>' +
     aRows +
     '<div style="display:flex;gap:8px;margin-top:8px">' +
