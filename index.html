@@ -514,11 +514,12 @@ onAuthStateChanged(auth, (user) => {
 
   <!-- Tabs -->
   <div style="display:flex;gap:6px;flex-wrap:wrap">
-    <button class="adm-tab adm-tab-active" id="adm-tab-questions" onclick="admSetTab('questions')">📋 Pytania</button>
-    <button class="adm-tab" id="adm-tab-pending" onclick="admSetTab('pending')">⏳ Do zatwierdzenia <span id="adm-pending-count" style="display:none;background:#f59e0b;color:#000;font-size:9px;padding:1px 5px;border-radius:99px;margin-left:3px"></span></button>
-    <button class="adm-tab" id="adm-tab-reports" onclick="admSetTab('reports')">⚑ Zgłoszenia <span id="adm-reports-count" style="display:none;background:#ef4444;color:#fff;font-size:9px;padding:1px 5px;border-radius:99px;margin-left:3px"></span></button>
-    <button class="adm-tab" id="adm-tab-users" onclick="admSetTab('users')">👥 Użytkownicy</button>
-  </div>
+	    <button class="adm-tab adm-tab-active" id="adm-tab-questions" onclick="admSetTab('questions')">📋 Pytania</button>
+	    <button class="adm-tab" id="adm-tab-pending" onclick="admSetTab('pending')">⏳ Do zatwierdzenia <span id="adm-pending-count" style="display:none;background:#f59e0b;color:#000;font-size:9px;padding:1px 5px;border-radius:99px;margin-left:3px"></span></button>
+	    <button class="adm-tab" id="adm-tab-reports" onclick="admSetTab('reports')">⚑ Zgłoszenia <span id="adm-reports-count" style="display:none;background:#ef4444;color:#fff;font-size:9px;padding:1px 5px;border-radius:99px;margin-left:3px"></span></button>
+	    <button class="adm-tab" id="adm-tab-games" onclick="admSetTab('games')">🎮 Gry</button>
+	    <button class="adm-tab" id="adm-tab-users" onclick="admSetTab('users')">👥 Użytkownicy</button>
+	  </div>
 
   <!-- Tab: All questions -->
   <div id="adm-pane-questions">
@@ -549,13 +550,35 @@ onAuthStateChanged(auth, (user) => {
   </div>
 
   <!-- Tab: Reports -->
-  <div id="adm-pane-reports" style="display:none">
-    <div id="adm-reports-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:32px 0;display:none">Brak zgłoszeń ✅</div>
-    <div id="adm-reports-list" style="display:flex;flex-direction:column;gap:10px"></div>
-  </div>
+	  <div id="adm-pane-reports" style="display:none">
+	    <div id="adm-reports-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:32px 0;display:none">Brak zgłoszeń ✅</div>
+	    <div id="adm-reports-list" style="display:flex;flex-direction:column;gap:10px"></div>
+	  </div>
 
-  <!-- Tab: Users -->
-  <div id="adm-pane-users" style="display:none">
+	  <!-- Tab: Games archive -->
+	  <div id="adm-pane-games" style="display:none">
+	    <div class="adm-card" style="gap:12px">
+	      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+	        <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;min-width:130px">Archiwum gier</div>
+	        <button onclick="admLoadGames()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer">Odśwież</button>
+	      </div>
+	      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+	        <label style="font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:5px">Od
+	          <input id="adm-games-from" type="date" onchange="admRenderGames()" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;color:var(--text);font-family:inherit">
+	        </label>
+	        <label style="font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:5px">Do
+	          <input id="adm-games-to" type="date" onchange="admRenderGames()" style="background:var(--bg);border:1.5px solid var(--rim);border-radius:8px;padding:8px;color:var(--text);font-family:inherit">
+	        </label>
+	      </div>
+	      <div id="adm-games-summary" style="font-size:12px;color:var(--muted)"></div>
+	      <div id="adm-games-chart" style="display:flex;align-items:flex-end;gap:6px;min-height:110px;border-top:1px solid var(--rim);border-bottom:1px solid var(--rim);padding:12px 0"></div>
+	    </div>
+	    <div id="adm-games-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:32px 0;display:none">Brak gier w wybranym zakresie.</div>
+	    <div id="adm-games-list" style="display:flex;flex-direction:column;gap:10px;margin-top:10px"></div>
+	  </div>
+
+	  <!-- Tab: Users -->
+	  <div id="adm-pane-users" style="display:none">
     <div id="adm-users-list" style="display:flex;flex-direction:column;gap:8px"></div>
   </div>
 </div>
@@ -1010,6 +1033,7 @@ let _lastRi=null; // track round index to reset local state on round change
 let _allVotedAt=null; // timestamp when all votes first detected
 let _countdownTimer=null; // drives timed transitions under SSE
 let _voteRetryTimer=null; // retry fetch if last vote missed by race condition
+let _archiveWriteStarted=false; // prevent duplicate archive writes from repeated end renders
 
 function startCountdown(ms, onTick, onDone){
   if(_countdownTimer) clearInterval(_countdownTimer);
@@ -1223,11 +1247,13 @@ function startKickCheck(){
 
 async function writeGS(){
   // Full PUT only for major phase transitions that reset many fields at once
+  if(GS) GS.updatedAt=Date.now();
   await fbPut(`games/${gameId}`,GS);
 }
 
 // Minimal PATCH for single-field updates during gameplay
 async function patchGS(fields){
+  if(!('updatedAt' in fields)) fields.updatedAt=Date.now();
   await fbPatch(`games/${gameId}`,fields);
   Object.assign(GS,fields);
 }
@@ -1427,10 +1453,12 @@ async function createGame(){
   hideErr('home-err');
   showErr('home-err','⏳ Tworzę grę…');
   $('home-err').style.color='var(--muted)';
-  try{
-    gameId=rnd4();
-    GS={phase:'lobby',players:[{name,pts:10},null,null,null,null,null,null,null],subjects:[],qSeq:[],rt:0,ri:0,votes:{},bets:{},sa:-1,ready:{},maxPlayers:8,pool:0,hostSlot:0,roundHistory:[]};
-    await fbPut(`games/${gameId}`,GS);
+	  try{
+	    gameId=rnd4();
+	    const now=Date.now();
+	    _archiveWriteStarted=false;
+	    GS={phase:'lobby',players:[{name,pts:10},null,null,null,null,null,null,null],subjects:[],qSeq:[],rt:0,ri:0,votes:{},bets:{},sa:-1,ready:{},maxPlayers:8,pool:0,hostSlot:0,roundHistory:[],createdAt:now,updatedAt:now};
+	    await fbPut(`games/${gameId}`,GS);
     mySlot=0;isHost=true;
     sessionStorage.setItem('ego_sess',JSON.stringify({gameId,mySlot}));
     hideErr('home-err');
@@ -1546,7 +1574,8 @@ async function claimSlot(slot,name){
     }
     // Use PATCH with only the changed player slot — minimal write, atomic
     const patch={};
-    patch[`players/${slot}`]={name:name||'Gracz',pts:fresh.players[slot]?.pts??10};
+	    patch[`players/${slot}`]={name:name||'Gracz',pts:fresh.players[slot]?.pts??10};
+	    patch.updatedAt=Date.now();
     await fbPatch(`games/${gameId}`,patch);
     GS=norm(dc(fresh));
     GS.players[slot]={name:name||'Gracz',pts:fresh.players[slot]?.pts??10};
@@ -1755,10 +1784,10 @@ async function leaveGame(){
       // Remove leaving player and reset to lobby for remaining players
       const newPlayers=[...GS.players];
       newPlayers[mySlot]=null;
-      const remainingSlots=newPlayers.map((p,i)=>p?i:null).filter(i=>i!==null);
-      if(remainingSlots.length===0){
-        await fbPatch(`games/${gameId}`,{phase:'ended'});
-      } else {
+	      const remainingSlots=newPlayers.map((p,i)=>p?i:null).filter(i=>i!==null);
+	      if(remainingSlots.length===0){
+	        await fbPatch(`games/${gameId}`,{phase:'ended',endedAt:Date.now(),updatedAt:Date.now()});
+	      } else {
         const currentHostSlot=GS.hostSlot??0;
         const rawHostSlot=remainingSlots.includes(currentHostSlot)
           ? currentHostSlot
@@ -1855,7 +1884,7 @@ async function hostStart(){
     }
   });
 
-  GS={...GS,phase:'subject',gameMode:mode,subjects:sub,qSeq,qAnswers,rt:sub.length,ri:0,votes:{},bets:{},sa:-1,ready:{},pool:playerCount*10,roundHistory:[]};
+  GS={...GS,phase:'subject',gameMode:mode,subjects:sub,qSeq,qAnswers,rt:sub.length,ri:0,votes:{},bets:{},sa:-1,ready:{},pool:playerCount*10,roundHistory:[],startedAt:Date.now()};
   await writeGS();render();
 }
 
@@ -1999,6 +2028,48 @@ function appendRoundHistory(gs){
   const entry=buildRoundHistoryEntry(gs);
   const history=(gs.roundHistory||[]).filter(r=>r.round!==entry.round);
   gs.roundHistory=[...history,entry].sort((a,b)=>a.round-b.round);
+}
+
+function buildGameArchive(gs,status='completed',at=Date.now()){
+  const createdAt=gs.createdAt||gs.startedAt||at;
+  const endedAt=gs.endedAt||at;
+  const players=(gs.players||[]).map((p,i)=>p?{slot:i,name:p.name||'Gracz',pts:parseInt(p.pts)||0}:null).filter(Boolean);
+  const sorted=[...players].sort((a,b)=>b.pts-a.pts);
+  const rounds=gs.roundHistory||[];
+  return{
+    id:`${gameId}_${createdAt}`,
+    gameId,
+    status,
+    createdAt,
+    startedAt:gs.startedAt||createdAt,
+    endedAt,
+    archivedAt:at,
+    durationMs:Math.max(0,endedAt-createdAt),
+    gameMode:gs.gameMode||'rounds',
+    playerCount:players.length,
+    roundCount:rounds.length||(gs.ri!=null?gs.ri+1:0),
+    players,
+    winner:sorted[0]||null,
+    podium:sorted.slice(0,3),
+    roundHistory:rounds
+  };
+}
+
+async function archiveGameEndOnce(){
+  if(!isHost||!gameId||!GS||GS.archivedAt||_archiveWriteStarted)return;
+  _archiveWriteStarted=true;
+  const archivedAt=Date.now();
+  try{
+    if(!GS.endedAt) GS.endedAt=archivedAt;
+    const archive=buildGameArchive(GS,'completed',archivedAt);
+    await fbPut(`gameArchive/${archive.id}`,archive);
+    await fbPatch(`games/${gameId}`,{archivedAt,archiveStatus:'completed',endedAt:GS.endedAt,updatedAt:archivedAt});
+    GS.archivedAt=archivedAt;
+    GS.archiveStatus='completed';
+  }catch(e){
+    _archiveWriteStarted=false;
+    console.error('archiveGameEndOnce',e);
+  }
 }
 
 // Dynamically scale question text font size based on character count
@@ -2282,10 +2353,11 @@ function confirmVote(){
 
 async function castVote(ans){
   try{
-    const patch={};
-    patch[`votes/${mySlot}`]=ans;
-    patch[`bets/${mySlot}`]=_localBet;
-    await fbPatch(`games/${gameId}`,patch);
+	    const patch={};
+	    patch[`votes/${mySlot}`]=ans;
+	    patch[`bets/${mySlot}`]=_localBet;
+	    patch.updatedAt=Date.now();
+	    await fbPatch(`games/${gameId}`,patch);
     GS.votes[mySlot]=ans;
     if(!GS.bets) GS.bets={};
     GS.bets[mySlot]=_localBet;
@@ -2559,14 +2631,15 @@ async function nextRound(){
     const poolGone=(GS.pool??0)<=0;
     const roundsDone=GS.ri+1>=GS.rt;
     const isEnd=(mode==='pool')?(poolGone||anyBroke):roundsDone;
-    if(isEnd){GS.phase='ended';}
-    else{GS.ri++;GS.votes={};GS.bets={};GS.sa=-1;GS.phase='subject';_localVote=null;_confirmedVote=null;_sjPick=null;_sjPending=null;_swapsLeft=2;_sjSwapsLeft=2;_lastSwapAt=null;_localBet=1;_allVotedAt=null;}
+	    if(isEnd){GS.phase='ended';GS.endedAt=Date.now();}
+	    else{GS.ri++;GS.votes={};GS.bets={};GS.sa=-1;GS.phase='subject';_localVote=null;_confirmedVote=null;_sjPick=null;_sjPending=null;_swapsLeft=2;_sjSwapsLeft=2;_lastSwapAt=null;_localBet=1;_allVotedAt=null;}
     await writeGS();render();
   }catch(e){console.error('nextRound',e);}
 }
 
 // ── END ──
 function renderEnd(){
+  archiveGameEndOnce();
   // Track game completion stats
   if(window._currentUser && mySlot!==null){
     updateUserStats({
@@ -2608,13 +2681,15 @@ function renderEnd(){
   }
 
   const eb=$('end-btns');eb.innerHTML='';
-  if(isHost){
-    const b=document.createElement('button');b.className='btn btn-lit';b.textContent='Zagraj ponownie';
-    b.onclick=async()=>{
-      GS={...GS,phase:'lobby',subjects:[],qSeq:[],ri:0,votes:{},bets:{},sa:-1,pool:0,roundHistory:[]};
-      GS.players.forEach(p=>{if(p)p.pts=10;});
-      await writeGS();render();
-    };
+	  if(isHost){
+	    const b=document.createElement('button');b.className='btn btn-lit';b.textContent='Zagraj ponownie';
+	    b.onclick=async()=>{
+	      const now=Date.now();
+	      _archiveWriteStarted=false;
+	      GS={...GS,phase:'lobby',subjects:[],qSeq:[],ri:0,votes:{},bets:{},sa:-1,pool:0,roundHistory:[],createdAt:now,startedAt:null,endedAt:null,archivedAt:null,archiveStatus:null};
+	      GS.players.forEach(p=>{if(p)p.pts=10;});
+	      await writeGS();render();
+	    };
     eb.appendChild(b);
   }
   const h2=document.createElement('button');h2.className='btn btn-dim';h2.textContent='← Wyjdź';
@@ -3137,6 +3212,7 @@ async function fbSet(path, data) {
 let _admTab = 'questions';
 let _admCatFilter = null;
 let _admSelectedQs = new Set();
+let _admGames = [];
 
 async function admGetToken() {
   const user = window._currentUser;
@@ -3173,7 +3249,7 @@ async function admDelete(path) {
 
 function admSetTab(tab) {
   _admTab = tab;
-  ['questions','pending','reports','users'].forEach(t => {
+  ['questions','pending','reports','games','users'].forEach(t => {
     const btn = $('adm-tab-' + t);
     const pane = $('adm-pane-' + t);
     if (btn) btn.classList.toggle('adm-tab-active', t === tab);
@@ -3182,6 +3258,7 @@ function admSetTab(tab) {
   if (tab === 'questions') admRenderQuestions();
   if (tab === 'pending')   admLoadPending();
   if (tab === 'reports')   admLoadReports();
+  if (tab === 'games')     admLoadGames();
   if (tab === 'users')     admLoadUsers();
 }
 
@@ -3741,6 +3818,192 @@ async function admLoadReportsCount() {
     const el = $('adm-reports-count');
     if (el) { el.textContent = n; el.style.display = n > 0 ? 'inline' : 'none'; }
   } catch(e) {}
+}
+
+// ── TAB: GAMES ARCHIVE ──
+const ADM_ABANDONED_AFTER_MS = 6 * 60 * 60 * 1000;
+
+function admGameTs(g){
+  return g.endedAt || g.archivedAt || g.startedAt || g.createdAt || 0;
+}
+
+function admDateKey(ts){
+  if(!ts)return 'brak daty';
+  const d=new Date(ts);
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+function admDuration(ms){
+  ms=parseInt(ms)||0;
+  const min=Math.floor(ms/60000);
+  const sec=Math.floor((ms%60000)/1000);
+  if(min>=60) return `${Math.floor(min/60)}h ${min%60}min`;
+  if(min>0) return `${min}min ${sec}s`;
+  return `${sec}s`;
+}
+
+function admStatusBadge(status){
+  const map={
+    completed:{txt:'Zakończona',bg:'#14532d',color:'#86efac',border:'#22c55e66'},
+    abandoned:{txt:'Porzucona',bg:'#451a03',color:'#fdba74',border:'#f9731666'},
+    interrupted:{txt:'Przerwana',bg:'#450a0a',color:'#fca5a5',border:'#ef444466'}
+  };
+  const s=map[status]||{txt:status||'—',bg:'var(--bg)',color:'var(--muted)',border:'var(--rim)'};
+  return `<span style="font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px;background:${s.bg};color:${s.color};border:1px solid ${s.border};white-space:nowrap">${s.txt}</span>`;
+}
+
+function admBuildArchiveFromLive(gid,gs,status,at=Date.now()){
+  const createdAt=gs.createdAt||gs.startedAt||gs.updatedAt||at;
+  const endedAt=status==='completed'?(gs.endedAt||at):(gs.updatedAt||at);
+  const players=(gs.players||[]).map((p,i)=>p?{slot:i,name:p.name||'Gracz',pts:parseInt(p.pts)||0}:null).filter(Boolean);
+  const sorted=[...players].sort((a,b)=>b.pts-a.pts);
+  const rounds=gs.roundHistory||[];
+  return{
+    id:`${gid}_${createdAt}`,
+    gameId:gid,
+    status,
+    createdAt,
+    startedAt:gs.startedAt||createdAt,
+    endedAt,
+    archivedAt:at,
+    durationMs:Math.max(0,endedAt-createdAt),
+    gameMode:gs.gameMode||'rounds',
+    playerCount:players.length,
+    roundCount:rounds.length||(gs.ri!=null?gs.ri+1:0),
+    players,
+    winner:sorted[0]||null,
+    podium:sorted.slice(0,3),
+    roundHistory:rounds
+  };
+}
+
+async function admArchiveStaleLiveGames(archiveData, liveData){
+  const now=Date.now();
+  const writes=[];
+  Object.entries(liveData||{}).forEach(([gid,raw])=>{
+    if(!raw||raw.archivedAt)return;
+    const gs=norm(dc(raw));
+    const last=gs.updatedAt||gs.startedAt||gs.createdAt||0;
+    const isCompleted=gs.phase==='ended';
+    const isAbandoned=!isCompleted && last && now-last>ADM_ABANDONED_AFTER_MS;
+    if(!isCompleted && !isAbandoned)return;
+    const status=isCompleted?'completed':'abandoned';
+    const archive=admBuildArchiveFromLive(gid,gs,status,now);
+    if(archiveData && archiveData[archive.id])return;
+    writes.push((async()=>{
+      await admWrite('gameArchive/' + archive.id, archive, 'PUT');
+      await admWrite('games/' + gid, {archivedAt:now, archiveStatus:status, updatedAt:now}, 'PATCH');
+      archiveData = archiveData || {};
+      archiveData[archive.id]=archive;
+    })());
+  });
+  if(writes.length) await Promise.allSettled(writes);
+  return archiveData;
+}
+
+async function admLoadGames(){
+  const list=$('adm-games-list');
+  const empty=$('adm-games-empty');
+  const summary=$('adm-games-summary');
+  if(!list)return;
+  if(empty) empty.style.display='none';
+  list.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">Ładowanie…</div>';
+  if(summary) summary.textContent='';
+  try{
+    let archiveData=await admFetch('gameArchive').catch(()=>null);
+    const liveData=await admFetch('games').catch(()=>null);
+    archiveData=await admArchiveStaleLiveGames(archiveData,liveData);
+    _admGames=Object.entries(archiveData||{}).map(([key,g])=>({...g,_key:key})).sort((a,b)=>admGameTs(b)-admGameTs(a));
+    admSetDefaultGameDates();
+    admRenderGames();
+  }catch(e){
+    list.innerHTML='<div style="color:var(--c0);font-size:13px;text-align:center;padding:16px">Błąd: '+escHtml(e.message)+'</div>';
+  }
+}
+
+function admSetDefaultGameDates(){
+  const from=$('adm-games-from');
+  const to=$('adm-games-to');
+  if(!from||!to||from.value||to.value||!_admGames.length)return;
+  const newest=admGameTs(_admGames[0]);
+  const oldest=admGameTs(_admGames[_admGames.length-1]);
+  const start=Math.max(oldest,newest-13*24*60*60*1000);
+  from.value=admDateKey(start);
+  to.value=admDateKey(newest);
+}
+
+function admFilteredGames(){
+  const fromVal=$('adm-games-from')?.value||'';
+  const toVal=$('adm-games-to')?.value||'';
+  const fromTs=fromVal?new Date(fromVal+'T00:00:00').getTime():0;
+  const toTs=toVal?new Date(toVal+'T23:59:59').getTime():Infinity;
+  return _admGames.filter(g=>{
+    const ts=admGameTs(g);
+    return ts>=fromTs && ts<=toTs;
+  });
+}
+
+function admRenderGames(){
+  const list=$('adm-games-list');
+  const empty=$('adm-games-empty');
+  const summary=$('adm-games-summary');
+  if(!list)return;
+  const games=admFilteredGames();
+  const completed=games.filter(g=>g.status==='completed').length;
+  const abandoned=games.filter(g=>g.status==='abandoned').length;
+  const players=games.reduce((sum,g)=>sum+(parseInt(g.playerCount)||0),0);
+  if(summary) summary.textContent=`${games.length} gier · ${completed} zakończonych · ${abandoned} porzuconych · ${players} graczy łącznie`;
+  admRenderGamesChart(games);
+  list.innerHTML='';
+  if(!games.length){ if(empty) empty.style.display=''; return; }
+  if(empty) empty.style.display='none';
+  games.forEach(g=>{
+    const card=document.createElement('div');
+    card.className='adm-card';
+    const ts=admGameTs(g);
+    const dateStr=ts?new Date(ts).toLocaleString('pl'):'—';
+    const winner=g.winner&&g.winner.name?`${escHtml(g.winner.name)} · ${parseInt(g.winner.pts)||0} 🪙`:'—';
+    const playerChips=(g.players||[]).map(p=>`<span style="font-size:11px;background:var(--bg);border:1px solid var(--rim);border-radius:99px;padding:4px 8px;color:var(--muted)">${escHtml(p.name)} · ${parseInt(p.pts)||0}</span>`).join('');
+    card.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;min-width:130px">${escHtml(dateStr)} · kod ${escHtml(g.gameId||'—')}</div>
+        ${admStatusBadge(g.status)}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--muted)">
+        <div><strong style="color:var(--text)">Zwycięzca:</strong><br>${winner}</div>
+        <div><strong style="color:var(--text)">Gra:</strong><br>${escHtml(g.gameMode||'—')} · ${parseInt(g.roundCount)||0} rund · ${admDuration(g.durationMs)}</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">${playerChips||'<span style="font-size:12px;color:var(--muted)">Brak graczy</span>'}</div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function admRenderGamesChart(games){
+  const chart=$('adm-games-chart');
+  if(!chart)return;
+  const counts={};
+  games.forEach(g=>{
+    const key=admDateKey(admGameTs(g));
+    counts[key]=(counts[key]||0)+1;
+  });
+  const days=Object.keys(counts).sort();
+  if(!days.length){
+    chart.innerHTML='<div style="width:100%;text-align:center;color:var(--muted);font-size:12px">Brak danych do wykresu</div>';
+    return;
+  }
+  const max=Math.max(...days.map(d=>counts[d]),1);
+  chart.innerHTML=days.map(d=>{
+    const h=18+Math.round((counts[d]/max)*72);
+    return `<div title="${d}: ${counts[d]} gier" style="flex:1;min-width:20px;display:flex;flex-direction:column;align-items:center;gap:5px">
+      <div style="font-size:11px;font-weight:800;color:var(--text)">${counts[d]}</div>
+      <div style="width:100%;max-width:26px;height:${h}px;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,var(--c1),#534AB7);border:1px solid #818cf866"></div>
+      <div style="font-size:9px;color:var(--muted);writing-mode:vertical-rl;max-height:46px;overflow:hidden">${d.slice(5)}</div>
+    </div>`;
+  }).join('');
 }
 
 // ── TAB: USERS ──
