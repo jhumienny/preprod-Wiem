@@ -3863,8 +3863,8 @@ function admStatusBadge(status){
 }
 
 function admBuildArchiveFromLive(gid,gs,status,at=Date.now()){
-  const createdAt=gs.createdAt||gs.startedAt||gs.updatedAt||at;
-  const endedAt=status==='completed'?(gs.endedAt||at):(gs.updatedAt||at);
+  const createdAt=gs.createdAt||gs.startedAt||gs.updatedAt||gs.endedAt||at;
+  const endedAt=status==='completed'?gs.endedAt:(gs.updatedAt||gs.startedAt||gs.createdAt||at);
   const players=(gs.players||[]).map((p,i)=>p?{slot:i,name:p.name||'Gracz',pts:parseInt(p.pts)||0}:null).filter(Boolean);
   const sorted=[...players].sort((a,b)=>b.pts-a.pts);
   const rounds=gs.roundHistory||[];
@@ -3887,17 +3887,40 @@ function admBuildArchiveFromLive(gid,gs,status,at=Date.now()){
   };
 }
 
+function admLivePlayers(gs){
+  return (gs.players||[]).filter(Boolean);
+}
+
+function admLiveRoundCount(gs){
+  if(Array.isArray(gs.roundHistory)) return gs.roundHistory.filter(Boolean).length;
+  if(gs.roundHistory && typeof gs.roundHistory==='object') return Object.keys(gs.roundHistory).length;
+  return 0;
+}
+
+function admIsValidArchiveGame(g){
+  if(!g || !g.status) return false;
+  const playerCount=parseInt(g.playerCount)||((g.players||[]).filter(Boolean).length);
+  const roundCount=parseInt(g.roundCount)||admLiveRoundCount(g);
+  if(g.status==='completed') return !!g.endedAt && playerCount>=2 && roundCount>=1;
+  if(g.status==='abandoned') return !!admGameTs(g) && playerCount>=1;
+  return false;
+}
+
 async function admArchiveStaleLiveGames(archiveData, liveData){
   const now=Date.now();
   const writes=[];
   Object.entries(liveData||{}).forEach(([gid,raw])=>{
     if(!raw)return;
     const gs=norm(dc(raw));
+    const playerCount=admLivePlayers(gs).length;
+    const roundCount=admLiveRoundCount(gs);
     const last=gs.updatedAt||gs.startedAt||gs.createdAt||0;
     const isCompleted=gs.phase==='ended'||gs.archiveStatus==='completed';
     const isAbandoned=!isCompleted && last && now-last>ADM_ABANDONED_AFTER_MS;
+    if(isCompleted && (!gs.endedAt || playerCount<2 || roundCount<1)) return;
+    if(isAbandoned && (playerCount<1 || !last)) return;
     if(!isCompleted && !isAbandoned)return;
-    const status=gs.archiveStatus||raw.archiveStatus||(isCompleted?'completed':'abandoned');
+    const status=isCompleted?'completed':'abandoned';
     const archive=admBuildArchiveFromLive(gid,gs,status,now);
     if(archiveData && archiveData[archive.id])return;
     writes.push((async()=>{
@@ -3933,7 +3956,7 @@ async function admLoadGames(){
     let archiveData=await admFetch('gameArchive').catch(()=>null);
     const liveData=await admFetch('games').catch(()=>null);
     archiveData=await admArchiveStaleLiveGames(archiveData,liveData);
-    _admGames=Object.entries(archiveData||{}).map(([key,g])=>({...g,_key:key})).sort((a,b)=>admGameTs(b)-admGameTs(a));
+    _admGames=Object.entries(archiveData||{}).map(([key,g])=>({...g,_key:key})).filter(admIsValidArchiveGame).sort((a,b)=>admGameTs(b)-admGameTs(a));
     admSetDefaultGameDates();
     admRenderGames();
   }catch(e){
@@ -3971,8 +3994,10 @@ function admRenderGames(){
   const games=admFilteredGames();
   const completed=games.filter(g=>g.status==='completed').length;
   const abandoned=games.filter(g=>g.status==='abandoned').length;
-  const players=games.reduce((sum,g)=>sum+(parseInt(g.playerCount)||0),0);
-  if(summary) summary.textContent=`${games.length} gier · ${completed} zakończonych · ${abandoned} porzuconych · ${players} graczy łącznie`;
+  const playerEntries=games.reduce((sum,g)=>sum+(parseInt(g.playerCount)||0),0);
+  const uniquePlayers=new Set();
+  games.forEach(g=>(g.players||[]).forEach(p=>{ if(p&&p.name) uniquePlayers.add(String(p.name).trim().toLowerCase()); }));
+  if(summary) summary.textContent=`${games.length} gier · ${completed} zakończonych · ${abandoned} porzuconych · ${playerEntries} udziałów graczy · ${uniquePlayers.size} unikalnych nazw`;
   admRenderGamesChart(games);
   list.innerHTML='';
   if(!games.length){ if(empty) empty.style.display=''; return; }
