@@ -2062,10 +2062,17 @@ async function archiveGameEndOnce(){
   try{
     if(!GS.endedAt) GS.endedAt=archivedAt;
     const archive=buildGameArchive(GS,'completed',archivedAt);
-    await fbPut(`gameArchive/${archive.id}`,archive);
-    await fbPatch(`games/${gameId}`,{archivedAt,archiveStatus:'completed',endedAt:GS.endedAt,updatedAt:archivedAt});
+    let archiveStored=true;
+    try{
+      await fbPut(`gameArchive/${archive.id}`,archive);
+    }catch(e){
+      archiveStored=false;
+      console.error('archiveGameEndOnce gameArchive write',e);
+    }
+    await fbPatch(`games/${gameId}`,{archivedAt,archiveStatus:'completed',archiveStored,endedAt:GS.endedAt,updatedAt:archivedAt});
     GS.archivedAt=archivedAt;
     GS.archiveStatus='completed';
+    GS.archiveStored=archiveStored;
   }catch(e){
     _archiveWriteStarted=false;
     console.error('archiveGameEndOnce',e);
@@ -3884,18 +3891,28 @@ async function admArchiveStaleLiveGames(archiveData, liveData){
   const now=Date.now();
   const writes=[];
   Object.entries(liveData||{}).forEach(([gid,raw])=>{
-    if(!raw||raw.archivedAt)return;
+    if(!raw)return;
     const gs=norm(dc(raw));
     const last=gs.updatedAt||gs.startedAt||gs.createdAt||0;
-    const isCompleted=gs.phase==='ended';
+    const isCompleted=gs.phase==='ended'||gs.archiveStatus==='completed';
     const isAbandoned=!isCompleted && last && now-last>ADM_ABANDONED_AFTER_MS;
     if(!isCompleted && !isAbandoned)return;
-    const status=isCompleted?'completed':'abandoned';
+    const status=gs.archiveStatus||raw.archiveStatus||(isCompleted?'completed':'abandoned');
     const archive=admBuildArchiveFromLive(gid,gs,status,now);
     if(archiveData && archiveData[archive.id])return;
     writes.push((async()=>{
-      await admWrite('gameArchive/' + archive.id, archive, 'PUT');
-      await admWrite('games/' + gid, {archivedAt:now, archiveStatus:status, updatedAt:now}, 'PATCH');
+      try{
+        await admWrite('gameArchive/' + archive.id, archive, 'PUT');
+      }catch(e){
+        console.error('admArchiveStaleLiveGames gameArchive write',e);
+      }
+      if(!raw.archivedAt||raw.archiveStatus!==status){
+        try{
+          await admWrite('games/' + gid, {archivedAt:now, archiveStatus:status, updatedAt:now}, 'PATCH');
+        }catch(e){
+          console.error('admArchiveStaleLiveGames games patch',e);
+        }
+      }
       archiveData = archiveData || {};
       archiveData[archive.id]=archive;
     })());
