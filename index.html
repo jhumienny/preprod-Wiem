@@ -44,85 +44,68 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:1;}
 
 /* home screen */
 #s-home{gap:14px;padding-top:14px;}
-.home-topbar{display:flex;align-items:center;gap:10px;padding:0 2px;}
-.home-auth{display:flex;justify-content:flex-end;flex:1;min-width:0;}
-.home-auth-row{display:flex;gap:8px;align-items:center;min-width:0;justify-content:flex-end;}
-.home-icon-btn{width:42px;height:42px;border-radius:14px;border:1px solid #ffffff14;background:linear-gradient(180deg,#1a1a21,#111117);color:var(--text);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 #ffffff0f,0 10px 22px #00000018;cursor:pointer;transition:transform 160ms cubic-bezier(.2,.8,.2,1),border-color 160ms ease,background 160ms ease;}
-.home-icon-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;fill:none;}
-.home-mini-btn{min-height:42px;padding:0 14px;border-radius:14px;border:1px solid #ffffff14;background:linear-gradient(180deg,#1a1a21,#111117);color:#d9d7e7;font-size:12px;font-weight:800;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;box-shadow:inset 0 1px 0 #ffffff0f,0 10px 22px #00000014;transition:transform 160ms cubic-bezier(.2,.8,.2,1),border-color 160ms ease,color 160ms ease,background 160ms ease,box-shadow 160ms ease;}
-.home-mini-btn.primary{border-color:#ffffff20;background:#f3f0ff;color:#121118;box-shadow:0 10px 24px #f3f0ff18;}
-.home-mini-btn.accent{border-color:#6d64df55;background:#2a255f;color:#d9d5ff;}
-.home-mini-btn.icon{width:42px;padding:0;font-size:0;}
-.home-mini-btn.icon::before{content:attr(data-icon);font-size:15px;line-height:1;}
-.home-mini-btn:active,.home-icon-btn:active{transform:scale(.96);}
+.home-topbar{display:flex;align-items:center;gap:8px;}
+.home-auth{display:flex;gap:6px;justify-content:flex-end;flex:1;min-width:0;}
+.home-auth-row{display:flex;gap:6px;align-items:center;min-width:0;flex-wrap:wrap;justify-content:flex-end;}
+.home-mini-btn{min-height:32px;padding:6px 11px;border-radius:10px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:800;font-family:'DM Sans',sans-serif;cursor:pointer;transition:transform 140ms cubic-bezier(0.23,1,0.32,1),border-color 160ms ease-out,color 160ms ease-out,background 160ms ease-out;}
+.home-mini-btn.primary{border-color:var(--text);background:var(--text);color:var(--bg);}
+.home-mini-btn.accent{border:none;background:#534AB7;color:#fff;}
+.home-mini-btn.icon{width:34px;padding:0;font-size:14px;}
+.home-mini-btn:active{transform:scale(.97);}
 @media (hover:hover) and (pointer:fine){
-  .home-mini-btn:hover,.home-icon-btn:hover{border-color:#ffffff32;color:var(--text);}
+  .home-mini-btn:hover{border-color:var(--text);color:var(--text);}
   .home-mini-btn.primary:hover{color:var(--bg);}
 }
-.home-hero{position:relative;isolation:isolate;min-height:204px;border:1px solid #ffffff14;border-radius:24px;padding:26px 20px;overflow:hidden;background:linear-gradient(145deg,#202029 0%,#121219 52%,#251414 100%);box-shadow:inset 0 1px 0 #ffffff10,0 24px 55px #00000028;}
-.home-hero::before{content:'';position:absolute;right:-72px;top:-76px;width:236px;height:236px;border-radius:50%;background:conic-gradient(from 130deg,#ff4d4d,#ffb830,#3dd68c,#4d8dff,#ff4d4d);opacity:.2;filter:blur(1px);}
-.home-hero::after{content:'';position:absolute;right:40px;bottom:-84px;width:190px;height:190px;border:1px solid #ffffff14;border-radius:50%;transform:rotate(-18deg);pointer-events:none;}
-.home-brand{position:relative;z-index:2;max-width:250px;}
-.home-logo{font-family:'Syne',sans-serif;font-size:clamp(58px,17vw,82px);font-weight:800;letter-spacing:0;line-height:.86;text-shadow:0 16px 40px #0008;}
+.home-hero{position:relative;isolation:isolate;min-height:186px;border:1.5px solid var(--rim);border-radius:18px;padding:22px 18px;overflow:hidden;background:radial-gradient(circle at 78% 18%,#ffb83022 0 24%,transparent 25%),linear-gradient(145deg,#18181f 0%,#111118 62%,#2a151a 100%);}
+.home-hero::before{content:'';position:absolute;inset:auto -18px -38px auto;width:188px;height:188px;border:1px solid #ffffff16;border-radius:50%;transform:rotate(-18deg);pointer-events:none;}
+.home-brand{position:relative;z-index:2;max-width:230px;}
+.home-logo{font-family:'Syne',sans-serif;font-size:clamp(52px,16vw,76px);font-weight:800;letter-spacing:0;line-height:.9;}
 .home-logo em{color:var(--c0);font-style:normal;}
-.home-tag{margin-top:14px;color:#dfdced;font-size:15px;line-height:1.45;max-width:235px;}
-.home-visual{position:absolute;right:10px;bottom:15px;width:158px;height:150px;z-index:1;pointer-events:none;}
-.home-card-stack{position:absolute;right:12px;bottom:20px;width:112px;height:82px;border-radius:18px;background:#f7f1df;color:#141318;box-shadow:0 20px 45px #0008;transform:rotate(-7deg);}
-.home-card-stack::before{content:'';position:absolute;inset:10px;border:1px solid #19171d22;border-radius:13px;}
+.home-tag{margin-top:10px;color:#d8d4e6;font-size:14px;line-height:1.4;max-width:210px;}
+.home-visual{position:absolute;right:14px;bottom:13px;width:150px;height:146px;z-index:1;pointer-events:none;}
+.home-card-stack{position:absolute;right:8px;bottom:18px;width:112px;height:82px;border-radius:14px;background:#f7f3e8;color:#141318;box-shadow:0 16px 38px #0007;transform:rotate(-7deg);}
+.home-card-stack::before{content:'';position:absolute;inset:8px;border:1.5px solid #19171d22;border-radius:10px;}
 .home-card-stack::after{content:'?';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:54px;color:#ff4d4d;}
-.home-chip{position:absolute;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:21px;box-shadow:0 14px 28px #0006;border:6px solid #ffffff28;}
-.home-chip.one{left:6px;bottom:2px;background:#3dd68c;color:#062012;animation:homeFloat 4.5s ease-in-out infinite;}
-.home-chip.two{right:0;top:8px;background:#4d8dff;color:#06152d;animation:homeFloat 5.2s ease-in-out infinite reverse;}
+.home-chip{position:absolute;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:20px;box-shadow:0 12px 26px #0006;border:5px solid #ffffff30;}
+.home-chip.one{left:6px;bottom:4px;background:var(--c2);color:#062012;animation:homeFloat 4.5s ease-in-out infinite;}
+.home-chip.two{right:0;top:12px;background:var(--c1);color:#06152d;animation:homeFloat 5.2s ease-in-out infinite reverse;}
 @keyframes homeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.home-panel{background:linear-gradient(180deg,#191920,#141419);border:1px solid #ffffff12;border-radius:24px;padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:inset 0 1px 0 #ffffff0b,0 18px 40px #0000001f;}
+.home-panel{background:var(--card);border:1.5px solid var(--rim);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 16px 34px #00000018;}
 .home-input-grid{display:grid;grid-template-columns:1fr;gap:10px;}
-.home-field{background:#0f0f14;border:1px solid #ffffff12;border-radius:18px;padding:13px 14px;display:flex;align-items:center;gap:10px;transition:border-color 160ms ease-out,box-shadow 160ms ease-out,background 160ms ease-out;}
-.home-field:focus-within{border-color:#8d86f1;box-shadow:0 0 0 4px #8d86f120;background:#111119;}
-.home-field label{font-size:10px;font-weight:900;text-transform:uppercase;color:#77758a;white-space:nowrap;letter-spacing:.7px;}
-.home-field input{flex:1;min-width:0;background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:800;color:var(--text);}
+.home-field{background:var(--bg);border:1.5px solid var(--rim);border-radius:14px;padding:12px 13px;display:flex;align-items:center;gap:10px;transition:border-color 160ms ease-out,box-shadow 160ms ease-out,background 160ms ease-out;}
+.home-field:focus-within{border-color:#7f77dd;box-shadow:0 0 0 3px #7f77dd22;}
+.home-field label{font-size:11px;font-weight:900;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.home-field input{flex:1;min-width:0;background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
 .home-field.code{overflow:hidden;}
 .home-field.code input{font-family:'Bebas Neue',sans-serif;font-size:25px;letter-spacing:2px;text-transform:uppercase;overflow:hidden;text-overflow:clip;}
-.home-action{min-height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 14px 28px #f3f0ff12;transition:transform 160ms cubic-bezier(.2,.8,.2,1),background 160ms ease,color 160ms ease,border-color 160ms ease;}
-.home-action svg{width:18px;height:18px;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;fill:none;}
-.home-rule-label{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#77758a;text-align:center;padding-top:4px;}
+.home-action{min-height:52px;border-radius:14px;}
+.home-rule-label{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);text-align:center;padding-top:2px;}
 .home-rules{display:grid;grid-template-columns:1fr;gap:8px;}
-.home-rule{background:linear-gradient(180deg,#18181f,#15151b);border:1px solid #ffffff12;border-radius:18px;padding:14px;display:grid;grid-template-columns:38px 1fr;gap:12px;align-items:start;box-shadow:inset 0 1px 0 #ffffff08;}
-.home-rule-icon{width:38px;height:38px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#0f0f14;color:var(--rule-color,#f3f0ff);font-family:'Bebas Neue',sans-serif;font-size:19px;border:1px solid #ffffff0e;}
-.home-rule-icon svg{width:19px;height:19px;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+.home-rule{background:var(--card);border:1.5px solid var(--rim);border-radius:14px;padding:13px;display:grid;grid-template-columns:36px 1fr;gap:12px;align-items:start;}
+.home-rule-icon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--bg);font-size:18px;}
 .home-rule-title{font-size:14px;font-weight:900;margin-bottom:2px;line-height:1.25;}
 .home-rule-copy{font-size:12.5px;color:var(--muted);line-height:1.45;}
 .home-link-btn{background:none;border:none;padding:0;font-family:inherit;font-size:12.5px;font-weight:900;color:var(--text);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
-[data-theme="light"] .home-icon-btn,[data-theme="light"] .home-mini-btn{border-color:#ddd8e9;background:linear-gradient(180deg,#ffffff,#f5f3fb);color:#514a68;box-shadow:0 10px 22px #4c1d9510;}
-[data-theme="light"] .home-mini-btn.primary{border-color:#12111a;background:#12111a;color:#fff;}
-[data-theme="light"] .home-mini-btn.accent{border-color:#7c3aed33;background:#ede9fe;color:#4c1d95;}
-[data-theme="light"] .home-hero{background:linear-gradient(145deg,#ffffff 0%,#f6f3ff 58%,#ffe8e8 100%);border-color:#ded9ea;box-shadow:0 22px 50px #4c1d9516;}
+[data-theme="light"] .home-hero{background:radial-gradient(circle at 78% 18%,#ffb83035 0 24%,transparent 25%),linear-gradient(145deg,#ffffff 0%,#f4f1ff 58%,#ffe5e5 100%);}
 [data-theme="light"] .home-tag{color:#514a68;}
 [data-theme="light"] .home-card-stack{background:#fff8e8;box-shadow:0 16px 32px #4c1d9520;}
-[data-theme="light"] .home-panel,[data-theme="light"] .home-rule{background:#ffffff;border-color:#ddd8e9;box-shadow:0 12px 28px #4c1d950c;}
-[data-theme="light"] .home-field,[data-theme="light"] .home-rule-icon{background:#f6f4fb;border-color:#ddd8e9;}
 @media(prefers-color-scheme:light){
-  :root:not([data-theme="dark"]) .home-icon-btn,:root:not([data-theme="dark"]) .home-mini-btn{border-color:#ddd8e9;background:linear-gradient(180deg,#ffffff,#f5f3fb);color:#514a68;box-shadow:0 10px 22px #4c1d9510;}
-  :root:not([data-theme="dark"]) .home-mini-btn.primary{border-color:#12111a;background:#12111a;color:#fff;}
-  :root:not([data-theme="dark"]) .home-mini-btn.accent{border-color:#7c3aed33;background:#ede9fe;color:#4c1d95;}
-  :root:not([data-theme="dark"]) .home-hero{background:linear-gradient(145deg,#ffffff 0%,#f6f3ff 58%,#ffe8e8 100%);border-color:#ded9ea;box-shadow:0 22px 50px #4c1d9516;}
+  :root:not([data-theme="dark"]) .home-hero{background:radial-gradient(circle at 78% 18%,#ffb83035 0 24%,transparent 25%),linear-gradient(145deg,#ffffff 0%,#f4f1ff 58%,#ffe5e5 100%);}
   :root:not([data-theme="dark"]) .home-tag{color:#514a68;}
   :root:not([data-theme="dark"]) .home-card-stack{background:#fff8e8;box-shadow:0 16px 32px #4c1d9520;}
-  :root:not([data-theme="dark"]) .home-panel,:root:not([data-theme="dark"]) .home-rule{background:#ffffff;border-color:#ddd8e9;box-shadow:0 12px 28px #4c1d950c;}
-  :root:not([data-theme="dark"]) .home-field,:root:not([data-theme="dark"]) .home-rule-icon{background:#f6f4fb;border-color:#ddd8e9;}
 }
 @media (min-width:430px){
   .home-input-grid{grid-template-columns:1.2fr .8fr;}
 }
 @media (max-width:360px){
-  .home-visual{opacity:.55;right:-16px;}
+  .home-visual{opacity:.65;right:-10px;}
   .home-brand{max-width:205px;}
   .home-tag{max-width:185px;}
-  .home-mini-btn{padding:0 10px;font-size:11px;}
 }
 @media (prefers-reduced-motion:reduce){
   .scr{animation:none;}
   .home-chip{animation:none;}
-  .home-mini-btn,.home-icon-btn,.home-field,.home-action{transition:none;}
+  .home-mini-btn,.home-field{transition:none;}
 }
 
 /* setup screen */
@@ -217,7 +200,6 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:1;}
 .dwait{background:var(--c3);animation:blink .9s infinite;}
 .derr{background:var(--c0);}
 .btn{border-radius:12px;padding:15px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .15s;text-align:center;width:100%;display:block;}
-.btn.home-action{display:flex;align-items:center;justify-content:center;gap:9px;}
 .btn:active{transform:scale(.98);}
 .btn-lit{background:var(--text);color:var(--bg);}
 .btn-dim{background:var(--card);color:var(--text);border:1.5px solid var(--rim);}
@@ -255,9 +237,7 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:1;}
 .adm-card{background:var(--card);border:1.5px solid var(--rim);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;}
 .adm-card-q{font-size:13px;font-weight:600;color:var(--text);line-height:1.4;}
 .adm-card-meta{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
-.theme-btn{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:12px;border:1.5px solid var(--rim);background:var(--card);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:all .15s;}
-.theme-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;fill:none;}
-#s-home .theme-btn{position:static;flex-shrink:0;width:42px;height:42px;border-radius:14px;}
+.theme-btn{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:10px;border:1.5px solid var(--rim);background:var(--card);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:all .15s;}
 .theme-btn:active{transform:scale(.95);}
 .lobby-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;}
 .leave-icon-btn{width:40px;height:40px;flex:0 0 40px;border-radius:12px;border:1.5px solid var(--c0);background:#2d1a1a;color:var(--c0);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s ease,background .15s ease,border-color .15s ease;}
@@ -317,7 +297,7 @@ onAuthStateChanged(auth, (user) => {
 <!-- ══ HOME ══ -->
 <div class="scr on" id="s-home">
   <div class="home-topbar">
-    <button class="home-icon-btn theme-btn" id="theme-btn" onclick="toggleTheme()" title="Zmień motyw" aria-label="Zmień motyw"></button>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Zmień motyw" style="position:static;flex-shrink:0">🌙</button>
     <div id="auth-bar" class="home-auth">
       <div id="auth-logged-out" class="home-auth-row">
         <button class="home-mini-btn" onclick="openAuthModal('login')">Zaloguj się</button>
@@ -327,8 +307,8 @@ onAuthStateChanged(auth, (user) => {
         <span id="auth-email" style="font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
         <button id="auth-admin-btn" class="home-mini-btn accent" onclick="show('s-admin')" style="display:none">Panel</button>
         <button id="auth-myq-btn" class="home-mini-btn primary" onclick="show('s-my-questions')" style="display:none">Pytania</button>
-        <button id="auth-stats-btn" class="home-mini-btn icon" data-icon="↗" onclick="openStatsModal()" style="display:none" title="Twoje statystyki" aria-label="Twoje statystyki"></button>
-        <button class="home-mini-btn icon" data-icon="✎" onclick="openSettings()" title="Ustawienia imienia" aria-label="Ustawienia imienia"></button>
+        <button id="auth-stats-btn" class="home-mini-btn icon" onclick="openStatsModal()" style="display:none" title="Twoje statystyki">📊</button>
+        <button class="home-mini-btn icon" onclick="openSettings()" title="Ustawienia imienia">✏️</button>
         <button class="home-mini-btn" onclick="authSignOut()">Wyloguj</button>
       </div>
     </div>
@@ -362,56 +342,47 @@ onAuthStateChanged(auth, (user) => {
         onkeydown="if(event.key==='Enter'){this.value.trim()?joinGame():createGame()}">
       </div>
     </div>
-    <button id="btn-join-create" class="btn btn-lit home-action" onclick="createGame()">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-      <span>Utwórz nową grę</span>
-    </button>
+    <button id="btn-join-create" class="btn btn-lit home-action" onclick="createGame()">🎮 Utwórz nową grę</button>
   </div>
 
   <div class="err-msg" id="home-err"></div>
 
   <div class="home-rule-label">Jak grać?</div>
   <div class="home-rules">
-    <div class="home-rule" style="--rule-color:#ffb830">
-      <div class="home-rule-icon">20</div>
+    <div class="home-rule">
+      <div class="home-rule-icon">🪙</div>
       <div>
         <div class="home-rule-title">Startujesz z 20 żetonami</div>
         <div class="home-rule-copy">Połowa wpada do wspólnej puli. Resztą ryzykujesz w rundach.</div>
       </div>
     </div>
 
-    <div class="home-rule" style="--rule-color:#4d8dff">
-      <div class="home-rule-icon">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 3v3M21 12h-3M12 21v-3M3 12h3"/></svg>
-      </div>
+    <div class="home-rule">
+      <div class="home-rule-icon">🎯</div>
       <div>
         <div class="home-rule-title">Jedna osoba odpowiada</div>
         <div class="home-rule-copy">Reszta zgaduje, co wybierze. Tu zaczyna się czytanie znajomych.</div>
       </div>
     </div>
 
-    <div class="home-rule" style="--rule-color:#3dd68c">
-      <div class="home-rule-icon">1/2</div>
+    <div class="home-rule">
+      <div class="home-rule-icon">⚖️</div>
       <div>
         <div class="home-rule-title">Stawiasz 1 albo 2</div>
         <div class="home-rule-copy">Pewny strzał daje więcej, nietrafiony boli bardziej. Prosta matematyka dramatu.</div>
       </div>
     </div>
 
-    <div class="home-rule" style="--rule-color:#ff4d4d">
-      <div class="home-rule-icon">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-      </div>
+    <div class="home-rule">
+      <div class="home-rule-icon">✅</div>
       <div>
         <div class="home-rule-title">Trafisz, zgarniesz pulę</div>
         <div class="home-rule-copy">Błędna odpowiedź oddaje żetony do puli. Osoba z pytaniem zarabia za zgodne głosy.</div>
       </div>
     </div>
 
-    <div class="home-rule" style="--rule-color:#a78bfa">
-      <div class="home-rule-icon">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>
-      </div>
+    <div class="home-rule">
+      <div class="home-rule-icon">✍️</div>
       <div>
         <div class="home-rule-title">Konto jest opcjonalne</div>
         <div class="home-rule-copy">Grasz bez logowania. <button class="home-link-btn" onclick="openAuthModal('register')">Załóż konto</button>, jeśli chcesz własne pytania i statystyki.</div>
@@ -807,13 +778,8 @@ const COLORS=['#a78bfa','#38bdf8','#fb923c','#e879f9','#f43f5e','#34d399','#facc
 function applyTheme(t, persist=true){
   document.documentElement.setAttribute('data-theme',t);
   if(persist) localStorage.setItem('ego_theme',t);
-  const icon=t==='dark'
-    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>'
-    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 7 7 0 1 0 20.5 14.5Z"/></svg>';
-  document.querySelectorAll('.theme-btn').forEach(b=>{
-    b.innerHTML=icon;
-    b.setAttribute('aria-label',t==='dark'?'Włącz jasny motyw':'Włącz ciemny motyw');
-  });
+  const icon=t==='dark'?'☀️':'🌙';
+  document.querySelectorAll('.theme-btn').forEach(b=>b.textContent=icon);
 }
 function toggleTheme(){
   const cur=document.documentElement.getAttribute('data-theme')||'dark';
@@ -1527,11 +1493,11 @@ function homeUpdateBtn() {
   const btn = $('btn-join-create');
   if (!btn) return;
   if (code.length > 0) {
-    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg><span>Dołącz do gry</span>';
+    btn.textContent = '→ Dołącz do gry';
     btn.className = 'btn btn-dim home-action';
     btn.onclick = joinGame;
   } else {
-    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Utwórz nową grę</span>';
+    btn.textContent = '🎮 Utwórz nową grę';
     btn.className = 'btn btn-lit home-action';
     btn.onclick = createGame;
   }
@@ -2805,12 +2771,12 @@ function renderEnd(){
     }catch(e){}
   }
   show('s-home');
-  // Keep any late-rendered theme buttons in sync.
+  // Also fix theme-btn icon on s-actions
   const tb2=document.querySelector('#s-actions .theme-btn');
   if(tb2){
     const saved=localStorage.getItem('ego_theme');
     const isDark=saved?saved==='dark':window.matchMedia('(prefers-color-scheme:dark)').matches;
-    applyTheme(isDark?'dark':'light', false);
+    tb2.textContent=isDark?'☀️':'🌙';
   }
 })();
 
