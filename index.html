@@ -42,6 +42,72 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
 .field input::placeholder{color:var(--muted);}
 input::placeholder,textarea::placeholder{color:var(--muted);opacity:1;}
 
+/* home screen */
+#s-home{gap:14px;padding-top:14px;}
+.home-topbar{display:flex;align-items:center;gap:8px;}
+.home-auth{display:flex;gap:6px;justify-content:flex-end;flex:1;min-width:0;}
+.home-auth-row{display:flex;gap:6px;align-items:center;min-width:0;flex-wrap:wrap;justify-content:flex-end;}
+.home-mini-btn{min-height:32px;padding:6px 11px;border-radius:10px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:800;font-family:'DM Sans',sans-serif;cursor:pointer;transition:transform 140ms cubic-bezier(0.23,1,0.32,1),border-color 160ms ease-out,color 160ms ease-out,background 160ms ease-out;}
+.home-mini-btn.primary{border-color:var(--text);background:var(--text);color:var(--bg);}
+.home-mini-btn.accent{border:none;background:#534AB7;color:#fff;}
+.home-mini-btn.icon{width:34px;padding:0;font-size:14px;}
+.home-mini-btn:active{transform:scale(.97);}
+@media (hover:hover) and (pointer:fine){
+  .home-mini-btn:hover{border-color:var(--text);color:var(--text);}
+  .home-mini-btn.primary:hover{color:var(--bg);}
+}
+.home-hero{position:relative;isolation:isolate;min-height:186px;border:1.5px solid var(--rim);border-radius:18px;padding:22px 18px;overflow:hidden;background:radial-gradient(circle at 78% 18%,#ffb83022 0 24%,transparent 25%),linear-gradient(145deg,#18181f 0%,#111118 62%,#2a151a 100%);}
+.home-hero::before{content:'';position:absolute;inset:auto -18px -38px auto;width:188px;height:188px;border:1px solid #ffffff16;border-radius:50%;transform:rotate(-18deg);pointer-events:none;}
+.home-brand{position:relative;z-index:2;max-width:230px;}
+.home-logo{font-family:'Syne',sans-serif;font-size:clamp(52px,16vw,76px);font-weight:800;letter-spacing:0;line-height:.9;}
+.home-logo em{color:var(--c0);font-style:normal;}
+.home-tag{margin-top:10px;color:#d8d4e6;font-size:14px;line-height:1.4;max-width:210px;}
+.home-visual{position:absolute;right:14px;bottom:13px;width:150px;height:146px;z-index:1;pointer-events:none;}
+.home-card-stack{position:absolute;right:8px;bottom:18px;width:112px;height:82px;border-radius:14px;background:#f7f3e8;color:#141318;box-shadow:0 16px 38px #0007;transform:rotate(-7deg);}
+.home-card-stack::before{content:'';position:absolute;inset:8px;border:1.5px solid #19171d22;border-radius:10px;}
+.home-card-stack::after{content:'?';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:54px;color:#ff4d4d;}
+.home-chip{position:absolute;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:20px;box-shadow:0 12px 26px #0006;border:5px solid #ffffff30;}
+.home-chip.one{left:6px;bottom:4px;background:var(--c2);color:#062012;animation:homeFloat 4.5s ease-in-out infinite;}
+.home-chip.two{right:0;top:12px;background:var(--c1);color:#06152d;animation:homeFloat 5.2s ease-in-out infinite reverse;}
+@keyframes homeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.home-panel{background:var(--card);border:1.5px solid var(--rim);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 16px 34px #00000018;}
+.home-input-grid{display:grid;grid-template-columns:1fr;gap:10px;}
+.home-field{background:var(--bg);border:1.5px solid var(--rim);border-radius:14px;padding:12px 13px;display:flex;align-items:center;gap:10px;transition:border-color 160ms ease-out,box-shadow 160ms ease-out,background 160ms ease-out;}
+.home-field:focus-within{border-color:#7f77dd;box-shadow:0 0 0 3px #7f77dd22;}
+.home-field label{font-size:11px;font-weight:900;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.home-field input{flex:1;min-width:0;background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
+.home-field.code{overflow:hidden;}
+.home-field.code input{font-family:'Bebas Neue',sans-serif;font-size:25px;letter-spacing:2px;text-transform:uppercase;overflow:hidden;text-overflow:clip;}
+.home-action{min-height:52px;border-radius:14px;}
+.home-rule-label{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);text-align:center;padding-top:2px;}
+.home-rules{display:grid;grid-template-columns:1fr;gap:8px;}
+.home-rule{background:var(--card);border:1.5px solid var(--rim);border-radius:14px;padding:13px;display:grid;grid-template-columns:36px 1fr;gap:12px;align-items:start;}
+.home-rule-icon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--bg);font-size:18px;}
+.home-rule-title{font-size:14px;font-weight:900;margin-bottom:2px;line-height:1.25;}
+.home-rule-copy{font-size:12.5px;color:var(--muted);line-height:1.45;}
+.home-link-btn{background:none;border:none;padding:0;font-family:inherit;font-size:12.5px;font-weight:900;color:var(--text);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+[data-theme="light"] .home-hero{background:radial-gradient(circle at 78% 18%,#ffb83035 0 24%,transparent 25%),linear-gradient(145deg,#ffffff 0%,#f4f1ff 58%,#ffe5e5 100%);}
+[data-theme="light"] .home-tag{color:#514a68;}
+[data-theme="light"] .home-card-stack{background:#fff8e8;box-shadow:0 16px 32px #4c1d9520;}
+@media(prefers-color-scheme:light){
+  :root:not([data-theme="dark"]) .home-hero{background:radial-gradient(circle at 78% 18%,#ffb83035 0 24%,transparent 25%),linear-gradient(145deg,#ffffff 0%,#f4f1ff 58%,#ffe5e5 100%);}
+  :root:not([data-theme="dark"]) .home-tag{color:#514a68;}
+  :root:not([data-theme="dark"]) .home-card-stack{background:#fff8e8;box-shadow:0 16px 32px #4c1d9520;}
+}
+@media (min-width:430px){
+  .home-input-grid{grid-template-columns:1.2fr .8fr;}
+}
+@media (max-width:360px){
+  .home-visual{opacity:.65;right:-10px;}
+  .home-brand{max-width:205px;}
+  .home-tag{max-width:185px;}
+}
+@media (prefers-reduced-motion:reduce){
+  .scr{animation:none;}
+  .home-chip{animation:none;}
+  .home-mini-btn,.home-field{transition:none;}
+}
+
 /* setup screen */
 .setup-card{background:var(--card);border:1.5px solid var(--rim);border-radius:var(--rad);padding:20px;}
 .setup-step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--rim);}
@@ -230,110 +296,99 @@ onAuthStateChanged(auth, (user) => {
 
 <!-- ══ HOME ══ -->
 <div class="scr on" id="s-home">
-  <div style="display:flex;align-items:center;gap:8px">
+  <div class="home-topbar">
     <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Zmień motyw" style="position:static;flex-shrink:0">🌙</button>
-    <div id="auth-bar" style="display:flex;gap:6px;justify-content:flex-end;flex:1">
-      <div id="auth-logged-out" style="display:flex;gap:6px">
-        <button onclick="openAuthModal('login')" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer">Zaloguj się</button>
-        <button onclick="openAuthModal('register')" style="padding:6px 12px;border-radius:8px;border:none;background:var(--text);color:var(--bg);font-size:11px;font-weight:700;cursor:pointer">Zarejestruj się</button>
+    <div id="auth-bar" class="home-auth">
+      <div id="auth-logged-out" class="home-auth-row">
+        <button class="home-mini-btn" onclick="openAuthModal('login')">Zaloguj się</button>
+        <button class="home-mini-btn primary" onclick="openAuthModal('register')">Zarejestruj się</button>
       </div>
-      <div id="auth-logged-in" style="display:none;align-items:center;gap:8px">
+      <div id="auth-logged-in" class="home-auth-row" style="display:none">
         <span id="auth-email" style="font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
-        <button id="auth-admin-btn" onclick="show('s-admin')" style="display:none;padding:6px 12px;border-radius:8px;border:none;background:#534AB7;color:#fff;font-size:11px;font-weight:700;cursor:pointer">⚙ Panel</button>
-        <button id="auth-myq-btn" onclick="show('s-my-questions')" style="display:none;padding:6px 12px;border-radius:8px;border:none;background:var(--text);color:var(--bg);font-size:11px;font-weight:700;cursor:pointer">📝 Pytania</button>
-        <button id="auth-stats-btn" onclick="openStatsModal()" style="display:none;padding:6px 10px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:14px;cursor:pointer" title="Twoje statystyki">📊</button>
-        <button onclick="openSettings()" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer" title="Ustawienia imienia">✏️</button>
-        <button onclick="authSignOut()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--rim);background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer">Wyloguj</button>
+        <button id="auth-admin-btn" class="home-mini-btn accent" onclick="show('s-admin')" style="display:none">Panel</button>
+        <button id="auth-myq-btn" class="home-mini-btn primary" onclick="show('s-my-questions')" style="display:none">Pytania</button>
+        <button id="auth-stats-btn" class="home-mini-btn icon" onclick="openStatsModal()" style="display:none" title="Twoje statystyki">📊</button>
+        <button class="home-mini-btn icon" onclick="openSettings()" title="Ustawienia imienia">✏️</button>
+        <button class="home-mini-btn" onclick="authSignOut()">Wyloguj</button>
       </div>
     </div>
   </div>
 
-  <div style="padding-top:24px">
-    <div class="logo">Wiem<em>!</em></div>
-    <div class="sub">Kto zna cię najlepiej?</div>
+  <div class="home-hero">
+    <div class="home-brand">
+      <div class="home-logo">Wiem<em>!</em></div>
+      <div class="home-tag">Szybka gra o tym, kto naprawdę czyta ludzi przy stole.</div>
+    </div>
+    <div class="home-visual" aria-hidden="true">
+      <div class="home-card-stack"></div>
+      <div class="home-chip one">1</div>
+      <div class="home-chip two">2</div>
+    </div>
   </div>
 
-  <!-- Imię + dołącz -->
-  <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:var(--rad);padding:18px;display:flex;flex-direction:column;gap:12px;">
-    <div class="field" style="background:var(--bg)">
-      <label style="font-size:13px;color:var(--muted);white-space:nowrap">Imię:</label>
+  <div class="home-panel">
+    <div class="home-input-grid">
+      <div class="home-field">
+      <label>Imię</label>
       <input id="inp-name" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="Twoje imię" maxlength="14" autocomplete="off"
-        style="font-size:16px;font-weight:600;"
         onkeydown="event.stopPropagation()"
         onkeyup="event.stopPropagation()">
-    </div>
-    <div style="height:1px;background:var(--rim)"></div>
-    <div class="field" style="background:var(--bg)">
-      <label style="font-size:13px;color:var(--muted);white-space:nowrap">Kod:</label>
-      <input id="inp-code" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="np. AB3K"
+      </div>
+      <div class="home-field code">
+      <label>Kod</label>
+      <input id="inp-code" type="text" data-1p-ignore data-lpignore="true" data-form-type="other" autocomplete="off" placeholder="AB3K"
         maxlength="4"
-        style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:6px;text-transform:uppercase;"
         oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);homeUpdateBtn()"
         onkeydown="if(event.key==='Enter'){this.value.trim()?joinGame():createGame()}">
+      </div>
     </div>
-    <button id="btn-join-create" class="btn btn-lit" onclick="createGame()">🎮 Utwórz nową grę</button>
+    <button id="btn-join-create" class="btn btn-lit home-action" onclick="createGame()">🎮 Utwórz nową grę</button>
   </div>
 
   <div class="err-msg" id="home-err"></div>
 
-  <!-- Jak grać -->
-  <div style="display:flex;flex-direction:column;gap:10px">
-    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;padding-top:4px">Jak grać?</div>
-
-    <div style="background:var(--card);border:1.5px solid var(--rim);border-radius:var(--rad);padding:18px;display:flex;flex-direction:column;gap:16px">
-
-      <div style="display:flex;gap:14px;align-items:flex-start">
-        <div style="font-size:28px;flex-shrink:0;width:40px;text-align:center">🪙</div>
-        <div>
-          <div style="font-weight:700;font-size:14px;margin-bottom:3px">Każdy startuje z 20 żetonami</div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.5">Na początku każdy gracz oddaje połowę do wspólnej puli. Celem gry jest zebrać jak najwięcej żetonów.</div>
-        </div>
+  <div class="home-rule-label">Jak grać?</div>
+  <div class="home-rules">
+    <div class="home-rule">
+      <div class="home-rule-icon">🪙</div>
+      <div>
+        <div class="home-rule-title">Startujesz z 20 żetonami</div>
+        <div class="home-rule-copy">Połowa wpada do wspólnej puli. Resztą ryzykujesz w rundach.</div>
       </div>
+    </div>
 
-      <div style="height:1px;background:var(--rim)"></div>
-
-      <div style="display:flex;gap:14px;align-items:flex-start">
-        <div style="font-size:28px;flex-shrink:0;width:40px;text-align:center">🎯</div>
-        <div>
-          <div style="font-weight:700;font-size:14px;margin-bottom:3px">W każdej rundzie jedna osoba odpowiada, a reszta zgaduje</div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.5">Jeden z graczy dostaje pytanie i odpowiada szczerze. Pozostali starają się przewidzieć jego odpowiedź.</div>
-        </div>
+    <div class="home-rule">
+      <div class="home-rule-icon">🎯</div>
+      <div>
+        <div class="home-rule-title">Jedna osoba odpowiada</div>
+        <div class="home-rule-copy">Reszta zgaduje, co wybierze. Tu zaczyna się czytanie znajomych.</div>
       </div>
+    </div>
 
-      <div style="height:1px;background:var(--rim)"></div>
-
-      <div style="display:flex;gap:14px;align-items:flex-start">
-        <div style="font-size:28px;flex-shrink:0;width:40px;text-align:center">⚖️</div>
-        <div>
-          <div style="font-weight:700;font-size:14px;margin-bottom:3px">Wybierz ile ryzykujesz</div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.5">Przed potwierdzeniem odpowiedzi decydujesz czy stawiasz <strong style="color:var(--text)">1</strong> czy <strong style="color:var(--text)">2 żetony</strong>. Im pewniejszy jesteś — tym więcej możesz zyskać.</div>
-        </div>
+    <div class="home-rule">
+      <div class="home-rule-icon">⚖️</div>
+      <div>
+        <div class="home-rule-title">Stawiasz 1 albo 2</div>
+        <div class="home-rule-copy">Pewny strzał daje więcej, nietrafiony boli bardziej. Prosta matematyka dramatu.</div>
       </div>
+    </div>
 
-      <div style="height:1px;background:var(--rim)"></div>
-
-      <div style="display:flex;gap:14px;align-items:flex-start">
-        <div style="font-size:28px;flex-shrink:0;width:40px;text-align:center">✅</div>
-        <div>
-          <div style="font-weight:700;font-size:14px;margin-bottom:3px">Trafisz — zyskujesz. Nie trafisz — tracisz</div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.5">Jeśli zgadniesz poprawnie, dostajesz postawione żetony z puli. Jeśli nie — tracisz je na rzecz puli. Osoba z pytaniem dostaje żeton za każdą osobę, która odpowiedziała zgodnie.</div>
-        </div>
+    <div class="home-rule">
+      <div class="home-rule-icon">✅</div>
+      <div>
+        <div class="home-rule-title">Trafisz, zgarniesz pulę</div>
+        <div class="home-rule-copy">Błędna odpowiedź oddaje żetony do puli. Osoba z pytaniem zarabia za zgodne głosy.</div>
       </div>
+    </div>
 
-      <div style="height:1px;background:var(--rim)"></div>
-
-      <div style="display:flex;gap:14px;align-items:flex-start">
-        <div style="font-size:28px;flex-shrink:0;width:40px;text-align:center">✍️</div>
-        <div>
-          <div style="font-weight:700;font-size:14px;margin-bottom:3px">Rejestracja jest opcjonalna</div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.5">Do grania nie jest potrzebne konto — bez rejestracji korzystasz z przygotowanych pytań i kategorii. <button onclick="openAuthModal('register')" style="background:none;border:none;padding:0;font-family:inherit;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;text-decoration:underline">Załóż konto</button>, jeśli chcesz dodawać własne pytania i śledzić statystyki swoich rozgrywek.</div>
-        </div>
+    <div class="home-rule">
+      <div class="home-rule-icon">✍️</div>
+      <div>
+        <div class="home-rule-title">Konto jest opcjonalne</div>
+        <div class="home-rule-copy">Grasz bez logowania. <button class="home-link-btn" onclick="openAuthModal('register')">Załóż konto</button>, jeśli chcesz własne pytania i statystyki.</div>
       </div>
-
     </div>
   </div>
-
-
 </div>
 
 <!-- ══ SLOT PICK ══ -->
@@ -1439,11 +1494,11 @@ function homeUpdateBtn() {
   if (!btn) return;
   if (code.length > 0) {
     btn.textContent = '→ Dołącz do gry';
-    btn.className = 'btn btn-dim';
+    btn.className = 'btn btn-dim home-action';
     btn.onclick = joinGame;
   } else {
     btn.textContent = '🎮 Utwórz nową grę';
-    btn.className = 'btn btn-lit';
+    btn.className = 'btn btn-lit home-action';
     btn.onclick = createGame;
   }
 }
